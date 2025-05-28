@@ -1,0 +1,138 @@
+\documentclass[10pt,conference]{IEEEtran}
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+% \usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage[hyphens]{url}
+\usepackage{fancyhdr}
+\usepackage{hyperref}
+
+
+
+\usepackage{booktabs}
+\usepackage{subfigure}
+\usepackage[ruled, vlined, linesnumbered]{algorithm2e}
+\usepackage{makecell}
+\usepackage{adjustbox}
+\usepackage{cleveref}
+\usepackage{multirow}
+\usepackage{soul}
+
+
+
+
+
+% Ensure letter paper
+\pdfpagewidth=8.5in
+\pdfpageheight=11in
+
+\newcommand{\hpcayear}{2026}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%% -- UPDATE -- %%%%%%%%%%%%%%%
+\newcommand{\hpcasubmissionnumber}{NaN}
+\title{Qubit Mapping and Routing tailored to Advanced Quantum ISAs: Not as Costly as You Think}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%% -- ONLY FOR CAMERA READY -- %%%%%%%%
+%\def\hpcacameraready{} % Uncomment to build camera-ready version
+\newcommand{\hpcapubid}{0000--0000/00\$00.00}
+\newcommand\hpcaauthors{First Author$\dagger$ and Second Author$\ddagger$}
+\newcommand\hpcaaffiliation{First Affiliation$\dagger$, Second Affiliation$\ddagger$}
+\newcommand\hpcaemail{Email(s)}
+
+%%%%% -- ARTEFACT EVALUATION RESULTS -- %%%%%%
+% Uncomment the following based on the badges that were awarded to this paper
+%\def\aeopen{}           % The artifact is publically available
+%\def\aereviewed{}     % The artefact has been reviewed
+%\def\aereproduced{} % The results have been reproduced
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+
+
+\newcommand{\canopus}{\textsc{Canopus}}
+\newcommand{\fullNameOfCanopus}{\textbf{Can}onical \textbf{O}ptimized \textbf{P}lacement \textbf{U}tility \textbf{S}uite}
+\newcommand{\nassc}{\textsc{NASSC}}
+\newcommand{\sabre}{\textsc{SABRE}}
+\newcommand{\mirage}{\textsc{Mirage}}
+
+
+
+
+\newcommand{\Can}{\mathtt{Can}}
+\newcommand{\XX}{\mathtt{Can}}
+\newcommand{\ZZ}{\mathtt{Can}}
+\newcommand{\CNOT}{\mathtt{CNOT}}
+\newcommand{\iSWAP}{\mathtt{iSWAP}}
+\newcommand{\SQiSW}{\mathtt{\sqrt{iSWAP}}}
+
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue,  
+  urlcolor=blue,   
+  citecolor=purple,   
+  filecolor=pink    
+}
+
+\input{hpca-template}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%% -- PAPER CONTENT STARTS -- %%%%%%%%%
+
+\begin{abstract}
+  We propose \canopus\ (\fullNameOfCanopus), A qubit mapping/routing framework tailored to advanced quantum ISAs adaptive to versatile hardware architectures.
+
+\end{abstract}
+
+
+
+% \input{sections/introduction.tex}
+% \input{sections/evaluation.tex}
+% \input{sections/conclusion.tex}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Introduction
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+
+Advanced ISAs---$\Can$~\cite{chen2024one}, $\SQiSW$~\cite{huang2023quantum}
+
+
+\canopus\ (\fullNameOfCanopus) is a qubit mapping and routing framework that is tailored to advanced quantum ISAs, such as $\Can$~\cite{chen2024one} and $\SQiSW$~\cite{huang2023quantum}, which are adaptive to versatile hardware architectures. \canopus\ is designed to optimize the placement of qubits and the routing of quantum gates, taking into account the specific requirements of these advanced ISAs.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Background
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+
+% \section*{Acknowledgements}
+% This document is an updated version of HPCA 2022 and 2023, which, in
+% turn, has been derived from two previous conferences, in particular
+% HPCA 2021 and MICRO 2021, which, in turn, are derived from past MICRO,
+% HPCA, ISCA, and ASPLOS conferences.
+
+%%%%%%% -- PAPER CONTENT ENDS -- %%%%%%%%
+
+
+%%%%%%%%% -- BIB STYLE AND FILE -- %%%%%%%%
+\bibliographystyle{IEEEtranS}
+\bibliography{refs}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\end{document}
+

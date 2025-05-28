@@ -172,3 +172,19 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+.DS_Store
+
+*tmp.*
+
+# Latex compilation cellaneous files
+*.aux
+*.bbl
+*.blg
+*.dvi
+*.log
+*.out
+*.toc
+*.synctex.gz
+*.fdb_latexmk
+*.fls
