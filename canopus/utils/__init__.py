@@ -1,3 +1,0 @@
-import cirq
-
-cirq.two_qubit_matrix_to_sqrt_iswap_operations

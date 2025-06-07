@@ -1,7 +1,7 @@
 import cirq
 from scipy import linalg
 import numpy as np
-from canopus.utils.functions import replace_close_to_zero_with_zero, fuzzy_compare
+from canopus.utils import replace_close_to_zero_with_zero, fuzzy_compare
 
 
 Paulis = {
@@ -54,3 +54,5 @@ class Canonical(cirq.Gate):
 def _format_float(x):
     formatted = f"{x:.2f}".rstrip('0').rstrip('.') if x != int(x) else str(int(x))
     return formatted if '.' in formatted else formatted + '.0' if '.' in str(x) else formatted
+
+
