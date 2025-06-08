@@ -23,7 +23,7 @@ def rebase_to_sqisw(circ: Circuit) -> Circuit:
 
 def tk2_to_sqisw(a, b, c):
     u = Op.create(OpType.TK2, [a, b, c]).get_unitary()
-    warnings.warn("The used cirq.two_qubit_matrix_to_sqrt_iswap_operations might not be optimal.")
+    # warnings.warn("The used cirq.two_qubit_matrix_to_sqrt_iswap_operations might not be optimal.")
     # TODO: 可以自己写一个wrapper, 因为传入是Canonical形式的门，必须要再用cirq做个KAK分解
     ops = cirq.two_qubit_matrix_to_sqrt_iswap_operations(*cirq_line_qubits, u)
     circ = cirq_to_tk(cirq.Circuit(ops))
