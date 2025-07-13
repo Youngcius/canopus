@@ -43,9 +43,8 @@ Sycamore = CouplingMap(read_device_topology('./configs/sycamore.graphml').to_dir
 All2all = CouplingMap(rx.generators.complete_graph(35).to_directed().edge_list())
 
 
-
-
-def canopus_pass(circ: pytket.Circuit, isa: str, coupling_map: CouplingMap, coupling_type: str=None) -> pytket.Circuit:
+def canopus_pass(circ: pytket.Circuit, isa: str, coupling_map: CouplingMap,
+                 coupling_type: str = None) -> pytket.Circuit:
     isa_type = ISAType(isa)
     if coupling_type is None:
         if isa_type == ISAType.ZZPhase:
@@ -58,7 +57,7 @@ def canopus_pass(circ: pytket.Circuit, isa: str, coupling_map: CouplingMap, coup
     circ = rebase_to_tk2(circ)
 
     qc = tket_to_qiskit(circ)
-    pm = PassManager(CanopusMappingPass(backend))
+    pm = PassManager(CanopusMapping(backend))
     qc = pm.run(qc)
     circ = qiskit_to_tket(qc)
     # console.print(f"Initial mapping: {qc.layout.initial_index_layout()}")

@@ -17,7 +17,7 @@ from copy import deepcopy
 
 logger = logging.getLogger(__name__)
 
-# 配置日志
+# configure logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -61,12 +61,6 @@ class SabreMapping(TransformationPass):
 
         self.distance_matrix = self.backend.coupling_map.distance_matrix.astype(int)
 
-    def _build_required_predecessors(self, dag):
-        required_predecessors = {}
-        for node in dag.topological_op_nodes():
-            required_predecessors[node] = len(list(dag.op_predecessors(node)))
-        return required_predecessors
-
     def run(self, dag: DAGCircuit):
         if dag.num_qubits() > self.backend.coupling_map.size():
             raise TranspilerError("Circuit qubit count exceeds device qubit count")
@@ -90,7 +84,8 @@ class SabreMapping(TransformationPass):
             initial_layout = generate_random_layout(dag, self.backend.coupling_map, trial_seed)
             # logger.info(f'Initial layout for trial {trial + 1}: {initial_layout}')
             routed_dag, initial_layout, final_layout = self._bidirectional_sabre_route(dag, initial_layout, trial_seed)
-            if routed_dag.count_ops()['swap'] < best_metric and routed_dag.depth() < best_depth:  # use rich metrics (e.g., pulse duration)
+            if routed_dag.count_ops()[
+                'swap'] < best_metric and routed_dag.depth() < best_depth:  # use rich metrics (e.g., pulse duration)
                 best_routed_dag, best_initial_layout, best_final_layout = routed_dag, initial_layout, final_layout
                 best_metric = routed_dag.count_ops()['swap']
                 logger.info(f"Trial {trial + 1}: Found better layout with {best_metric} swaps")
@@ -129,7 +124,7 @@ class SabreMapping(TransformationPass):
         """Given the DAG and initial layout, perform SABRE routing. Return the routed DAG and the final layout."""
         np.random.seed(seed)
         layout = initial_layout.copy()
-        required_predecessors = self._build_required_predecessors(dag)
+        required_predecessors = build_required_predecessors(dag)
 
         num_searches = 0
         layouts = [layout.copy()]
@@ -218,6 +213,13 @@ class SabreMapping(TransformationPass):
             raise ValueError("Unsupported number of qubits for executable check: {}".format(len(qargs)))
 
 
+def build_required_predecessors(dag):
+    required_predecessors = {}
+    for node in dag.topological_op_nodes():
+        required_predecessors[node] = len(list(dag.op_predecessors(node)))
+    return required_predecessors
+
+
 def unify_intermediate_layouts(dag, layouts: List[Dict[Qubit, int]]):
     layout_idx = 0
     layout = layouts[layout_idx]
@@ -246,7 +248,6 @@ def generate_random_layout(dag, coupling_map, seed) -> Layout:
     # return {logical_qubits[i]: p for i, p in enumerate(physical_qubits)}
     return Layout.from_intlist(physical_qubits, qreg)
 
-
 #
 # def unify_intermediate_layouts(qc: QuantumCircuit, layouts: List[Dict[int, int]]):
 #     qubit_indices = {q: i for i, q in enumerate(qc.qubits)}
@@ -272,17 +273,17 @@ def generate_random_layout(dag, coupling_map, seed) -> Layout:
 #     return layout
 
 
-def reverse_dag(dag: DAGCircuit) -> DAGCircuit:
-    circuit = dag_to_circuit(dag)
-    reversed_circuit = circuit.reverse_ops()
-    return circuit_to_dag(reversed_circuit)
+# def reverse_dag(dag: DAGCircuit) -> DAGCircuit:
+#     circuit = dag_to_circuit(dag)
+#     reversed_circuit = circuit.reverse_ops()
+#     return circuit_to_dag(reversed_circuit)
 
 
-def constr_layout(layout: Dict[int, int], qubits) -> Layout:
-    layout_dict = {}
-    for virt, phys in layout.items():
-        layout_dict[qubits[virt]] = phys
-    return Layout(layout_dict)
+# def constr_layout(layout: Dict[int, int], qubits) -> Layout:
+#     layout_dict = {}
+#     for virt, phys in layout.items():
+#         layout_dict[qubits[virt]] = phys
+#     return Layout(layout_dict)
 
 # def reverse_int_dict(d: Dict[int, int]) -> Dict[int, int]:
 #     """Reverse a dictionary with integer keys and values."""
