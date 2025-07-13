@@ -13,12 +13,21 @@ from qiskit import qasm2
 
 from qiskit.circuit.library import QFT
 
+# configure logging
+# logging.basicConfig(
+#     level=logging.INFO,
+#     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+#     handlers=[logging.StreamHandler()]
+# )
+
 qc = QFT(4, do_swaps=False).decompose()
 circ = qiskit_to_tket(qc)
 circ = rebase_to_tk2(circ)
 qc = tket_to_qiskit(circ)
 print(qc)
 assert compare_unitaries(circ.get_unitary(), qc_to_unitary(qc))
+
+print(qiskit_to_tket(qc).get_commands())
 
 # pm = PassManager(CanopusBackend(
 #     CanopusBackend(ISAType.Canonical, CouplingType.XX, CouplingMap.from_line(num_qubits=qc.num_qubits))))
@@ -48,9 +57,23 @@ assert compare_unitaries(circ.get_unitary(), qc_to_unitary(qc))
 pm = PassManager(
     SabreMapping(
         CanopusBackend(ISAType.Canonical, CouplingType.XX, CouplingMap.from_line(num_qubits=qc.num_qubits))))
-qc = pm.run(qc)
+qc_sabre = pm.run(qc)
 
-# print(qc)
+print('After SABRE mapping:')
+print(qc_sabre)
+
+
+
+
+# from regulus.transforms import mirror
+# from regulus import Circuit
+# import rustworkx as rx
+#
+# qc_regulus = mirror.mirror_with_sabre(Circuit.from_qiskit(qc), rx.generators.path_graph(qc.num_qubits))[0].to_qiskit()
+# print('After Regulus mapping:')
+# print(qc_regulus)
+
+
 # circ = qiskit_to_tket(qc)
 # circ = rebase_to_tk2(circ)
 # print(tket_to_qiskit(circ))

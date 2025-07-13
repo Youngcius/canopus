@@ -20,26 +20,28 @@ from canopus.basics import CanonicalGate
     circ.Rz(c + 0.5, 0).Ry(b, 0).Rz(a - 0.5, 0)
     return circ
     """
+
+
 def tket_to_qiskit(circ: pytket.Circuit) -> qiskit.QuantumCircuit:
     """The self-implemented conversion function holds the high-level semantics of some customized Gate instances"""
     if set(gate_counts(circ).keys()) == {OpType.TK1, OpType.TK2}:
         qc = qiskit.QuantumCircuit(circ.n_qubits)
         for cmd in circ.get_commands():
             if cmd.op.type == OpType.TK1:
-                a,b,c = cmd.op.params
-                qc.u(b*pi, (a-0.5)*pi, (c+0.5)*pi, cmd.qubits[0].index[0])
+                a, b, c = cmd.op.params
+                qc.u(b * pi, (a - 0.5) * pi, (c + 0.5) * pi, cmd.qubits[0].index[0])
             elif cmd.op.type == OpType.TK2:
                 a, b, c = cmd.op.params
-                qc.append(CanonicalGate(a*pi, b*pi, c*pi), [cmd.qubits[0].index[0], cmd.qubits[1].index[0]])
+                qc.append(CanonicalGate(a * pi, b * pi, c * pi), [cmd.qubits[0].index[0], cmd.qubits[1].index[0]])
     else:
         qc = qiskit.QuantumCircuit.from_qasm_str(pytket.qasm.circuit_to_qasm_str(circ))
 
     return qc
 
 
-
 def qiskit_to_tket(circ: qiskit.QuantumCircuit) -> pytket.Circuit:
     """The self-implemented conversion function holds the high-level semantics of some customized Gate instances"""
+    # TODO: 写一个接口，避免 [U3(3.5）, can_13229013472(1/8,0,0) q[3], q[1];, U3(3.27339, 0.883661, 1.33133) q[2];, can_13229013424(1/16,0,0) q[3], q[0];, can(1/4,0,0) q[2], q[1];, can_13229012848(1/8,0,0) q[2], q[0];, U3(3.66667, 0.195913, 0.195913) q[1];, U3(1.5, 0, 0) q[3];, U3(0.875, 1.5, 1.5) q[0];, U3(0.5, 0, 1) q[2];, can(1/4,0,0) q[1], q[0];, U3(1.5, 0, 1) q[1];]
     return pytket.qasm.circuit_from_qasm_str(qiskit.qasm2.dumps(circ))
 
 
@@ -121,7 +123,6 @@ def determine_ashn_gate_duration(x, y, z, a, b, c):
     tau = min(tau1, tau2)
     return tau * coupling_strength  # unit is 1/coupling_strength
 
-
 # import cirq
 # import numpy as np
 # from typing import Union
@@ -141,5 +142,3 @@ def determine_ashn_gate_duration(x, y, z, a, b, c):
 #         return 3
 
 #     raise ValueError("Unsupported gate type")
-
-
