@@ -1,19 +1,19 @@
-\documentclass[10pt,conference]{IEEEtran}
-\usepackage{cite}
-\usepackage{amsmath,amssymb,amsfonts}
-% \usepackage{algorithmic}
+% use the base acmart.cls
+% use the sigplan proceeding template with the default 10 pt fonts
+% nonacm option removes ACM related text in the submission. 
+\documentclass[sigplan,nonacm]{acmart}
+
+
+
+% \usepackage{amsmath,amssymb,amsfonts,amsthm}
+\usepackage[ruled, vlined, linesnumbered]{algorithm2e}
+% \usepackage[version=4]{mhchem}
 \usepackage{graphicx}
 \usepackage{textcomp}
 \usepackage{xcolor}
-\usepackage[hyphens]{url}
-\usepackage{fancyhdr}
-\usepackage{hyperref}
-
-
-
 \usepackage{booktabs}
 \usepackage{subfigure}
-\usepackage[ruled, vlined, linesnumbered]{algorithm2e}
+\usepackage{hyperref}
 \usepackage{makecell}
 \usepackage{adjustbox}
 \usepackage{cleveref}
@@ -22,40 +22,18 @@
 
 
 
+% enable page numbers
+\settopmatter{printfolios=true}
 
 
-% Ensure letter paper
-\pdfpagewidth=8.5in
-\pdfpageheight=11in
+\newcommand{\squote}[1]{`#1'}
+\newcommand{\dquote}[1]{``#1''}
+\newcommand{\code}{\texttt}
 
-\newcommand{\hpcayear}{2026}
+\newcommand{\note}[1]{{\color{blue} #1}}
+\newcommand{\NOTE}[1]{{\color{green} #1}}
 
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%% -- UPDATE -- %%%%%%%%%%%%%%%
-\newcommand{\hpcasubmissionnumber}{NaN}
-\title{Qubit Mapping and Routing tailored to Advanced Quantum ISAs: Not as Costly as You Think}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%% -- ONLY FOR CAMERA READY -- %%%%%%%%
-%\def\hpcacameraready{} % Uncomment to build camera-ready version
-\newcommand{\hpcapubid}{0000--0000/00\$00.00}
-\newcommand\hpcaauthors{First Author$\dagger$ and Second Author$\ddagger$}
-\newcommand\hpcaaffiliation{First Affiliation$\dagger$, Second Affiliation$\ddagger$}
-\newcommand\hpcaemail{Email(s)}
-
-%%%%% -- ARTEFACT EVALUATION RESULTS -- %%%%%%
-% Uncomment the following based on the badges that were awarded to this paper
-%\def\aeopen{}           % The artifact is publically available
-%\def\aereviewed{}     % The artefact has been reviewed
-%\def\aereproduced{} % The results have been reproduced
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-
-
+\newcommand{\ZY}[1]{{\color{purple}[ZY: #1]}}
 
 
 \newcommand{\canopus}{\textsc{Canopus}}
@@ -83,56 +61,60 @@
   filecolor=pink    
 }
 
-\input{hpca-template}
+% \everydisplay{\small}  % 所有行间公式字体
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%% -- PAPER CONTENT STARTS -- %%%%%%%%%
+
+% \AtBeginEnvironment{takeaways}{\normalfont} % 内容强制正体
+
+% \SetAlFnt{\small}
+% \SetAlCapFnt{\small}
+% \SetCommentSty{textit}
+
+% \hypersetup{hidelinks}
+
+
+% \hypersetup{draft}
+
+% \def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+%     T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+
+
+\begin{document}
+\title{Qubit Mapping and Routing tailored to Advanced Quantum ISAs: Not as Costly as You Think}
+
 
 \begin{abstract}
   We propose \canopus\ (\fullNameOfCanopus), a qubit mapping/routing framework tailored to advanced quantum ISAs adaptive to versatile hardware architectures.
-
 \end{abstract}
 
 
+\maketitle % should come after the abstract
 
-% \input{sections/introduction.tex}
-% \input{sections/evaluation.tex}
-% \input{sections/conclusion.tex}
-
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Introduction
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Introduction}
-
-Advanced ISAs---$\Can$~\cite{chen2024one}, $\SQiSW$~\cite{huang2023quantum}
-
-
-\canopus\ (\fullNameOfCanopus) is a qubit mapping and routing framework that is tailored to advanced quantum ISAs, such as $\Can$~\cite{chen2024one} and $\SQiSW$~\cite{huang2023quantum}, which are adaptive to versatile hardware architectures. \canopus\ is designed to optimize the placement of qubits and the routing of quantum gates, taking into account the specific requirements of these advanced ISAs.
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Background
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% add the paper content here
 
 
 
+\input{sections/introduction}
+\input{sections/background}
+\input{sections/motivation}
+\input{sections/canopus}
+\input{sections/study}
+\input{sections/evaluation}
+\input{sections/related}
+\input{sections/conclusion}
 
 
-% \section*{Acknowledgements}
-% This document is an updated version of HPCA 2022 and 2023, which, in
-% turn, has been derived from two previous conferences, in particular
-% HPCA 2021 and MICRO 2021, which, in turn, are derived from past MICRO,
-% HPCA, ISCA, and ASPLOS conferences.
 
-%%%%%%% -- PAPER CONTENT ENDS -- %%%%%%%%
+% insert appendix
+% \appendix
+% \input{sections/appendix}
 
 
-%%%%%%%%% -- BIB STYLE AND FILE -- %%%%%%%%
-\bibliographystyle{IEEEtranS}
-\bibliography{refs}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% use the ACM bibliography style
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{reference}
+
 
 \end{document}
-

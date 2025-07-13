@@ -3,16 +3,39 @@ import qiskit
 import pytket.qasm
 import qiskit.qasm2
 import numpy as np
+from pytket import OpType
+from math import pi
 from typing import Union
 from rich.console import Console
 from rich.table import Table
+from pytket.utils.stats import gate_counts
 
 console = Console()
 
+from qiskit.circuit.library import UGate, U3Gate
+from canopus.basics import CanonicalGate
 
+"""def tk1_to_rzry(a, b, c):
+    circ = Circuit(1)
+    circ.Rz(c + 0.5, 0).Ry(b, 0).Rz(a - 0.5, 0)
+    return circ
+    """
 def tket_to_qiskit(circ: pytket.Circuit) -> qiskit.QuantumCircuit:
     """The self-implemented conversion function holds the high-level semantics of some customized Gate instances"""
-    return qiskit.QuantumCircuit.from_qasm_str(pytket.qasm.circuit_to_qasm_str(circ))
+    if set(gate_counts(circ).keys()) == {OpType.TK1, OpType.TK2}:
+        qc = qiskit.QuantumCircuit(circ.n_qubits)
+        for cmd in circ.get_commands():
+            if cmd.op.type == OpType.TK1:
+                a,b,c = cmd.op.params
+                qc.u(b*pi, (a-0.5)*pi, (c+0.5)*pi, cmd.qubits[0].index[0])
+            elif cmd.op.type == OpType.TK2:
+                a, b, c = cmd.op.params
+                qc.append(CanonicalGate(a*pi, b*pi, c*pi), [cmd.qubits[0].index[0], cmd.qubits[1].index[0]])
+    else:
+        qc = qiskit.QuantumCircuit.from_qasm_str(pytket.qasm.circuit_to_qasm_str(circ))
+
+    return qc
+
 
 
 def qiskit_to_tket(circ: qiskit.QuantumCircuit) -> pytket.Circuit:
@@ -119,29 +142,4 @@ def determine_ashn_gate_duration(x, y, z, a, b, c):
 
 #     raise ValueError("Unsupported gate type")
 
-from typing import Union
-from pytket.circuit import Command, Op, OpType
 
-
-def synth_cost_by_sqisw(target: Union[Command, Op]):
-    if isinstance(target, Command):
-        target = target.op
-
-    if isinstance(target, (OpType.CX, OpType.CZ, OpType.XXPhase, OpType.ZZPhase)):
-        return 2
-
-    if isinstance(target, OpType.ISWAP):
-        if target.params[0] == 0.5:
-            return 1
-        else:
-            return 2
-
-    if isinstance(target, OpType.TK2):
-        a, b, c = target.params
-        if not (0.5 >= a >= b >= abs(c)):
-            raise ValueError('(a, b, c) should be confined to {1/2 ≥ a ≥ b ≥ |c|}')
-        if fuzzy_compare(target.x, target.y + abs(target.z), ">="):
-            return 2
-        return 3
-
-    raise ValueError("Unsupported gate type")

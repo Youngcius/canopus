@@ -35,6 +35,29 @@ def qiskit_to_tket(circ: qiskit.QuantumCircuit) -> pytket.Circuit:
 
 
 
+- $\mathtt{Can}(a,b,c)=e^{-i\frac{\pi}{2}(a\,XX+b\,YY+c\,ZZ)}$:
+  - TKet `OpType.TK2(a, b, c)` (e.g., $\mathtt{Can}(0.5, 0, 0)$ is $\mathtt{CX}$)
+  - Qiskit `name=tk2, params=[a*pi, b*pi, c*pi]`
+
+- $\sqrt{\mathtt{iSWAP}}$: 
+  - TKet `OpType.ISWAP(0.5)` 
+  - Qiskit `iSWAPGate()` with `params = [pi/2]`
+- $\sqrt[3]{\mathtt{CX}}$: 
+  - TKet `OpType.ZZPhase(1/6)`
+  - Qiskit `RzzGate()` with `params = [pi/6]`
+- $\sqrt{\mathtt{CX}}$: 
+  - TKet `OpType.ZZPhase(1/4)`
+  - Qiskit `RzzGate()` with `params = [pi/4]`
+- ${\mathtt{CX}}$: 
+  - TKet `OpType.ZZPhase(1/2)`
+  - Qiskit `RzzGate()` with `params = [pi/2]`
+
+
+
+
+
+
+
 
 
 
@@ -47,6 +70,14 @@ def qiskit_to_tket(circ: qiskit.QuantumCircuit) -> pytket.Circuit:
 - [ ] 首先要获取TK2-basis circuit,是应该先用`passes.FullPeepholeOptimise(allow_swaps=False, target_2qb_gate=OpType.TK2).apply(circ)` 还是`passes.FullPeepholeOptimise(allow_swaps=False, target_2qb_gate=OpType.CX).apply(circ)`???前者会不会破坏某些局部 CX chain 的对易性？
 
 
+$$
+        U(\theta, \phi, \lambda) =
+        \begin{pmatrix}
+            \cos\left(\rotationangle\right) & -e^{i\lambda}\sin\left(\rotationangle\right) \\
+            e^{i\phi}\sin\left(\rotationangle\right) & e^{i(\phi+\lambda)}\cos\left(\rotationangle\right)
+        \end{pmatrix}
+$$
+
 
 
 
@@ -55,6 +86,37 @@ def tk1_to_u3(a, b, c):
     """Rz(a)Rx(b)Rz(c) --> Rz(φ)Ry(θ)Rz(γ)"""
     circ = Circuit(1)
     raise NotImplementedError("This function is not implemented yet.")
+    
+def tk1_to_rzry(a, b, c):
+    circ = Circuit(1)
+    circ.Rz(c + 0.5, 0).Ry(b, 0).Rz(a - 0.5, 0)
+    return circ
+
+
+def tk1_to_tk1(a, b, c):
+    circ = Circuit(1)
+    circ.add_gate(OpType.TK1, [a, b, c])
+    return circ
+  
+
+def tk2_to_sqisw(a, b, c):
+    u = Op.create(OpType.TK2, [a, b, c]).get_unitary()
+    # warnings.warn("The used cirq.two_qubit_matrix_to_sqrt_iswap_operations might not be optimal.") TODO ...
+    ops = cirq.two_qubit_matrix_to_sqrt_iswap_operations(*cirq_line_qubits, u)
+    circ = cirq_to_tk(cirq.Circuit(ops))
+    return circ
+  
+def tk2_to_sqisw(a, b, c):
+    kak = cirq.KakDecomposition(global_phase=1,
+                                single_qubit_operations_before=(Z, I),
+                                interaction_coefficients=(a * pi / 2, b * pi / 2, -c * pi / 2),
+                                single_qubit_operations_after=(Z, I))
+    # warnings.warn("The used cirq.two_qubit_matrix_to_sqrt_iswap_operations might not be optimal.") TODO ...
+    from cirq.transformers.analytical_decompositions.two_qubit_to_sqrt_iswap import _kak_decomposition_to_sqrt_iswap_operations
+    ops = _kak_decomposition_to_sqrt_iswap_operations(*CirqQubitPair, kak)
+    circ = cirq_to_tk(cirq.Circuit(ops))
+    return circ
+
 ```
 
 
