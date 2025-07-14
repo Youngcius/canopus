@@ -103,25 +103,35 @@ def print_circ_info(circ: Union[pytket.Circuit, qiskit.QuantumCircuit], title=No
     console.print(table)
 
 
-def determine_ashn_gate_duration(x, y, z, a, b, c):
+def determine_ashn_gate_duration(x, y, z, gx, gy, gz):
     """
     Determine the optimal 2Q gate duration in the AshN gate scheme.
         Input (x, y, z) are the Canonical coefficients of an SU(4), where π/4 ≥ x ≥ y ≥ |z|
-        Input (a, b, c) are the normalized coefficients of the coupling Hamiltonian, where a ≥ b ≥ |c|
+        Input (gx, gy, gc) are the normalized coefficients of the coupling Hamiltonian, where a ≥ b ≥ |c|
     """
-    coupling_strength = np.linalg.norm([a, b, c], ord=1)
-    tau0 = x / a
-    tau_plus = (x + y - z) / (a + b - c)
-    tau_minus = (x + y + z) / (a + b + c)
+    coupling_strength = np.linalg.norm([gx, gy, gz], ord=1)
+    tau0 = x / gx
+    tau_plus = (x + y - z) / (gx + gy - gz)
+    tau_minus = (x + y + z) / (gx + gy + gz)
     tau1 = max(tau0, tau_plus, tau_minus)
 
-    tau0_prime = (np.pi / 2 - x) / a
-    tau_plus_prime = (np.pi / 2 - x + y + z) / (a + b - c)
-    tau_minus_prime = (np.pi / 2 - x + y - z) / (a + b + c)
+    tau0_prime = (np.pi / 2 - x) / gx
+    tau_plus_prime = (np.pi / 2 - x + y + z) / (gx + gy - gz)
+    tau_minus_prime = (np.pi / 2 - x + y - z) / (gx + gy + gz)
     tau2 = max(tau0_prime, tau_plus_prime, tau_minus_prime)
 
     tau = min(tau1, tau2)
     return tau * coupling_strength  # unit is 1/coupling_strength
+
+
+def mirror_weyl_coord(a, b, c):
+    # TODO: check this through random testing
+    # TODO: comment following line to improve performance
+    if not (fuzzy_compare(0.5, a, '>=') and fuzzy_compare(a, b, '>=') and fuzzy_compare(b, abs(c), '>=')):
+        raise ValueError('Weyl coordinate must be normalized to satisfy 0.5 >= a >= b >= |c|')
+    if fuzzy_compare(c, 0, '>='):
+        return 0.5 - c, 0.5 - b, a - 0.5
+    return 0.5 + c, 0.5 - b, 0.5 - a
 
 # import cirq
 # import numpy as np

@@ -1,16 +1,9 @@
 import qiskit.quantum_info as qi
 from scipy import linalg
-import numpy as np
-
 from qiskit.circuit import QuantumRegister, QuantumCircuit
 from qiskit.circuit.gate import Gate
-import qiskit.quantum_info as qi
-from typing import Optional, Union
-from qiskit.circuit.parameterexpression import ParameterValueType, ParameterExpression
-
-from qiskit.circuit.library import RXGate, UGate, iSwapGate
-
-from regulus import gates
+from typing import Optional
+from qiskit.circuit.parameterexpression import ParameterValueType
 
 X = qi.Pauli('X').to_matrix()
 Y = qi.Pauli('Y').to_matrix()

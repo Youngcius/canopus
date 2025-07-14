@@ -20,9 +20,6 @@ logger = logging.getLogger(__name__)
 from typing import Dict, List, Tuple
 from qiskit.converters import dag_to_circuit, circuit_to_dag
 
-# TODO: 或许可以基于Qiskit框架写mapping pass：https://docs.quantum.ibm.com/guides/DAG-representation
-
-
 INIT_DECAY = 1
 DECAY_STEP = 0.001
 NUM_SEARCHES_TO_RESET = 5
@@ -37,7 +34,6 @@ class CanopusMapping(TransformationPass):
         self.trials = CPU_COUNT if trials is None else trials
         self.seed = seed
         self.layout_trials = CPU_COUNT if layout_trials is None else layout_trials
-        self.backend.pulse_evaluator.cx_duration
 
         self.distance_matrix = self.backend.coupling_map.distance_matrix.astype(int)
 
@@ -63,7 +59,7 @@ class CanopusMapping(TransformationPass):
         best_metric = float('inf')
         best_depth = float('inf')
 
-        logger.info(f"开始SABRE映射，布局试验次数: {self.layout_trials}")
+        logger.info(f"开始SABRE映射, 布局试验次数: {self.layout_trials}")
 
         for trial in range(self.layout_trials):
             trial_seed = None if self.seed is None else self.seed + trial
@@ -140,15 +136,18 @@ class CanopusMapping(TransformationPass):
                         if required_predecessors[successor] == 0:
                             front_layer.append(successor)
             else:
+                swap = self._find_best_swap(dag, front_layer, layout, required_predecessors)
+                routed_dag.apply_operation_back(SwapGate(), [self.canonical_qreg[layout._v2p[v]] for v in swap])
+
+                layout.swap(*swap)
+                layouts.append(layout.copy())
+
                 num_searches += 1
                 if num_searches % NUM_SEARCHES_TO_RESET == 0:
                     self.qubit_decays = dict.fromkeys(dag.qubits, INIT_DECAY)
-                swap = self._find_best_swap(dag, front_layer, layout, required_predecessors)
-                routed_dag.apply_operation_back(SwapGate(), [self.canonical_qreg[layout._v2p[v]] for v in swap])
-                self.qubit_decays[swap[0]] += DECAY_STEP
-                self.qubit_decays[swap[1]] += DECAY_STEP
-                layout.swap(*swap)
-                layouts.append(layout.copy())
+                else:
+                    self.qubit_decays[swap[0]] += DECAY_STEP
+                    self.qubit_decays[swap[1]] += DECAY_STEP
 
         return routed_dag, layout
 
@@ -234,7 +233,7 @@ class SabreMapping(TransformationPass):
         best_metric = float('inf')
         best_depth = float('inf')
 
-        logger.info(f"开始SABRE映射，布局试验次数: {self.layout_trials}")
+        logger.info(f"开始SABRE映射, 布局试验次数: {self.layout_trials}")
 
         for trial in range(self.layout_trials):
             trial_seed = None if self.seed is None else self.seed + trial
@@ -311,15 +310,18 @@ class SabreMapping(TransformationPass):
                         if required_predecessors[successor] == 0:
                             front_layer.append(successor)
             else:
+                swap = self._find_best_swap(dag, front_layer, layout, required_predecessors)
+                routed_dag.apply_operation_back(SwapGate(), [self.canonical_qreg[layout._v2p[v]] for v in swap])
+
+                layout.swap(*swap)
+                layouts.append(layout.copy())
+
                 num_searches += 1
                 if num_searches % NUM_SEARCHES_TO_RESET == 0:
                     self.qubit_decays = dict.fromkeys(dag.qubits, INIT_DECAY)
-                swap = self._find_best_swap(dag, front_layer, layout, required_predecessors)
-                routed_dag.apply_operation_back(SwapGate(), [self.canonical_qreg[layout._v2p[v]] for v in swap])
-                self.qubit_decays[swap[0]] += DECAY_STEP
-                self.qubit_decays[swap[1]] += DECAY_STEP
-                layout.swap(*swap)
-                layouts.append(layout.copy())
+                else:
+                    self.qubit_decays[swap[0]] += DECAY_STEP
+                    self.qubit_decays[swap[1]] += DECAY_STEP
 
         return routed_dag, layout
 
@@ -447,4 +449,3 @@ def generate_random_layout(qreg, coupling_map, seed) -> Layout:
 # def reverse_int_dict(d: Dict[int, int]) -> Dict[int, int]:
 #     """Reverse a dictionary with integer keys and values."""
 #     return {v: k for k, v in d.items()}
-

@@ -20,7 +20,7 @@ is equvalent to
 OpType.ISWAP(0.5)
 ```
 
-
+基于Qiskit框架写mapping pass：https://docs.quantum.ibm.com/guides/DAG-representation
 
 
 
@@ -157,4 +157,25 @@ Circuit TK2_using_ZZPhase(
 
 
 ```
+
+
+
+
+
+
+$$
+R_{XX+YY}(\theta, \beta)\ q_0, q_1 =
+          RZ_0(-\beta) \cdot \exp\left(-i \frac{\theta}{2} \frac{XX+YY}{2}\right) \cdot RZ_0(\beta) =
+            \begin{pmatrix}
+                1 & 0 & 0 & 0  \\
+                0 & \cos\left(\frac{\theta}{2}\right) & -i\sin\left(\frac{\theta}{2}\right)e^{-i\beta} & 0 \\
+                0 & -i\sin\left(\frac{\theta}{2}\right)e^{i\beta} & \cos\left(\frac{\theta}{2}\right) & 0 \\
+                0 & 0 & 0 & 1
+            \end{pmatrix}
+$$
+
+
+
+
+
 
