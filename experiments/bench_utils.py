@@ -53,7 +53,7 @@ def canopus_pass(circ: pytket.Circuit, isa: str, coupling_map: CouplingMap,
             coupling_type = CouplingType.XY
         else:
             raise ValueError(f"Please designate coupling_type for ISA {isa_type}")
-    backend = CanopusBackend(isa_type, CouplingType(coupling_type), coupling_map)
+    backend = CanopusBackend(coupling_map, isa_type, coupling_type)
     circ = rebase_to_tk2(circ)
 
     qc = tket_to_qiskit(circ)

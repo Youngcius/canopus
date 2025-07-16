@@ -62,4 +62,5 @@ def rebase_to_tk2(circ: Circuit, optimize: bool = True) -> Circuit:
     if optimize:
         passes.FullPeepholeOptimise(allow_swaps=False, target_2qb_gate=OpType.TK2).apply(circ)
     passes.SynthesiseTK().apply(circ)
+    passes.NormaliseTK2().apply(circ)
     return circ

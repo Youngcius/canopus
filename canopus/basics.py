@@ -1,9 +1,12 @@
 import qiskit.quantum_info as qi
 from scipy import linalg
+from math import pi
 from qiskit.circuit import QuantumRegister, QuantumCircuit
 from qiskit.circuit.gate import Gate
 from typing import Optional
 from qiskit.circuit.parameterexpression import ParameterValueType
+
+half_pi = pi / 2
 
 X = qi.Pauli('X').to_matrix()
 Y = qi.Pauli('Y').to_matrix()
@@ -22,21 +25,21 @@ class CanonicalGate(Gate):
     .. code-block:: text
           ┌─────────────┐
         ──┤0            ├──
-          │  Can(ϴ,φ,λ) │
+          │  Can(a,b,c) │
         ──┤1            ├──
           └─────────────┘
 
     .. math::
-        \mathrm{Can}(\theta, \phi, \lamda) = e^{- i \frac{1}{2}(\theta XX + \phi YY + \lambda ZZ)}
+        \mathrm{Can}(a, b, c) = e^{- i \frac{\pi}{2}(a XX + b YY + c ZZ)}
         
     """
 
     def __init__(
             self,
-            theta: ParameterValueType, phi: ParameterValueType, lam: ParameterValueType,
+            a: ParameterValueType, b: ParameterValueType, c: ParameterValueType,
             label: Optional[str] = None, *, duration=None, unit="dt",
     ):
-        super().__init__("can", 2, [theta, phi, lam], label=label, duration=duration, unit=unit)
+        super().__init__("can", 2, [a, b, c], label=label, duration=duration, unit=unit)
 
     def inverse(self, annotated: bool = False):
         return CanonicalGate(-self.params[0], -self.params[1], -self.params[2])
@@ -54,9 +57,9 @@ class CanonicalGate(Gate):
         q = QuantumRegister(2, "q")
         qc = QuantumCircuit(q, name=self.name)
         rules = [
-            (RXXGate(self.params[0]), [q[0], q[1]], []),
-            (RYYGate(self.params[1]), [q[0], q[1]], []),
-            (RZZGate(self.params[2]), [q[0], q[1]], []),
+            (RXXGate(self.params[0] * pi), [q[0], q[1]], []),
+            (RYYGate(self.params[1] * pi), [q[0], q[1]], []),
+            (RZZGate(self.params[2] * pi), [q[0], q[1]], []),
         ]
         for instr, qargs, cargs in rules:
             qc._append(instr, qargs, cargs)
@@ -68,17 +71,14 @@ class CanonicalGate(Gate):
         if copy is False:
             raise ValueError("unable to avoid copy while creating an array as requested")
 
-        theta, phi, lam = (float(param) for param in self.params)
-        mat = linalg.expm(-1j / 2 * (theta * XX + phi * YY + lam * ZZ))
+        a,b,c = (float(param) for param in self.params)
+        mat = linalg.expm(-1j * pi / 2 * (a * XX + b * YY + c * ZZ))
         return qi.Operator(mat).reverse_qargs().to_matrix()
 
     def __eq__(self, other):
         if isinstance(other, CanonicalGate):
             return self._compare_parameters(other)
         return False
-
-
-from regulus.basic.gates import Canonical
 
 # from pytket import Circuit, OpType
 # from pytket.circuit import CustomGate, CustomGateDef

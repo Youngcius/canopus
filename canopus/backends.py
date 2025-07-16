@@ -1,15 +1,16 @@
+import numpy as np
 from enum import Enum
-from math import pi
-from typing import Union
-
+from typing import Dict, List, Tuple, Union
 from qiskit import QuantumCircuit
 from qiskit.transpiler import CouplingMap
-from canopus.utils import determine_ashn_gate_duration
-import numpy as np
-from pytket import OpType, Circuit
-from canopus.utils import fuzzy_compare
+from qiskit.dagcircuit import DAGCircuit
+from qiskit.converters import dag_to_circuit
 
-half_pi = pi / 2
+from canopus.utils import optimal_can_gate_duration
+from functools import cached_property
+from canopus.utils import fuzzy_compare
+from canopus.basics import half_pi
+from canopus.utils import mirror_weyl_coord
 
 
 class ISAType(Enum):
@@ -40,12 +41,12 @@ class CanopusBackend:
         else:
             self.coupling_type = CouplingType(coupling_type)
 
-        # self.pulse_evaluator = PulseEvaluator(self.coupling_type)
-        self.synth_cost_estimator = SynthCostEstimator(self.isa_type, self.coupling_type)
+        self.cost_estimator = SynthCostEstimator(self.isa_type, self.coupling_type)
 
 
 class SynthCostEstimator:
     def __init__(self, isa_type: Union[ISAType, str], coupling_type: Union[CouplingType, str] = None):
+        # coupling_type 只有在 Can ISA 中才有用
         if isinstance(isa_type, ISAType):
             self.isa_type = isa_type
         else:
@@ -55,6 +56,20 @@ class SynthCostEstimator:
             self.coupling_type = coupling_type
         else:
             self.coupling_type = CouplingType(coupling_type)
+
+        self._cached_gate_costs = {}
+
+    @cached_property
+    def cx_cost(self):
+        return self.eval_gate_cost(0.5, 0.0, 0.0)
+
+    @cached_property
+    def iswap_cost(self):
+        return self.eval_gate_cost(0.5, 0.5, 0.0)
+
+    @cached_property
+    def swap_cost(self):
+        return self.eval_gate_cost(0.5, 0.5, 0.5)
 
     @staticmethod
     def synth_cost_by_cx(a, b, c):
@@ -75,93 +90,50 @@ class SynthCostEstimator:
         return 3
 
     def eval_gate_cost(self, a, b, c):
+        if (a, b, c) in self._cached_gate_costs:
+            return self._cached_gate_costs[a, b, c]
+
         if self.isa_type == ISAType.CX:
-            return self.synth_cost_by_cx(a, b, c)
-        if self.isa_type == ISAType.ZZPhase:
-            ...
-        if self.isa_type == ISAType.SQiSW:
-            return self.synth_cost_by_sqisw(a, b, c)
-        if self.isa_type == ISAType.Canonical:
-            x, y, z = np.array([a, b, c]) * half_pi
+            cost = self.synth_cost_by_cx(a, b, c)
+        elif self.isa_type == ISAType.ZZPhase:
+            cost = self.synth_cost_by_zzphase(a, b, c)
+        elif self.isa_type == ISAType.SQiSW:
+            cost = self.synth_cost_by_sqisw(a, b, c)
+        elif self.isa_type == ISAType.Canonical:
             if self.coupling_type == CouplingType.XX:
-                return determine_ashn_gate_duration(x, y, z, 1, 0, 0)
+                cost = optimal_can_gate_duration(a, b, c, 1, 0, 0)
             elif self.coupling_type == CouplingType.XY:
-                return determine_ashn_gate_duration(x, y, z, 1, 1, 0)
+                cost = optimal_can_gate_duration(a, b, c, 1, 1, 0)
             else:
                 raise TypeError(f"Unsupported coupling type: {self.coupling_type}")
+        self._cached_gate_costs[a, b, c] = cost
+        return cost
 
-
-class PulseEvaluator:
-    """Pulse duration evaluator for quantum circuits."""
-
-    def __init__(self, coupling_type: Union[CouplingType, str]):
-        self.coupling_type = coupling_type if isinstance(coupling_type, CouplingType) else CouplingType(coupling_type)
-        if self.coupling_type == CouplingType.XX:
-            self.iswap_duration = 0.5 * pi
-            self.cx_duration = 0.25 * pi
-            self.b_duration = 0.375 * pi
-            self.swap_duration = 0.75 * pi
-        elif self.coupling_type == CouplingType.XY:
-            self.coupling_type = CouplingType.XY
-            self.iswap_duration = 0.5 * pi
-            self.cx_duration = 0.5 * pi
-            self.b_duration = 0.5 * pi
-            self.swap_duration = 0.75 * pi
-        elif self.coupling_type == CouplingType.Rand:
-            # ! Following numbers are obtained from simulation
-            self.iswap_duration = 1.8976590834308076
-            self.cx_duration = 1.22804282981187
-            self.b_duration = 1.4346683092344887
-            self.swap_duration = 2.3561944901923444
-
-    def iswap_family_duration(self, t=1.0):
-        return t * self.iswap_duration
-
-    def cx_family_duration(self, t=1.0):
-        return t * self.cx_duration
-
-    def b_family_duration(self, t=1.0):
-        return t * self.b_duration
-
-    def swap_family_duration(self, t=1.0):
-        return t * self.swap_duration
-
-    def can_duration(self, a, b, c):
-        if np.isclose(a, b) and np.isclose(c, 0):
-            return self.iswap_family_duration(a / 0.5)
-        elif np.isclose(b, 0) and np.isclose(c, 0):
-            return self.cx_family_duration(a / 0.5)
-        elif np.isclose(a, b) and np.isclose(a, c):
-            return self.swap_family_duration(a / 0.5)
-        elif np.isclose(a, b * 2) and np.isclose(c, 0):
-            return self.b_family_duration(a / 0.5)
-        else:
-            coord = np.array([a, b, c]) * pi / 2
-            if self.coupling_type == CouplingType.XX:
-                return determine_ashn_gate_duration(*coord, 1, 0, 0)
-            elif self.coupling_type == CouplingType.XY:
-                return determine_ashn_gate_duration(*coord, 1, 1, 0)
-            else:  # random coupling
-                raise TypeError(f"Unsupported coupling type: {self.coupling_type}")
-
-    def eval_circuit_duration(self, circ: Union[Circuit, QuantumCircuit]):
-        if isinstance(circ, QuantumCircuit):
-            return self._eval_qiskit_circuit_duration(circ)
-        elif isinstance(circ, Circuit):
-            return self._eval_tket_circuit_duration(circ)
-        else:
-            raise TypeError(
-                f"Unsupported circuit type: {type(circ)}. Expected qiskit.QuantumCircuit or pytket.Circuit.")
-
-    def _eval_qiskit_circuit_duration(self, circ: QuantumCircuit):
+    def eval_circuit_duration(self, qc: QuantumCircuit):
         """Evaluate the pulse-level duration of a Qiskit QuantumCircuit instance."""
-        wire_durations = {q: 0.0 for q in circ.qubits}
-        for instr in circ.data:
+
+        qubit_indices = {qarg: q for q, qarg in enumerate(qc.qubits)}
+        wire_durations = {q: 0.0 for q in range(qc.num_qubits)}
+        last_mapped_layer: Dict[Tuple[int, int], Tuple[str, List[float]]] = {}
+
+        for instr in qc.data:
             if instr.operation.num_qubits == 1:
                 continue
 
-            if instr.operation.name == 'can':
-                gate_duration = self.can_duration(*(np.array(instr.operation.params) / half_pi))
+            q0, q1 = tuple(sorted([qubit_indices[qarg] for qarg in instr.qubits]))
+
+            if instr.operation.name == 'swap':
+                if (q0, q1) in last_mapped_layer:
+                    gname, params = last_mapped_layer[q0, q1]
+                    if gname == 'can':
+                        gate_duration = self.eval_gate_cost(*mirror_weyl_coord(*params)) - self.eval_gate_cost(*params)
+                    else:
+                        raise ValueError(f"Unsupported gate type: {gname}")
+                        # warinings.warn(f"Unsupported gate type: {gname}, using swap_cost instead.")
+                else:
+                    gate_duration = self.swap_cost
+            elif instr.operation.name == 'can':
+                gate_duration = self.eval_gate_cost(*instr.operation.params)
             elif instr.operation.name == 'cx':
                 gate_duration = self.cx_duration
             elif instr.operation.name == 'iswap':
@@ -173,34 +145,70 @@ class PulseEvaluator:
             else:
                 raise ValueError(f"Unsupported operation type: {instr.operation.name}")
 
-            qubits = [q for q in instr.qubits]
-            current_duration = max(wire_durations[q] for q in qubits) + gate_duration
-            for q in qubits:
-                wire_durations[q] = current_duration
+            current_duration = max(wire_durations[q0], wire_durations[q1]) + gate_duration
+            wire_durations[q0] = current_duration
+            wire_durations[q1] = current_duration
+
+        # update last_mapped_layer
+        for pair in list(last_mapped_layer.keys()):
+            if q0 in pair or q1 in pair:
+                last_mapped_layer.pop(pair)
+        last_mapped_layer[q0, q1] = (instr.operation.name, instr.operation.params)
+
         return max(wire_durations.values())
 
-    def _eval_tket_circuit_duration(self, circ: Circuit):
-        """Evaluate the pulse-level duration of a pytket Circuit instance."""
-        wire_durations = {q: 0.0 for q in circ.qubits}
-        for cmd in circ.get_commands():
-            if cmd.op.n_qubits == 1:
+    def eval_dagcircuit_duration(self, dag: DAGCircuit):
+        """Evaluate the pulse-level duration of a Qiskit DAGCircuit instance."""
+        qubit_indices = {qarg: q for q, qarg in enumerate(dag.qubits)}
+        wire_durations = {q: 0.0 for q in range(dag.num_qubits())}
+        last_mapped_layer: Dict[Tuple[int, int], Tuple[str, List[float]]] = {}
+
+        dag_ = dag.copy_empty_like()
+        i =  0
+        for node in dag.topological_op_nodes():
+            dag_.apply_operation_back(node.op, node.qargs, node.cargs)
+
+            if node.num_qubits == 1:
                 continue
 
-            if cmd.op.type == OpType.TK2:
-                gate_duration = self.can_duration(*cmd.op.params)
-            elif cmd.op.type == OpType.CX:
-                gate_duration = self.cx_duration
-            elif cmd.op.type == OpType.ISWAPMax:
-                gate_duration = self.iswap_duration
-            elif cmd.op.type == OpType.XXPhase or cmd.op.type == OpType.ZZPhase:
-                gate_duration = self.cx_family_duration(cmd.op.params[0] / 0.5)
-            elif cmd.op.type == OpType.ISWAP:
-                gate_duration = self.iswap_family_duration(cmd.op.params[0])
-            else:
-                raise ValueError(f"Unsupported operation type: {cmd.op.type}")
+            q0, q1 = tuple(sorted([qubit_indices[qarg] for qarg in node.qargs]))
 
-            qubits = cmd.qubits
-            current_duration = max(wire_durations[q] for q in qubits) + gate_duration
-            for q in qubits:
-                wire_durations[q] = current_duration
+            if node.op.name == 'swap':
+                i += 1
+                # print(i)
+                if (q0, q1) in last_mapped_layer:
+                    gname, params = last_mapped_layer[q0, q1]
+                    if gname == 'can':
+                        gate_duration = self.eval_gate_cost(*mirror_weyl_coord(*params)) - self.eval_gate_cost(*params)
+                    else:
+                        qc = dag_to_circuit(dag_)
+                        print(qc)
+                        from qiskit import qasm2
+                        qasm2.dump(qc, 'debugcircuit.qasm')
+                        raise ValueError(f"Unsupported gate type: {gname}")
+                else:
+                    gate_duration = self.swap_cost
+            elif node.op.name == 'can':
+                gate_duration = self.eval_gate_cost(*node.op.params)
+            elif node.op.name == 'cx':
+                gate_duration = self.cx_cost
+            elif node.op.name == 'iswap':
+                gate_duration = self.iswap_cost
+            elif node.op.name == 'rzz':
+                gate_duration = self.cx_cost * node.op.params[0] / half_pi
+            elif node.op.name == 'xx_plus_yy':
+                gate_duration = self.iswap_cost * node.op.params[0] / 2 / half_pi
+            else:
+                raise ValueError(f"Unsupported operation type: {node.op.name}")
+
+            current_duration = max(wire_durations[q0], wire_durations[q1]) + gate_duration
+            wire_durations[q0] = current_duration
+            wire_durations[q1] = current_duration
+
+            # update last_mapped_layer
+            for pair in list(last_mapped_layer.keys()):
+                if q0 in pair or q1 in pair:
+                    last_mapped_layer.pop(pair)
+            last_mapped_layer[q0, q1] = (node.op.name, node.op.params)
+
         return max(wire_durations.values())
