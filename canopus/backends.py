@@ -5,12 +5,11 @@ from qiskit import QuantumCircuit
 from qiskit.transpiler import CouplingMap
 from qiskit.dagcircuit import DAGCircuit
 from qiskit.converters import dag_to_circuit
-
-from canopus.utils import optimal_can_gate_duration
 from functools import cached_property
-from canopus.utils import fuzzy_compare
 from canopus.basics import half_pi
-from canopus.utils import mirror_weyl_coord
+from accel_utils import * 
+
+
 
 
 class ISAType(Enum):
@@ -45,6 +44,7 @@ class CanopusBackend:
 
 
 class SynthCostEstimator:
+    """Evaluate the synthesis cost of Canonical-based circuits in any specific ISA."""
     def __init__(self, isa_type: Union[ISAType, str], coupling_type: Union[CouplingType, str] = None):
         # coupling_type 只有在 Can ISA 中才有用
         if isinstance(isa_type, ISAType):
@@ -61,44 +61,30 @@ class SynthCostEstimator:
 
     @cached_property
     def cx_cost(self):
+        """Cost of a single CX gate."""
         return self.eval_gate_cost(0.5, 0.0, 0.0)
 
     @cached_property
     def iswap_cost(self):
+        """Cost of a single ISWAP gate."""
         return self.eval_gate_cost(0.5, 0.5, 0.0)
 
     @cached_property
     def swap_cost(self):
+        """Cost of a single SWAP gate."""
         return self.eval_gate_cost(0.5, 0.5, 0.5)
-
-    @staticmethod
-    def synth_cost_by_cx(a, b, c):
-        if np.isclose(b, 0) and np.isclose(c, 0):
-            return 1
-        if np.isclose(c, 0):
-            return 2
-        return 3
-
-    @staticmethod
-    def synth_cost_by_zzphase(a, b, c):
-        raise NotImplementedError
-
-    @staticmethod
-    def synth_cost_by_sqisw(a, b, c):
-        if fuzzy_compare(a, b + abs(c), ">="):
-            return 2
-        return 3
+    
 
     def eval_gate_cost(self, a, b, c):
         if (a, b, c) in self._cached_gate_costs:
             return self._cached_gate_costs[a, b, c]
 
         if self.isa_type == ISAType.CX:
-            cost = self.synth_cost_by_cx(a, b, c)
+            cost = synth_cost_by_cx(a, b, c)
         elif self.isa_type == ISAType.ZZPhase:
-            cost = self.synth_cost_by_zzphase(a, b, c)
+            cost = synth_cost_by_zzphase(a, b, c)
         elif self.isa_type == ISAType.SQiSW:
-            cost = self.synth_cost_by_sqisw(a, b, c)
+            cost = synth_cost_by_sqisw(a, b, c)
         elif self.isa_type == ISAType.Canonical:
             if self.coupling_type == CouplingType.XX:
                 cost = optimal_can_gate_duration(a, b, c, 1, 0, 0)
@@ -120,7 +106,7 @@ class SynthCostEstimator:
             if instr.operation.num_qubits == 1:
                 continue
 
-            q0, q1 = tuple(sorted([qubit_indices[qarg] for qarg in instr.qubits]))
+            q0, q1 = sort_two_numbers(qubit_indices[instr.qubits[0]], qubit_indices[instr.qubits[1]])
 
             if instr.operation.name == 'swap':
                 if (q0, q1) in last_mapped_layer:
@@ -135,13 +121,13 @@ class SynthCostEstimator:
             elif instr.operation.name == 'can':
                 gate_duration = self.eval_gate_cost(*instr.operation.params)
             elif instr.operation.name == 'cx':
-                gate_duration = self.cx_duration
+                gate_duration = self.cx_cost
             elif instr.operation.name == 'iswap':
-                gate_duration = self.iswap_duration
+                gate_duration = self.iswap_cost
             elif instr.operation.name == 'rzz':
-                gate_duration = self.cx_family_duration(instr.operation.params[0] / half_pi)
+                gate_duration = self.cx_cost * instr.operation.params[0] / half_pi
             elif instr.operation.name == 'xx_plus_yy':
-                gate_duration = self.iswap_family_duration(instr.operation.params[0] / 2 / half_pi)
+                gate_duration = self.iswap_cost * instr.operation.params[0] / 2 / half_pi
             else:
                 raise ValueError(f"Unsupported operation type: {instr.operation.name}")
 
@@ -171,7 +157,7 @@ class SynthCostEstimator:
             if node.num_qubits == 1:
                 continue
 
-            q0, q1 = tuple(sorted([qubit_indices[qarg] for qarg in node.qargs]))
+            q0, q1 = sort_two_numbers(qubit_indices[node.qargs[0]], qubit_indices[node.qargs[1]])
 
             if node.op.name == 'swap':
                 i += 1
@@ -212,3 +198,10 @@ class SynthCostEstimator:
             last_mapped_layer[q0, q1] = (node.op.name, node.op.params)
 
         return max(wire_durations.values())
+
+
+
+
+
+def synth_cost_by_zzphase(a, b, c):
+    raise NotImplementedError

@@ -1,0 +1,19 @@
+[build-system]
+requires = ["maturin>=1.0,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "accel_utils"
+version = "0.1.0"
+description = "High-performance Rust utilities for quantum circuit optimization"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Rust",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
+]
+
+[tool.maturin]
+# 指定 Python 源码目录
+python-source = "python"
+# maturin 会自动打包 python/ 目录下的内容

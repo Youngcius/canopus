@@ -46,7 +46,7 @@ else:
     raise ValueError(f"Unsupported topology: {args.topology}")
 
 benchmark_dpath = './output/logical/'  # Path to benchmark files
-output_dpath = os.path.join('./output/canopus/', args.isa, args.topology,  '' if args.coupling is None else args.coupling)
+output_dpath = os.path.join('./output/canopus/', args.topology, args.isa,  '' if args.coupling is None else args.coupling)
 if not os.path.exists(output_dpath):
     os.makedirs(output_dpath)
 fnames = [os.path.join(benchmark_dpath, fname) for fname in natsorted(os.listdir(benchmark_dpath)) if fname.endswith('.qasm')]
@@ -54,10 +54,8 @@ fnames = [os.path.join(benchmark_dpath, fname) for fname in natsorted(os.listdir
 backend = canopus.CanopusBackend(coupling_map, args.isa, args.coupling)
 for fname in fnames:
     console.rule(f"Processing {fname}")
-    if 'dnn' in fname:
-        continue
-    if 'qpeexact_16.qasm' not in fname:
-        continue
+    # if 'dnn' not in fname:
+    #     continue
     # if 'bigadder' not in fname:
     #     continue
     circ = pytket.qasm.circuit_from_qasm(fname)

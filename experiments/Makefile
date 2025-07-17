@@ -11,48 +11,68 @@ init:
 	@echo "Preparing logical-level optimized circuits ...\n"
 	@python gene_logic_opt_circuits.py
 
-cx:
-	@echo "Testing Canopus for CX ISA ...\n"
-	@echo "For CX ISA, chain topology:"
+chain: chain_cx chain_zzphase chain_sqisw chain_can chain_ftqc
+chain_cx:
+	@echo "Testing Canopus for Chain topology and CX ISA ...\n"
 	@./bench_all.py -t chain -isa cx
-# 	@echo "For CX ISA, square topology:"
-# 	@./bench_all.py -t square -isa cx
-# 	@echo "For CX ISA, hhex topology:"
-# 	@./bench_all.py -t hhex -isa cx
-
-cx_sabre:
-	@echo "Testing Canopus for CX ISA with SABRE mapping ..."
-	@./bench_all.py -t chain -isa cx --sabre
-
-zzphase:
-	@echo "Testing Canopus for ZZPhase ISA ..."
+chain_zzphase:
+	@echo "Testing Canopus for Chain topology and ZZPhase ISA ..."
 	@./bench_all.py -t chain -isa zzphase
-
-sqisw:
-	@echo "Testing Canopus for SQiSW ISA ..."
+chain_sqisw:
+	@echo "Testing Canopus for Chain topology and SQiSW ISA ..."
 	@./bench_all.py -t chain -isa sqisw
-
-sqisw_sabre:
-	@echo "Testing Canopus for SQiSW ISA with SABRE mapping ..."
-	@./bench_all.py -t chain -isa sqisw --sabre
-
-can:
-	@echo "Testing Canopus for Can ISA ..."
+chain_can:
+	@echo "Testing Canopus for Chain topology and Can ISA ..."
 	@./bench_all.py -t chain -isa can -c xx
-# 	@./bench_all.py -t chain -isa can -c xy
+	@./bench_all.py -t chain -isa can -c xy
+chain_ftqc:
+	@echo "Testing Canopus for Chain topology and FTQC backend ..."
+	@./bench_all.py -t chain -isa ftqc
 
-can_sabre:
-	@echo "Testing Canopus for Can ISA with SABRE mapping ..."
-	@./bench_all.py -t chain -isa can -c xx --sabre
+hhex: hhex_cx hhex_zzphase hhex_sqisw hhex_can hhex_ftqc
+hhex_cx:
+	@echo "Testing Canopus for HHex topology and CX ISA ..."
+	@./bench_all.py -t hhex -isa cx
+hhex_zzphase:
+	@echo "Testing Canopus for HHex topology and ZZPhase ISA ..."
+	@./bench_all.py -t hhex -isa zzphase
+hhex_sqisw:
+	@echo "Testing Canopus for HHex topology and SQiSW ISA ..."
+	@./bench_all.py -t hhex -isa sqisw
+hhex_can:
+	@echo "Testing Canopus for HHex topology and Can ISA ..."
+	@./bench_all.py -t hhex -isa can -c xx
+	@./bench_all.py -t hhex -isa can -c xy
+hhex_ftqc:
+	@echo "Testing Canopus for HHex topology and FTQC backend ..."
+	@./bench_all.py -t hhex -isa ftqc
 
+square: square_cx square_zzphase square_sqisw square_can square_ftqc
+square_cx:
+	@echo "Testing Canopus for Square topology and CX ISA ..."
+	@./bench_all.py -t square -isa cx
+square_zzphase:
+	@echo "Testing Canopus for Square topology and ZZPhase ISA ..."
+	@./bench_all.py -t square -isa zzphase
+square_sqisw:
+	@echo "Testing Canopus for Square topology and SQiSW ISA ..."
+	@./bench_all.py -t square -isa sqisw
+square_can:
+	@echo "Testing Canopus for Square topology and Can ISA ..."
+	@./bench_all.py -t square -isa can -c xx
+	@./bench_all.py -t square -isa can -c xy
+square_ftqc:
+	@echo "Testing Canopus for Square topology and FTQC backend ..."
+	@./bench_all.py -t square -isa ftqc
 
-ftqc:
-	@echo "Testing Canopus for FTQC backend ..."
 
 
 baselines:
 	@echo "Running baseline compilers (SABRE, TOQM, OLSQ, Mirage) ...\n"
+
 	@echo "Running SABRE compiler ..."
+	@echo "For SABRE, chain topology:"
+	@./run_sabre.sh
 
 	@echo "Running TOQM compiler ..."
 
@@ -63,8 +83,8 @@ baselines:
 	@echo "\n✅ All baseline compilers executed successfully."
 
 disp_result:
-
-
+	@echo "Displaying results for all topologies and ISAs ..."
+	@python disp_result.py
 
 
 clean:

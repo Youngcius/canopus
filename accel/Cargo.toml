@@ -1,0 +1,11 @@
+[package]
+name = "accel_utils"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+name = "accel_utils"
+crate-type = ["cdylib"]  # 编译为动态库
+
+[dependencies]
+pyo3 = { version = "0.25.1", features = ["extension-module"] }

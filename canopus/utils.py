@@ -2,6 +2,7 @@ import pytket
 import qiskit
 import pytket.qasm
 import qiskit.qasm2
+import cirq
 import numpy as np
 from pytket import OpType
 from math import pi
@@ -61,7 +62,7 @@ def tket_to_qiskit(circ: pytket.Circuit) -> qiskit.QuantumCircuit:
                 q1 = max(cmd.qubits[0].index[0], cmd.qubits[1].index[0])
                 qc.append(CanonicalGate(*cmd.op.params), [q0, q1])
     else:
-        warnings.warn('!!!!!! Unsupported pytket circuit type:', set(gate_counts(circ).keys()))
+        warnings.warn('!!!!!! Unsupported pytket circuit type: {}'.format(set(gate_counts(circ).keys())))
         qc = qiskit.QuantumCircuit.from_qasm_str(pytket.qasm.circuit_to_qasm_str(circ))
 
     return qc
@@ -78,20 +79,23 @@ def qc_to_unitary(qc: qiskit.QuantumCircuit) -> np.ndarray:
     return Operator(qc.reverse_bits()).data
 
 
-def fuzzy_compare(a, b, op, rtol=1e-7, atol=1e-10):
-    """Comparison function with tolerance for floating point errors."""
-    if op == ">=":
-        return a > b or np.isclose(a, b, rtol=rtol, atol=atol)
-    elif op == "<=":
-        return a < b or np.isclose(a, b, rtol=rtol, atol=atol)
-    elif op == ">":
-        return a > b and not np.isclose(a, b, rtol=rtol, atol=atol)
-    elif op == "<":
-        return a < b and not np.isclose(a, b, rtol=rtol, atol=atol)
-    elif op == "==":
-        return np.isclose(a, b, rtol=rtol, atol=atol)
-    else:
-        raise ValueError("Unsupported operator (options: >=, <=, >, <, ==)")
+
+
+# @njit(fastmath=True)
+# def fuzzy_compare(a, b, op, rtol=1e-7, atol=1e-10):
+#     """Comparison function with tolerance for floating point errors."""
+#     if op == ">=":
+#         return a > b or np.isclose(a, b, rtol=rtol, atol=atol)
+#     elif op == "<=":
+#         return a < b or np.isclose(a, b, rtol=rtol, atol=atol)
+#     elif op == ">":
+#         return a > b and not np.isclose(a, b, rtol=rtol, atol=atol)
+#     elif op == "<":
+#         return a < b and not np.isclose(a, b, rtol=rtol, atol=atol)
+#     elif op == "==":
+#         return np.isclose(a, b, rtol=rtol, atol=atol)
+#     else:
+#         raise ValueError("Unsupported operator (options: >=, <=, >, <, ==)")
 
 
 def replace_close_to_zero_with_zero(arr) -> np.ndarray:
@@ -131,40 +135,54 @@ def print_circ_info(circ: Union[pytket.Circuit, qiskit.QuantumCircuit], title=No
     console.print(table)
 
 
-def optimal_can_gate_duration(a, b, c, gx, gy, gz):
-    # def determine_ashn_gate_duration(a, b, c, gx, gy, gz):
-    """
-    Determine the optimal 2Q gate duration in the AshN gate scheme.
-        Input (x, y, z) are the Canonical coefficients of an SU(4), where π/4 ≥ x ≥ y ≥ |z|
-        Input (gx, gy, gc) are the normalized coefficients of the coupling Hamiltonian, where a ≥ b ≥ |c|
-    """
-    # TODO: comment following line to improve performance
-    if not (fuzzy_compare(0.5, a, '>=') and fuzzy_compare(a, b, '>=') and fuzzy_compare(b, abs(c), '>=')):
-        raise ValueError('Weyl coordinate must be normalized to satisfy 0.5 >= a >= b >= |c|')
-    x, y, z = a * half_pi, b * half_pi, c * half_pi
-    coupling_strength = np.linalg.norm([gx, gy, gz], ord=1)
-    tau0 = x / gx
-    tau_plus = (x + y - z) / (gx + gy - gz)
-    tau_minus = (x + y + z) / (gx + gy + gz)
-    tau1 = max(tau0, tau_plus, tau_minus)
-
-    tau0_prime = (pi / 2 - x) / gx
-    tau_plus_prime = (pi / 2 - x + y + z) / (gx + gy - gz)
-    tau_minus_prime = (pi / 2 - x + y - z) / (gx + gy + gz)
-    tau2 = max(tau0_prime, tau_plus_prime, tau_minus_prime)
-
-    tau = min(tau1, tau2)
-    return tau * coupling_strength  # unit is 1/coupling_strength
 
 
-def mirror_weyl_coord(a, b, c):
-    # TODO: check this through random testing
-    # TODO: comment following line to improve performance
-    if not (fuzzy_compare(0.5, a, '>=') and fuzzy_compare(a, b, '>=') and fuzzy_compare(b, abs(c), '>=')):
-        raise ValueError('Weyl coordinate must be normalized to satisfy 0.5 >= a >= b >= |c|')
-    if fuzzy_compare(c, 0, '>='):
-        return 0.5 - c, 0.5 - b, a - 0.5
-    return 0.5 + c, 0.5 - b, 0.5 - a
+# def optimal_can_gate_duration(a, b, c, gx, gy, gz):
+#     """
+#     Determine the optimal 2Q gate duration in the AshN gate scheme.
+#         Input (x, y, z) are the Canonical coefficients of an SU(4), where π/4 ≥ x ≥ y ≥ |z|
+#         Input (gx, gy, gc) are the normalized coefficients of the coupling Hamiltonian, where a ≥ b ≥ |c|
+#     """
+#     # TODO: 不用写这个
+#     if not (fuzzy_compare(0.5, a, '>=') and fuzzy_compare(a, b, '>=') and fuzzy_compare(b, abs(c), '>=')):
+#         warnings.warn('Weyl coordinate must be normalized to satisfy 0.5 >= a >= b >= |c|')
+#         a, b, c = np.array(cirq.kak_canonicalize_vector(a*half_pi, b*half_pi, c*half_pi).interaction_coefficients) / half_pi
+#     return _optimal_can_gate_duration_numba(a, b, c, gx, gy, gz)
+
+
+# @njit(fastmath=True)
+# def _optimal_can_gate_duration_numba(a, b, c, gx, gy, gz):
+    # x, y, z = a * half_pi, b * half_pi, c * half_pi
+    # coupling_strength = gx + gy + abs(gz)
+    # tau0 = x / gx
+    # tau_plus = (x + y - z) / (gx + gy - gz)
+    # tau_minus = (x + y + z) / (gx + gy + gz)
+    # tau1 = max(tau0, tau_plus, tau_minus)
+
+    # tau0_prime = (pi / 2 - x) / gx
+    # tau_plus_prime = (pi / 2 - x + y + z) / (gx + gy - gz)
+    # tau_minus_prime = (pi / 2 - x + y - z) / (gx + gy + gz)
+    # tau2 = max(tau0_prime, tau_plus_prime, tau_minus_prime)
+
+    # tau = min(tau1, tau2)
+    # return tau * coupling_strength  # unit is 1/coupling_strength
+
+
+# TODO: 把这个写成Rust调用
+
+# def mirror_weyl_coord(a, b, c):
+#     # TODO: check this through random testing
+#     if not (fuzzy_compare(0.5, a, '>=') and fuzzy_compare(a, b, '>=') and fuzzy_compare(b, abs(c), '>=')):
+#         warnings.warn('Weyl coordinate must be normalized to satisfy 0.5 >= a >= b >= |c|')
+#         a, b, c = np.array(cirq.kak_canonicalize_vector(a*half_pi, b*half_pi, c*half_pi).interaction_coefficients) / half_pi
+#     return _mirror_weyl_coord_numba(a, b, c)
+
+    
+# @njit(fastmath=True)
+# def _mirror_weyl_coord_numba(a, b, c):
+#     if fuzzy_compare(c, 0, '>='):
+#         return 0.5 - c, 0.5 - b, a - 0.5
+#     return 0.5 + c, 0.5 - b, 0.5 - a
 
 
 def crop_coupling_map(coupling_map, crop_size, seed=None):

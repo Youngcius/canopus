@@ -52,9 +52,9 @@ assert compare_unitaries(circ.get_unitary(), qc_to_unitary(qc))
 
 print(qiskit_to_tket(qc).get_commands())
 
-coupling_map = CouplingMap.from_line(num_qubits=qc.num_qubits)
-# coupling_map = CouplingMap.from_grid(np.ceil(np.sqrt(qc.num_qubits)).astype(int), np.ceil(np.sqrt(qc.num_qubits)).astype(int))
-backend = CanopusBackend(coupling_map, 'cx', 'xy')
+# coupling_map = CouplingMap.from_line(num_qubits=qc.num_qubits)
+coupling_map = CouplingMap.from_grid(np.ceil(np.sqrt(qc.num_qubits)).astype(int), np.ceil(np.sqrt(qc.num_qubits)).astype(int))
+backend = CanopusBackend(coupling_map, 'cx', 'xx')
 
 console.print('Pulse duration: {:.4f}'.format(backend.cost_estimator.eval_circuit_duration(qc)))
 
@@ -64,9 +64,7 @@ pm = PassManager(SabreMapping(backend, seed=123))
 qc_sabre = pm.run(qc)
 end = time.perf_counter()
 print(qc_sabre)
-qc_sabre_opt = tket_to_qiskit(rebase_to_tk2(qiskit_to_tket(qc_sabre)))
-# print(qc_sabre_opt)
-console.print('Pulse duration: {:.4f}'.format(backend.cost_estimator.eval_circuit_duration(qc_sabre_opt)))
+console.print('Pulse duration: {:.4f}'.format(backend.cost_estimator.eval_circuit_duration(qc_sabre)))
 console.print('Time taken for Canopus mapping: {:.4f} seconds'.format(end - start))
 
 console.rule('Canopus mapping')
@@ -75,9 +73,7 @@ pm = PassManager(CanopusMapping(backend, seed=123))
 qc_canopus = pm.run(qc)
 end = time.perf_counter()
 print(qc_canopus)
-qc_canopus_opt = tket_to_qiskit(rebase_to_tk2(qiskit_to_tket(qc_canopus)))
-# print(qc_canopus_opt)
-console.print('Pulse duration: {:.4f}'.format(backend.cost_estimator.eval_circuit_duration(qc_canopus_opt)))
+console.print('Pulse duration: {:.4f}'.format(backend.cost_estimator.eval_circuit_duration(qc_canopus)))
 console.print('Time taken for Canopus mapping: {:.4f} seconds'.format(end - start))
 
 # from regulus.transforms import mirror
