@@ -97,6 +97,10 @@ class SynthCostEstimator:
 
     def eval_circuit_duration(self, qc: QuantumCircuit):
         """Evaluate the pulse-level duration of a Qiskit QuantumCircuit instance."""
+        # import pytket
+        # from canopus.utils import tket_to_qiskit
+        # if isinstance(qc, pytket.Circuit):
+        #     qc = tket_to_qiskit(qc)
 
         qubit_indices = {qarg: q for q, qarg in enumerate(qc.qubits)}
         wire_durations = {q: 0.0 for q in range(qc.num_qubits)}
@@ -127,7 +131,7 @@ class SynthCostEstimator:
             elif instr.operation.name == 'rzz':
                 gate_duration = self.cx_cost * instr.operation.params[0] / half_pi
             elif instr.operation.name == 'xx_plus_yy':
-                gate_duration = self.iswap_cost * instr.operation.params[0] / 2 / half_pi
+                gate_duration = self.iswap_cost * (-instr.operation.params[0]) / 2 / half_pi
             else:
                 raise ValueError(f"Unsupported operation type: {instr.operation.name}")
 
@@ -183,7 +187,7 @@ class SynthCostEstimator:
             elif node.op.name == 'rzz':
                 gate_duration = self.cx_cost * node.op.params[0] / half_pi
             elif node.op.name == 'xx_plus_yy':
-                gate_duration = self.iswap_cost * node.op.params[0] / 2 / half_pi
+                gate_duration = self.iswap_cost * (-node.op.params[0]) / 2 / half_pi
             else:
                 raise ValueError(f"Unsupported operation type: {node.op.name}")
 
@@ -203,5 +207,3 @@ class SynthCostEstimator:
 
 
 
-def synth_cost_by_zzphase(a, b, c):
-    raise NotImplementedError

@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import sys
+
 sys.path.append("..")  # Adjust the path to import canopus
 
 import os
@@ -25,10 +26,10 @@ console = Console()
 # )
 
 
-
 parser = argparse.ArgumentParser(description="Canopus executable.")
 parser.add_argument('-isa', '--isa', type=str, help="Instruction Set Architecture (e.g., zzphase, sqisw, can, ftqc)")
-parser.add_argument('-t', '--topology', default=None, type=str, help="NISQ backend device topology (chain, hhex, square)")
+parser.add_argument('-t', '--topology', default=None, type=str,
+                    help="NISQ backend device topology (chain, hhex, square)")
 parser.add_argument('-c', '--coupling', default=None, type=str, help="Coupling type (e.g., xx, xy)")
 parser.add_argument('--sabre', action='store_true', help="Use SABRE mapping instead of Canopus mapping")
 args = parser.parse_args()
@@ -46,16 +47,20 @@ else:
     raise ValueError(f"Unsupported topology: {args.topology}")
 
 benchmark_dpath = './output/logical/'  # Path to benchmark files
-output_dpath = os.path.join('./output/canopus/', args.topology, args.isa,  '' if args.coupling is None else args.coupling)
+output_dpath = os.path.join('./output/canopus/', args.topology, args.isa,
+                            '' if args.coupling is None else args.coupling)
 if not os.path.exists(output_dpath):
     os.makedirs(output_dpath)
-fnames = [os.path.join(benchmark_dpath, fname) for fname in natsorted(os.listdir(benchmark_dpath)) if fname.endswith('.qasm')]
+fnames = [os.path.join(benchmark_dpath, fname) for fname in natsorted(os.listdir(benchmark_dpath)) if
+          fname.endswith('.qasm')]
 
 backend = canopus.CanopusBackend(coupling_map, args.isa, args.coupling)
 for fname in fnames:
     console.rule(f"Processing {fname}")
-    # if 'dnn' not in fname:
-    #     continue
+    if 'knn' in fname:
+        continue
+    if 'multiplier' in fname:
+        continue
     # if 'bigadder' not in fname:
     #     continue
     circ = pytket.qasm.circuit_from_qasm(fname)

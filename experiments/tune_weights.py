@@ -14,7 +14,7 @@ import bench_utils
 
 def get_result(qc, coupling_map, isa, coupling_type=None):
     backend = canopus.CanopusBackend(coupling_map, isa, coupling_type)
-    qc = canopus.utils.tket_to_qiskit(canopus.rebase_to_tk2(canopus.utils.qiskit_to_tket(qc)))
+    qc = canopus.rebase_to_tk2(qc)
     qc_mapped = PassManager(canopus.CanopusMapping(backend)).run(qc)
     return np.round(backend.cost_estimator.eval_circuit_duration(qc_mapped), 3)
 
@@ -51,23 +51,63 @@ def test_chain_topology():
     table.add_row([
         'Demo', get_result(qc_demo, bench_utils.Chain, 'cx'), get_result(qc_demo, bench_utils.Chain, 'sqisw'), get_result(qc_demo, bench_utils.Chain, 'can', 'xx'), get_result(qc_demo, bench_utils.Chain, 'can', 'xy'),
     ])
-    print(table)
     table.add_row([
         'QFT-6', get_result(qc_qft6, bench_utils.Chain, 'cx'), get_result(qc_qft6, bench_utils.Chain, 'sqisw'), get_result(qc_qft6, bench_utils.Chain, 'can', 'xx'), get_result(qc_qft6, bench_utils.Chain, 'can', 'xy'),
     ])
-    print(table)
     table.add_row([
         'QFT-10', get_result(qc_qft10, bench_utils.Chain, 'cx'), get_result(qc_qft10, bench_utils.Chain, 'sqisw'), get_result(qc_qft10, bench_utils.Chain, 'can', 'xx'), get_result(qc_qft10, bench_utils.Chain, 'can', 'xy'),
     ])
-    print(table)
     table.add_row([
         'QFT-15', get_result(qc_qft_15, bench_utils.Chain, 'cx'), get_result(qc_qft_15, bench_utils.Chain, 'sqisw'), get_result(qc_qft_15, bench_utils.Chain, 'can', 'xx'), get_result(qc_qft_15, bench_utils.Chain, 'can', 'xy'),
     ])
-    print(table)
     table.add_row([
         'QFT-20', get_result(qc_qft_20, bench_utils.Chain, 'cx'), get_result(qc_qft_20, bench_utils.Chain, 'sqisw'), get_result(qc_qft_20, bench_utils.Chain, 'can', 'xx'), get_result(qc_qft_20, bench_utils.Chain, 'can', 'xy'),
     ])
     print(table)
 
+def test_square_topology():
+    table = PrettyTable()
+    table.field_names = ["Square", "CX", "SQiSW", "Can-XX", "Can-XY"]
+    table.add_row([
+        'Demo', get_result(qc_demo, bench_utils.Sycamore, 'cx'), get_result(qc_demo, bench_utils.Sycamore, 'sqisw'), get_result(qc_demo, bench_utils.Sycamore, 'can', 'xx'), get_result(qc_demo, bench_utils.Sycamore, 'can', 'xy'),
+    ])
+    table.add_row([
+        'QFT-6', get_result(qc_qft6, bench_utils.Sycamore, 'cx'), get_result(qc_qft6, bench_utils.Sycamore, 'sqisw'), get_result(qc_qft6, bench_utils.Sycamore, 'can', 'xx'), get_result(qc_qft6, bench_utils.Sycamore, 'can', 'xy'),
+    ])
+    table.add_row([
+        'QFT-10', get_result(qc_qft10, bench_utils.Sycamore, 'cx'), get_result(qc_qft10, bench_utils.Sycamore, 'sqisw'), get_result(qc_qft10, bench_utils.Sycamore, 'can', 'xx'), get_result(qc_qft10, bench_utils.Sycamore, 'can', 'xy'),
+    ])
+    table.add_row([
+        'QFT-15', get_result(qc_qft_15, bench_utils.Sycamore, 'cx'), get_result(qc_qft_15, bench_utils.Sycamore, 'sqisw'), get_result(qc_qft_15, bench_utils.Sycamore, 'can', 'xx'), get_result(qc_qft_15, bench_utils.Sycamore, 'can', 'xy'),
+    ])
+    table.add_row([
+        'QFT-20', get_result(qc_qft_20, bench_utils.Sycamore, 'cx'), get_result(qc_qft_20, bench_utils.Sycamore, 'sqisw'), get_result(qc_qft_20, bench_utils.Sycamore, 'can', 'xx'), get_result(qc_qft_20, bench_utils.Sycamore, 'can', 'xy'),
+    ])
+    print(table)
+
+def test_hhex_topology():
+    table = PrettyTable()
+    table.field_names = ["HHex", "CX", "SQiSW", "Can-XX", "Can-XY"]
+    table.add_row([
+        'Demo', get_result(qc_demo, bench_utils.Manhattan, 'cx'), get_result(qc_demo, bench_utils.Manhattan, 'sqisw'), get_result(qc_demo, bench_utils.Manhattan, 'can', 'xx'), get_result(qc_demo, bench_utils.Manhattan, 'can', 'xy'),
+    ])
+    table.add_row([
+        'QFT-6', get_result(qc_qft6, bench_utils.Manhattan, 'cx'), get_result(qc_qft6, bench_utils.Manhattan, 'sqisw'), get_result(qc_qft6, bench_utils.Manhattan, 'can', 'xx'), get_result(qc_qft6, bench_utils.Manhattan, 'can', 'xy'),
+    ])
+    table.add_row([
+        'QFT-10', get_result(qc_qft10, bench_utils.Manhattan, 'cx'), get_result(qc_qft10, bench_utils.Manhattan, 'sqisw'), get_result(qc_qft10, bench_utils.Manhattan, 'can', 'xx'), get_result(qc_qft10, bench_utils.Manhattan, 'can', 'xy'),
+    ])
+    table.add_row([
+        'QFT-15', get_result(qc_qft_15, bench_utils.Manhattan, 'cx'), get_result(qc_qft_15, bench_utils.Manhattan, 'sqisw'), get_result(qc_qft_15, bench_utils.Manhattan, 'can', 'xx'), get_result(qc_qft_15, bench_utils.Manhattan, 'can', 'xy'),
+    ])
+    table.add_row([
+        'QFT-20', get_result(qc_qft_20, bench_utils.Manhattan, 'cx'), get_result(qc_qft_20, bench_utils.Manhattan, 'sqisw'), get_result(qc_qft_20, bench_utils.Manhattan, 'can', 'xx'), get_result(qc_qft_20, bench_utils.Manhattan, 'can', 'xy'),
+    ])
+    print(table)
+
+
+
 if __name__ == '__main__':
     test_chain_topology()
+    test_hhex_topology()
+    test_square_topology()

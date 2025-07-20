@@ -9,3 +9,6 @@ crate-type = ["cdylib"]  # 编译为动态库
 
 [dependencies]
 pyo3 = { version = "0.25.1", features = ["extension-module"] }
+numpy = "0.25.0"
+ndarray = "0.16.1"
+num-complex = "0.4"

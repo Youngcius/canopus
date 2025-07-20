@@ -32,7 +32,7 @@ console.rule('Original circuit')
 
 print(qc)
 if qc.num_qubits < 7:
-    assert compare_unitaries(circ.get_unitary(), circ2mat(qc))
+    assert compare_unitaries(circ.get_unitary(), qc2mat(qc))
 
 # print(qiskit_to_tket(qc).get_commands())
 

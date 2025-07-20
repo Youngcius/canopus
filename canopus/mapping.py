@@ -123,7 +123,7 @@ class CanopusMapping(TransformationPass):
         self.property_set['layout'] = best_initial_layout
         self.property_set['final_layout'] = best_final_layout
 
-        best_routed_dag.remove_all_ops_named('u')
+        # best_routed_dag.remove_all_ops_named('u')
 
         return best_routed_dag
 

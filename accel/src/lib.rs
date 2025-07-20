@@ -1,6 +1,33 @@
 // src/lib.rs
+use ndarray::{Array2, array};
+use num_complex::Complex64;
+use numpy::IntoPyArray;
 use pyo3::prelude::*;
 use std::f64::consts::{FRAC_PI_2, PI};
+
+// 类型别名，使用标准的 num_complex
+type C64 = Complex64;
+
+#[macro_export]
+macro_rules! c {
+    ($re:expr, $im:expr) => {
+        Complex64::new($re as f64, $im as f64)
+    };
+}
+
+#[macro_export]
+macro_rules! r {
+    ($re:expr) => {
+        Complex64::new($re as f64, 0.0)
+    };
+}
+
+#[macro_export]
+macro_rules! i {
+    ($im:expr) => {
+        Complex64::new(0.0, $im as f64)
+    };
+}
 
 #[pyfunction]
 #[pyo3(signature = (a, b, atol=None))]
@@ -190,17 +217,25 @@ fn sort_two_objs(
 
 #[pyfunction]
 fn synth_cost_by_cx(a: f64, b: f64, c: f64) -> i32 {
+    assert!(
+        check_weyl_coord(a, b, c),
+        "Weyl coordinate must be normalized to satisfy 0.5 >= a >= b >= |c|"
+    );
     if fuzzy_equal(a, 0.5, None) && fuzzy_equal(b, 0.0, None) && fuzzy_equal(c, 0.0, None) {
         return 1;
     }
     if fuzzy_equal(c, 0.0, None) {
-        return  2;
+        return 2;
     }
     3
 }
 
 #[pyfunction]
 fn synth_cost_by_sqisw(a: f64, b: f64, c: f64) -> i32 {
+    assert!(
+        check_weyl_coord(a, b, c),
+        "Weyl coordinate must be normalized to satisfy 0.5 >= a >= b >= |c|"
+    );
     if fuzzy_equal(a, 0.25, None) && fuzzy_equal(b, 0.25, None) && fuzzy_equal(c, 0.0, None) {
         return 1;
     }
@@ -208,6 +243,30 @@ fn synth_cost_by_sqisw(a: f64, b: f64, c: f64) -> i32 {
         return 2;
     }
     3
+}
+
+#[pyfunction]
+fn canonical_unitary(py: Python, a: f64, b: f64, c: f64) -> PyResult<PyObject> {
+    let zero = r!(0.0);
+    let x = a * FRAC_PI_2;
+    let y = b * FRAC_PI_2;
+    let z = c * FRAC_PI_2;
+    let cosm = (x - y).cos();
+    let cosp = (x + y).cos();
+    let sinm = (x - y).sin();
+    let sinp = (x + y).sin();
+    let eim = c!(0.0, -z).exp();
+    let eip = c!(0.0, z).exp();
+
+    // U = exp(-i * π/2 * (a XX + b YY + c ZZ))
+    let matrix: Array2<C64> = array![
+        [eim * cosm, zero, zero, i!(-1.0) * eim * sinm],
+        [zero, eip * cosp, i!(-1.0) * eip * sinp, zero],
+        [zero, i!(-1.0) * eip * sinp, eip * cosp, zero],
+        [i!(-1.0) * eim * sinm, zero, zero, eim * cosm]
+    ];
+
+    Ok(matrix.into_pyarray(py).into())
 }
 
 /// Python 模块入口
@@ -226,5 +285,6 @@ fn accel_utils(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(sort_two_objs, m)?)?;
     m.add_function(wrap_pyfunction!(synth_cost_by_cx, m)?)?;
     m.add_function(wrap_pyfunction!(synth_cost_by_sqisw, m)?)?;
+    m.add_function(wrap_pyfunction!(canonical_unitary, m)?)?;
     Ok(())
 }

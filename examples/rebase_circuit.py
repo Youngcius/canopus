@@ -9,7 +9,7 @@ import pytket.qasm
 from pytket.utils import compare_unitaries
 from rich.console import Console
 from canopus.synthesis import rebase_to_sqisw, rebase_to_zzphase
-from canopus.metrics import AshNPulseEvaluator, XXPulseEvaluator
+from canopus.backends import SynthCostEstimator
 from pytket import circuit_library
 
 def rebase_to_zzphase_trivial(circ: Circuit) -> Circuit:
@@ -23,7 +23,7 @@ def rebase_to_zzphase_trivial(circ: Circuit) -> Circuit:
 
 console = Console()
 
-evaluator = AshNPulseEvaluator(coupling_type='xy')
+evaluator = SynthCostEstimator(isa_type='can', coupling_type='xy')
 
 if __name__ == "__main__":
     circ = pytket.qasm.circuit_from_qasm('../benchmarks/medium/qec9xz_n17.qasm')
@@ -37,21 +37,20 @@ if __name__ == "__main__":
     console.rule("TK2-rebased circuit:")
     print(circ.get_commands())
     print(tket_to_qiskit(circ).draw())
-    print('Pulse-level circuit duration:', evaluator.circuit_duration(circ))
+    print('Pulse-level circuit duration:', evaluator.eval_circuit_duration(tket_to_qiskit(circ)))
 
     circ_sqisw = rebase_to_sqisw(circ)
     console.rule("SQiSW-based circuit:")
     print(circ_sqisw.get_commands())
     # print(tket_to_qiskit(circ_sqisw).draw())
-    print('Pulse-level circuit duration:', evaluator.circuit_duration(circ_sqisw))
+    print('Pulse-level circuit duration:', evaluator.eval_circuit_duration(tket_to_qiskit(circ_sqisw)))
     # assert compare_unitaries(circ.get_unitary(), circ_sqisw.get_unitary())
 
     circ_zzphase = rebase_to_zzphase_trivial(circ)
     console.rule("ZZPhase-based circuit (trivial decomposition):")
     print(circ_zzphase.get_commands())
     print(tket_to_qiskit(circ_zzphase).draw())
-    print('Pulse-level circuit duration:', evaluator.circuit_duration(circ_zzphase))
-    print('Pulse-level circuit duration (XX scheme):', XXPulseEvaluator().circuit_duration(circ_zzphase))
+    print('Pulse-level circuit duration:', evaluator.eval_circuit_duration(tket_to_qiskit(circ_zzphase)))
     # assert compare_unitaries(circ.get_unitary(), circ_zzphase.get_unitary())
 
     circ_zzphase = rebase_to_zzphase(circ)
@@ -59,5 +58,4 @@ if __name__ == "__main__":
     print(circ_zzphase.get_commands())
     print(tket_to_qiskit(circ_zzphase).draw())
     print('Pulse-level circuit duration:', evaluator.circuit_duration(circ_zzphase))
-    print('Pulse-level circuit duration (XX scheme):', XXPulseEvaluator().circuit_duration(circ_zzphase))
     # assert compare_unitaries(circ.get_unitary(), circ_zzphase.get_unitary())

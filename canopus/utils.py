@@ -2,28 +2,22 @@ import pytket
 import qiskit
 import pytket.qasm
 import qiskit.qasm2
-import cirq
 import numpy as np
 from pytket import OpType
 from math import pi
-from typing import Union
+from typing import Union, Tuple
 from rich.console import Console
 from rich.table import Table
 from pytket.utils.stats import gate_counts
 from qiskit.transpiler import Layout, CouplingMap
 import rustworkx as rx
 from canopus.basics import half_pi
+from accel_utils import sort_two_ints
 
 console = Console()
 
-from qiskit.circuit.library import UGate, U3Gate
+from qiskit.circuit.library import XXPlusYYGate
 from canopus.basics import CanonicalGate
-
-"""def tk1_to_rzry(a, b, c):
-    circ = Circuit(1)
-    circ.Rz(c + 0.5, 0).Ry(b, 0).Rz(a - 0.5, 0)
-    return circ
-    """
 
 import warnings
 
@@ -31,10 +25,10 @@ import warnings
 def tket_to_qiskit(circ: pytket.Circuit) -> qiskit.QuantumCircuit:
     """The self-implemented conversion function holds the high-level semantics of some customized Gate instances"""
     if set(gate_counts(circ).keys()).issubset(
-            {OpType.X, OpType.Y, OpType.Z,
-             OpType.H, OpType.S, OpType.T, OpType.Sdg, OpType.Tdg,
-             OpType.TK1, OpType.U3, OpType.TK2}):
-        qc = qiskit.QuantumCircuit(circ.n_qubits)
+            {OpType.X, OpType.Y, OpType.Z, OpType.H, OpType.S, OpType.T, OpType.Sdg, OpType.Tdg,
+             OpType.TK1, OpType.U3,
+             OpType.TK2, OpType.ISWAP, OpType.ZZPhase}):
+        qc = qiskit.QuantumCircuit(circ.n_qubits, circ.n_bits)
         for cmd in circ.get_commands():
             if cmd.op.type == OpType.X:
                 qc.x(cmd.qubits[0].index[0])
@@ -56,22 +50,74 @@ def tket_to_qiskit(circ: pytket.Circuit) -> qiskit.QuantumCircuit:
                 a, b, c = cmd.op.params
                 qc.u(b * pi, (a - 0.5) * pi, (c + 0.5) * pi, cmd.qubits[0].index[0])
             elif cmd.op.type == OpType.U3:
-                qc.u(*cmd.op.params, cmd.qubits[0].index[0])
+                theta, phi, lam = np.array(cmd.op.params) * pi
+                qc.u(theta, phi, lam, cmd.qubits[0].index[0])
+            elif cmd.op.type == OpType.ISWAP:
+                q0, q1 = sort_two_ints(cmd.qubits[0].index[0], cmd.qubits[1].index[0])
+                qc.append(XXPlusYYGate(-cmd.op.params[0] * pi), [q0, q1])
+            elif cmd.op.type == OpType.ZZPhase:
+                q0, q1 = sort_two_ints(cmd.qubits[0].index[0], cmd.qubits[1].index[0])
+                qc.rzz(cmd.op.params[0] * pi, q0, q1)
             elif cmd.op.type == OpType.TK2:
-                q0 = min(cmd.qubits[0].index[0], cmd.qubits[1].index[0])
-                q1 = max(cmd.qubits[0].index[0], cmd.qubits[1].index[0])
+                q0, q1 = sort_two_ints(cmd.qubits[0].index[0], cmd.qubits[1].index[0])
                 qc.append(CanonicalGate(*cmd.op.params), [q0, q1])
     else:
-        warnings.warn('!!!!!! Unsupported pytket circuit type: {}'.format(set(gate_counts(circ).keys())))
+        warnings.warn(
+            '!!!!!! Unsupported pytket circuit type: {} for native conversion'.format(set(gate_counts(circ).keys())))
         qc = qiskit.QuantumCircuit.from_qasm_str(pytket.qasm.circuit_to_qasm_str(circ))
 
     return qc
 
 
-def qiskit_to_tket(circ: qiskit.QuantumCircuit) -> pytket.Circuit:
+def qiskit_to_tket(qc: qiskit.QuantumCircuit) -> pytket.Circuit:
     """The self-implemented conversion function holds the high-level semantics of some customized Gate instances"""
-    # TODO: 写一个接口，避免 [U3(3.5）, can_13229013472(1/8,0,0) q[3], q[1];, U3(3.27339, 0.883661, 1.33133) q[2];, can_13229013424(1/16,0,0) q[3], q[0];, can(1/4,0,0) q[2], q[1];, can_13229012848(1/8,0,0) q[2], q[0];, U3(3.66667, 0.195913, 0.195913) q[1];, U3(1.5, 0, 0) q[3];, U3(0.875, 1.5, 1.5) q[0];, U3(0.5, 0, 1) q[2];, can(1/4,0,0) q[1], q[0];, U3(1.5, 0, 1) q[1];]
-    return pytket.qasm.circuit_from_qasm_str(qiskit.qasm2.dumps(circ))
+    # return 
+    circ = pytket.Circuit(qc.num_qubits, qc.num_clbits)
+    if set(qc.count_ops().keys()).issubset(
+            {'x', 'y', 'z', 'h', 's', 't', 'sdg', 'tdg', 'u3', 'u',
+             'cx', 'swap', 'can', 'iswap', 'rzz', 'rzx', 'xx_plus_yy'}):
+        for instr in qc.data:
+            qubits = [q._index for q in (instr.qubits)]
+            if instr.operation.name == 'can':
+                q0, q1 = sort_two_ints(qubits[0], qubits[1])
+                circ.TK2(*instr.operation.params, q0, q1)
+            elif instr.operation.name == 'swap':
+                circ.SWAP(*qubits)
+            elif instr.operation.name == 'cx':
+                circ.CX(*qubits)
+            elif instr.operation.name == 'rzx':
+                circ.H(qubits[1])
+                circ.ZZPhase(instr.operation.params[0] / pi, *qubits)
+                circ.H(qubits[1])
+            elif instr.operation.name == 'rzz':
+                circ.ZZPhase(instr.operation.params[0] / pi, *qubits)
+            elif instr.operation.name == 'iswap':
+                circ.ISWAPMax(*qubits)
+            elif instr.operation.name == 'xx_plus_yy':
+                circ.ISWAP((-instr.operation.params[0] / pi), *qubits)
+            elif instr.operation.name == 'x':
+                circ.X(*qubits)
+            elif instr.operation.name == 'y':
+                circ.Y(*qubits)
+            elif instr.operation.name == 'z':
+                circ.Z(*qubits)
+            elif instr.operation.name == 'h':
+                circ.H(*qubits)
+            elif instr.operation.name == 's':
+                circ.S(*qubits)
+            elif instr.operation.name == 'sdg':
+                circ.Sdg(*qubits)
+            elif instr.operation.name == 't':
+                circ.T(*qubits)
+            elif instr.operation.name == 'tdg':
+                circ.Tdg(*qubits)
+            elif instr.operation.name == 'u' or instr.operation.name == 'u3':
+                theta, phi, lam = np.array(instr.operation.params) / pi
+                circ.U3(theta, phi, lam, *qubits)
+    else:
+        circ = pytket.qasm.circuit_from_qasm_str(qiskit.qasm2.dumps(qc))
+
+    return circ
 
 
 def qc2mat(qc: qiskit.QuantumCircuit) -> np.ndarray:
@@ -80,32 +126,15 @@ def qc2mat(qc: qiskit.QuantumCircuit) -> np.ndarray:
 
 
 def remove_1q_gates(qc: qiskit.QuantumCircuit) -> qiskit.QuantumCircuit:
-    new_circuit = qiskit.QuantumCircuit(qc.num_qubits, qc.num_clbits)
-    new_circuit.name = qc.name
-    new_circuit.global_phase = qc.global_phase
+    qc_new = qiskit.QuantumCircuit(qc.num_qubits, qc.num_clbits)
+    qc_new.name = qc.name
+    qc_new.global_phase = qc.global_phase
 
-    for instr in qc.data:  
-        if instr.num_qubits != 1:
-            new_circuit.append(instr.operation, instr.qubits, instr.clbits)  
+    for instr in qc.data:
+        if instr.operation.num_qubits != 1:
+            qc_new.append(instr.operation, instr.qubits, instr.clbits)
 
-    return new_circuit
-
-
-# @njit(fastmath=True)
-# def fuzzy_compare(a, b, op, rtol=1e-7, atol=1e-10):
-#     """Comparison function with tolerance for floating point errors."""
-#     if op == ">=":
-#         return a > b or np.isclose(a, b, rtol=rtol, atol=atol)
-#     elif op == "<=":
-#         return a < b or np.isclose(a, b, rtol=rtol, atol=atol)
-#     elif op == ">":
-#         return a > b and not np.isclose(a, b, rtol=rtol, atol=atol)
-#     elif op == "<":
-#         return a < b and not np.isclose(a, b, rtol=rtol, atol=atol)
-#     elif op == "==":
-#         return np.isclose(a, b, rtol=rtol, atol=atol)
-#     else:
-#         raise ValueError("Unsupported operator (options: >=, <=, >, <, ==)")
+    return qc_new
 
 
 def replace_close_to_zero_with_zero(arr) -> np.ndarray:
@@ -145,54 +174,48 @@ def print_circ_info(circ: Union[pytket.Circuit, qiskit.QuantumCircuit], title=No
     console.print(table)
 
 
+def match_global_phase(a: np.ndarray, b: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+    """Phases the given matrices so that they agree on the phase of one entry.
+
+    To maximize precision, the position with the largest entry from one of the
+    matrices is used when attempting to compute the phase difference between
+    the two matrices.
+
+    Args:
+        a: A numpy array.
+        b: Another numpy array.
+
+    Returns:
+        A tuple (a', b') where a' == b' implies a == b*exp(i t) for some t.
+    """
+
+    # Not much point when they have different shapes.
+    if a.shape != b.shape or a.size == 0:
+        return np.copy(a), np.copy(b)
+
+    # Find the entry with the largest magnitude in one of the matrices.
+    k = max(np.ndindex(*a.shape), key=lambda t: abs(b[t]))
+
+    def dephase(v):
+        r = np.real(v)
+        i = np.imag(v)
+
+        # Avoid introducing floating point error when axis-aligned.
+        if i == 0:
+            return -1 if r < 0 else 1
+        if r == 0:
+            return 1j if i < 0 else -1j
+
+        return np.exp(-1j * np.arctan2(i, r))
+
+    # Zero the phase at this entry in both matrices.
+    return a * dephase(a[k]), b * dephase(b[k])
 
 
-# def optimal_can_gate_duration(a, b, c, gx, gy, gz):
-#     """
-#     Determine the optimal 2Q gate duration in the AshN gate scheme.
-#         Input (x, y, z) are the Canonical coefficients of an SU(4), where π/4 ≥ x ≥ y ≥ |z|
-#         Input (gx, gy, gc) are the normalized coefficients of the coupling Hamiltonian, where a ≥ b ≥ |c|
-#     """
-#     # TODO: 不用写这个
-#     if not (fuzzy_compare(0.5, a, '>=') and fuzzy_compare(a, b, '>=') and fuzzy_compare(b, abs(c), '>=')):
-#         warnings.warn('Weyl coordinate must be normalized to satisfy 0.5 >= a >= b >= |c|')
-#         a, b, c = np.array(cirq.kak_canonicalize_vector(a*half_pi, b*half_pi, c*half_pi).interaction_coefficients) / half_pi
-#     return _optimal_can_gate_duration_numba(a, b, c, gx, gy, gz)
-
-
-# @njit(fastmath=True)
-# def _optimal_can_gate_duration_numba(a, b, c, gx, gy, gz):
-    # x, y, z = a * half_pi, b * half_pi, c * half_pi
-    # coupling_strength = gx + gy + abs(gz)
-    # tau0 = x / gx
-    # tau_plus = (x + y - z) / (gx + gy - gz)
-    # tau_minus = (x + y + z) / (gx + gy + gz)
-    # tau1 = max(tau0, tau_plus, tau_minus)
-
-    # tau0_prime = (pi / 2 - x) / gx
-    # tau_plus_prime = (pi / 2 - x + y + z) / (gx + gy - gz)
-    # tau_minus_prime = (pi / 2 - x + y - z) / (gx + gy + gz)
-    # tau2 = max(tau0_prime, tau_plus_prime, tau_minus_prime)
-
-    # tau = min(tau1, tau2)
-    # return tau * coupling_strength  # unit is 1/coupling_strength
-
-
-# TODO: 把这个写成Rust调用
-
-# def mirror_weyl_coord(a, b, c):
-#     # TODO: check this through random testing
-#     if not (fuzzy_compare(0.5, a, '>=') and fuzzy_compare(a, b, '>=') and fuzzy_compare(b, abs(c), '>=')):
-#         warnings.warn('Weyl coordinate must be normalized to satisfy 0.5 >= a >= b >= |c|')
-#         a, b, c = np.array(cirq.kak_canonicalize_vector(a*half_pi, b*half_pi, c*half_pi).interaction_coefficients) / half_pi
-#     return _mirror_weyl_coord_numba(a, b, c)
-
-    
-# @njit(fastmath=True)
-# def _mirror_weyl_coord_numba(a, b, c):
-#     if fuzzy_compare(c, 0, '>='):
-#         return 0.5 - c, 0.5 - b, a - 0.5
-#     return 0.5 + c, 0.5 - b, 0.5 - a
+def is_equiv_unitary(u: np.ndarray, v: np.ndarray) -> bool:
+    """Distinguish whether two unitary operators are equivalent, regardless of the global phase."""
+    u, v = match_global_phase(u, v)
+    return np.allclose(u, v, atol=1e-8)
 
 
 def crop_coupling_map(coupling_map, crop_size, seed=None):
@@ -223,7 +246,6 @@ def generate_random_layout(qreg, coupling_map, seed=None) -> Layout:
     # return {logical_qubits[i]: p for i, p in enumerate(physical_qubits)}
     return Layout.from_intlist(physical_qubits, qreg)
 
-
 # from regulus.utils import arch
 # def gene_1d_chain
 
@@ -247,13 +269,3 @@ def generate_random_layout(qreg, coupling_map, seed=None) -> Layout:
 #         return 3
 
 #     raise ValueError("Unsupported gate type")
-
-
-def synth_cost_by_cx_family(coord, costs=[]):
-    r"""
-    coord: 要综合的canonical gate的坐标 (a, b, c)，满足 0.5 >= a >= b >= |c|,
-            (a, b, c) ~ e^{- i \frac{\pi}{2}(a XX + b YY + c ZZ)}
-    costs: 分别为 [CX^{1/3}, CX^{1/2}, CX] 的自定义cost；E.g., costs=[0.4, 0.6, 1.0]
-    """
-    # TODO: 利用monodromy中的polytopes coverage计算用 [CX^{1/3}, CX^{1/2}, CX] 要综合 Canonical(coord) 这个门的代价
-    ...

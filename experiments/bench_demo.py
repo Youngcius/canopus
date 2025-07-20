@@ -10,7 +10,6 @@ from qiskit.transpiler import CouplingMap, PassManager
 from pytket.utils import compare_unitaries
 from qiskit import qasm2
 
-from qiskit.circuit.library import QFT
 
 # configure logging
 # logging.basicConfig(
@@ -48,20 +47,22 @@ qc = tket_to_qiskit(circ)
 console.rule('Original circuit')
 
 print(qc)
-assert compare_unitaries(circ.get_unitary(), circ2mat(qc))
+
+assert compare_unitaries(circ.get_unitary(), qc2mat(qc))
 
 print(qiskit_to_tket(qc).get_commands())
 
-# coupling_map = CouplingMap.from_line(num_qubits=qc.num_qubits)
-coupling_map = CouplingMap.from_grid(np.ceil(np.sqrt(qc.num_qubits)).astype(int), np.ceil(np.sqrt(qc.num_qubits)).astype(int))
-backend = CanopusBackend(coupling_map, 'cx', 'xx')
+coupling_map = CouplingMap.from_line(num_qubits=qc.num_qubits)
+# coupling_map = CouplingMap.from_grid(np.ceil(np.sqrt(qc.num_qubits)).astype(int),
+#                                      np.ceil(np.sqrt(qc.num_qubits)).astype(int))
+backend = CanopusBackend(coupling_map, 'sqisw', 'xx')
 
 console.print('Pulse duration: {:.4f}'.format(backend.cost_estimator.eval_circuit_duration(qc)))
 
 console.rule('SABRE mapping')
 start = time.perf_counter()
 pm = PassManager(SabreMapping(backend, seed=123))
-qc_sabre = pm.run(qc)
+qc_sabre = remove_1q_gates(pm.run(qc))
 end = time.perf_counter()
 print(qc_sabre)
 console.print('Pulse duration: {:.4f}'.format(backend.cost_estimator.eval_circuit_duration(qc_sabre)))
@@ -70,11 +71,12 @@ console.print('Time taken for Canopus mapping: {:.4f} seconds'.format(end - star
 console.rule('Canopus mapping')
 start = time.perf_counter()
 pm = PassManager(CanopusMapping(backend, seed=123))
-qc_canopus = pm.run(qc)
+qc_canopus = remove_1q_gates(pm.run(qc))
 end = time.perf_counter()
 print(qc_canopus)
 console.print('Pulse duration: {:.4f}'.format(backend.cost_estimator.eval_circuit_duration(qc_canopus)))
 console.print('Time taken for Canopus mapping: {:.4f} seconds'.format(end - start))
+
 
 # from regulus.transforms import mirror
 # from regulus import Circuit

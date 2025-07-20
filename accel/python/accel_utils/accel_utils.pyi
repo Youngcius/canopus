@@ -3,6 +3,7 @@ Type stubs for accel_utils Rust extension module.
 This file provides type hints for the Rust-compiled functions.
 """
 from typing import Any, Callable
+import numpy as np
 
 
 def fuzzy_equal(a: float, b: float, atol: float | None = None) -> bool:
@@ -185,3 +186,15 @@ def synth_cost_by_sqisw(a: float, b: float, c: float) -> int:
     """Synthesis cost with the SQiSW ISA"""
     ...
 
+
+def canonical_unitary(a: float, b: float, c: float) -> np.ndarray:
+    """
+    Generate a canonical unitary matrix from Weyl coordinates.
+    
+    Args:
+        a, b, c: (a, b, c) ~ exp(-i * π / 2 * (a XX + b YY + c ZZ))
+        
+    Returns:
+        Canonical unitary matrix as a NumPy array
+    """
+    ...
