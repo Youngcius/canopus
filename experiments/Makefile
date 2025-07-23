@@ -9,7 +9,7 @@ all: init
 
 init:
 	@echo "Preparing logical-level optimized circuits ...\n"
-# 	@cd ../accel && make install
+	@cd ../accel && make install
 	@python gene_logic_opt_circuits.py
 
 chain: chain_cx chain_zzphase chain_sqisw chain_can chain_ftqc
