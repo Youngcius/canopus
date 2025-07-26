@@ -6,24 +6,7 @@ Skipping ./output/canopus/chain/zzphase/gcm_n13.qasm, already processed.
 Skipping ./output/canopus/chain/zzphase/ghz_state_n23.qasm, already processed.
 Skipping ./output/canopus/chain/zzphase/ising_n26.qasm, already processed.
 Skipping ./output/canopus/chain/zzphase/knn_n25.qasm, already processed.
-─────────────── Processing ./output/logical/multiplier_n15.qasm ────────────────
-                 Logical-level optimization                 
-┏━━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━┳━━━━━━━━━━┓
-┃ num_qubits ┃ num_gates ┃ num_2q_gates ┃ depth ┃ depth_2q ┃
-┡━━━━━━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━╇━━━━━━━━━━┩
-│ 15         │ 482       │ 198          │ 240   │ 122      │
-└────────────┴───────────┴──────────────┴───────┴──────────┘
-Gate counts: OrderedDict({'u': 284, 'can': 198})
-Circuit cost: 118.00
-                       Mapped circuit                       
-┏━━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━┳━━━━━━━━━━┓
-┃ num_qubits ┃ num_gates ┃ num_2q_gates ┃ depth ┃ depth_2q ┃
-┡━━━━━━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━╇━━━━━━━━━━┩
-│ 15         │ 714       │ 430          │ 337   │ 205      │
-└────────────┴───────────┴──────────────┴───────┴──────────┘
-Gate counts: OrderedDict({'u': 284, 'swap': 232, 'can': 198})
-Circuit cost: 292.50; Routing overhead: 2.48
-Saved to ./output/canopus/chain/zzphase/multiplier_n15.qasm
+Skipping ./output/canopus/chain/zzphase/multiplier_n15.qasm, already processed.
 Skipping ./output/canopus/chain/zzphase/qec9xz_n17.qasm, already processed.
 Skipping ./output/canopus/chain/zzphase/qf21_n15.qasm, already processed.
 Skipping ./output/canopus/chain/zzphase/qft_n18.qasm, already processed.

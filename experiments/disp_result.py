@@ -9,7 +9,7 @@ def filter_v2flayout(result):
 
 
 
-ISA_TYPES = ['cx', 'zzphase', 'sqisw', 'can_xx', 'can_xy']
+ISA_TYPES = ['cx', 'zzphase', 'sqisw', 'can_xx', 'can_xy', 'zzphase_', 'sqisw_', 'het']
 COMPILERS = ['sabre', 'canopus']
 
 
@@ -20,7 +20,7 @@ def display_result(compiler: str):
     result_square= filter_v2flayout(pd.read_csv('./results/{}-square.csv'.format(compiler)))
 
     table = PrettyTable()
-    table.field_names = ['Routing overhead', 'CX', 'ZZPhase', 'SQiSW', 'Can-XX', 'Can-XY']
+    table.field_names = ['Routing overhead', 'CX', 'ZZPhase', 'SQiSW', 'Can-XX', 'Can-XY', 'ZZPhase_', 'SQiSW_', 'Het']
     table.add_row(['Chain'] + [gmean(result_chain[isa]).round(2) for isa in ISA_TYPES])
     table.add_row(['HHex'] + [gmean(result_hhex[isa]).round(2) for isa in ISA_TYPES])
     table.add_row(['Square'] + [gmean(result_square[isa]).round(2) for isa in ISA_TYPES])

@@ -55,7 +55,7 @@ print(qiskit_to_tket(qc).get_commands())
 coupling_map = gene_chain_coupling_map(qc.num_qubits)
 # coupling_map = gene_square_coupling_map(qc.num_qubits)
 # coupling_map = gene_hhex_coupling_map(qc.num_qubits)
-backend = CanopusBackend(coupling_map, 'cx', 'xx')
+backend = CanopusBackend(coupling_map, 'het', 'xx')
 
 console.print('Pulse duration: {:.4f}'.format(backend.cost_estimator.eval_circuit_duration(qc)))
 

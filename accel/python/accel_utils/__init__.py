@@ -33,7 +33,6 @@ __all__ = [
     'sort_two_floats',
     'sort_two_objs',
     'synth_cost_by_cx',
-    'synth_cost_by_zzphase',
     'synth_cost_by_sqisw',
     'canonical_unitary',
 ]
@@ -56,58 +55,34 @@ __all__ = [
 
 # zzphase_infidelities = [default_zx_operation_cost(Fraction(frac)) for frac in [1/3, 1/2, 1]]
 
-# from functools import lru_cache
-# from monodromy.coverage import gates_to_coverage, coverage_lookup_cost
-# from qiskit.circuit.library import RZZGate
+
+
+
+
+# from qiskit.quantum_info import Operator
+# from qiskit.synthesis import XXDecomposer
 # from math import pi
-# from fractions import Fraction
-
-
-# @lru_cache(maxsize=1) # maxsize=1 意味着只缓存最近1次调用的结果
-# def get_zzphase_coverage():
-#     # costs (infidelities) for RZZGate(pi/6), RZZGate(pi/3), RZZGate(2*pi/2)
-#     # basis_fidelity = 0.995  # basis_fidelity is the fidelity of the ZZGate(pi/2) gate
-#     # slope, offset = (1 - basis_fidelity) / 2, (1 - basis_fidelity) / 2
-#     # infidelities = [
-#     #     slope / 3 + offset,
-#     #     slope / 2 + offset,
-#     #     slope + offset,
-#     # ]
-#     infidelities = [1/3, 1/2, 1]
-#     return gates_to_coverage(RZZGate(pi/6), RZZGate(pi/3), RZZGate(2*pi/2), costs=infidelities)
+# _xx_decomposer = XXDecomposer()
+# _half_pi = pi / 2
 
 
 # def synth_cost_by_zzphase(a, b, c):
-#     """Synthesis cost with the ZZ phase gate."""
+#     """Define the synthesis costs for [RZZGate(pi/6), RZZGate(pi/4), RZZGate(pi/2)] are [1/3, 1/2, 1], respectively."""
 #     assert check_weyl_coord(a, b, c), "Weyl coordinate must be normalized to satisfy 0.5 >= a >= b >= |c|"
-#     zzphase_coverage = get_zzphase_coverage()
-#     target = canonical_unitary(a, b, c)
-#     cost, fid = coverage_lookup_cost(zzphase_coverage, target)
+#     if fuzzy_equal(a, 0.5) and fuzzy_equal(b, 0) and fuzzy_equal(c, 0): # CX == RZZGate(pi/2)
+#         return 1
+#     if fuzzy_equal(a, 0.5) and fuzzy_equal(b, 0.5) and fuzzy_equal(c, 0): # iSWAP == RZZGate(pi/2) + RZZGate(pi/2)
+#         return 2
+#     if fuzzy_equal(a, 0.25) and fuzzy_equal(b, 0.25) and fuzzy_equal(c, 0): # SQiSW == RZZGate(pi/4) + RZZGate(pi/4)
+#         return 1
+#     if fuzzy_equal(a, 0.5) and fuzzy_equal(b, 0.5) and fuzzy_equal(c, 0.5): # SWAP == RZZGate(pi/2) + RZZGate(pi/2) + RZZGate(pi/2)
+#         return 3
+#     if fuzzy_equal(a, 0.5) and fuzzy_equal(b, 0.25) and fuzzy_equal(c, 0.25): # ECP == RZZGate(pi/2) + RZZGate(pi/4) + RZZGate(pi/4)
+#         return 2
+#     if fuzzy_equal(a, 0.5) and fuzzy_equal(b, 0.25) and fuzzy_equal(c, 0): # B == RZZGate(pi/2) + RZZGate(pi/4)
+#         return 1.5
+#     if fuzzy_equal(a, 0.25) and fuzzy_equal(b, 0) and fuzzy_equal(c, 0): # CV == RZZGate(pi/4)
+#         return 0.5
+#     qc = _xx_decomposer(Operator(canonical_unitary(a, b, c)).reverse_qargs(), approximate=False)
+#     cost = sum([instr.operation.params[0] / _half_pi for instr in qc.data if instr.operation.num_qubits == 2])
 #     return cost
-
-from qiskit.quantum_info import Operator
-from qiskit.synthesis import XXDecomposer
-from math import pi
-_xx_decomposer = XXDecomposer()
-_half_pi = pi / 2
-
-def synth_cost_by_zzphase(a, b, c):
-    """Define the synthesis costs for [RZZGate(pi/6), RZZGate(pi/3), RZZGate(2*pi/2)] are [1/3, 1/2, 1], respectively."""
-    assert check_weyl_coord(a, b, c), "Weyl coordinate must be normalized to satisfy 0.5 >= a >= b >= |c|"
-    # if fuzzy_equal(a, 0.5) and fuzzy_equal(b, 0) and fuzzy_equal(c, 0): # CX == RZZGate(pi/2)
-    #     return 1
-    # if fuzzy_equal(a, 0.5) and fuzzy_equal(b, 0.5) and fuzzy_equal(c, 0): # iSWAP == RZZGate(pi/2) + RZZGate(pi/2)
-    #     return 2
-    # if fuzzy_equal(a, 0.25) and fuzzy_equal(b, 0.25) and fuzzy_equal(c, 0): # SQiSW == RZZGate(pi/4) + RZZGate(pi/4)
-    #     return 1
-    # if fuzzy_equal(a, 0.5) and fuzzy_equal(b, 0.5) and fuzzy_equal(c, 0.5): # SWAP == RZZGate(pi/2) + RZZGate(pi/2) + RZZGate(pi/2)
-    #     return 3
-    # if fuzzy_equal(a, 0.25) and fuzzy_equal(b, 0.25) and fuzzy_equal(c, 0): # ECP == RZZGate(pi/4) + RZZGate(pi/4) + RZZGate(pi/4)
-    #     return 1.5
-    # if fuzzy_equal(a, 0.5) and fuzzy_equal(b, 0.25) and fuzzy_equal(c, 0): # B == RZZGate(pi/2) + RZZGate(pi/4)
-    #     return 1.5
-    # if fuzzy_equal(a, 0.25) and fuzzy_equal(b, 0) and fuzzy_equal(c, 0): # CV == RZZGate(pi/4)
-    #     return 0.5
-    qc = _xx_decomposer(Operator(canonical_unitary(a, b, c)).reverse_qargs(), approximate=False)
-    cost = sum([instr.operation.params[0] / _half_pi for instr in qc.data if instr.operation.num_qubits == 2])
-    return cost

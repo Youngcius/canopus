@@ -1,5 +1,6 @@
 import pytket
 import qiskit
+import pickle
 import pytket.qasm
 import qiskit.qasm2
 import numpy as np
@@ -19,6 +20,102 @@ from qiskit.circuit.library import XXPlusYYGate
 from canopus.basics import CanonicalGate
 
 import warnings
+import os
+
+from functools import lru_cache
+from qiskit.circuit.library import RZZGate, iSwapGate, CXGate
+from canopus.basics import CanonicalGate
+from accel_utils import check_weyl_coord, canonical_unitary, optimal_can_gate_duration
+from monodromy.coverage import gates_to_coverage, coverage_lookup_cost
+
+Coverage_Dumped_Dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'configs')
+ZZPhase_Coverage_File = os.path.join(Coverage_Dumped_Dir, 'zzphase_coverage.pkl')
+ZZPhase_With_Mirror_Coverage_File = os.path.join(Coverage_Dumped_Dir, 'zzphase_with_mirror_coverage.pkl')
+SQiSW_Coverage_File = os.path.join(Coverage_Dumped_Dir, 'sqisw_coverage.pkl')
+SQiSW_With_Mirror_Coverage_File = os.path.join(Coverage_Dumped_Dir, 'sqisw_with_mirror_coverage.pkl')
+Het_ISA_Coverage_File = os.path.join(Coverage_Dumped_Dir, 'het_isa_coverage.pkl')
+
+
+@lru_cache(maxsize=1)  # maxsize=1 意味着只缓存最近1次调用的结果
+def get_zzphase_coverage():
+    if os.path.exists(ZZPhase_Coverage_File):
+        with open(ZZPhase_Coverage_File, 'rb') as f:
+            return pickle.load(f)
+    gate_set = [RZZGate(pi / 6), RZZGate(pi / 4), RZZGate(pi / 2)]
+    infidelities = [1 / 3, 1 / 2, 1]
+    return gates_to_coverage(*gate_set, costs=infidelities)
+
+
+def synth_cost_by_zzphase(a, b, c):
+    """Synthesis cost with the ZZ phase gate."""
+    assert check_weyl_coord(a, b, c), "Weyl coordinate must be normalized to satisfy 0.5 >= a >= b >= |c|"
+    zzphase_coverage = get_zzphase_coverage()
+    target = canonical_unitary(a, b, c)
+    cost, fid = coverage_lookup_cost(zzphase_coverage, target)
+    return cost
+
+
+@lru_cache(maxsize=1)
+def get_zzphase_with_mirror_coverage():
+    """Get the coverage set for the ZZ phase gate with mirror symmetry."""
+    if os.path.exists(ZZPhase_With_Mirror_Coverage_File):
+        with open(ZZPhase_With_Mirror_Coverage_File, 'rb') as f:
+            return pickle.load(f)
+    gate_set = [RZZGate(pi / 6), RZZGate(pi / 4), RZZGate(pi / 2), CanonicalGate(0.5, 0.5, 1 / 3),
+                CanonicalGate(0.5, 0.5, 1 / 4), CanonicalGate(0.5, 0.5, 0)]
+    cx_time = optimal_can_gate_duration(0.5, 0, 0, 1, 1, 0)
+    iswap_time = optimal_can_gate_duration(0.5, 0.5, 0, 1, 1, 0)
+    swap_time = optimal_can_gate_duration(0.5, 0.5, 0.5, 1, 1, 0)
+    costs = [cx_time / 3, cx_time / 2, cx_time,
+             swap_time - (swap_time - iswap_time) / 3, (iswap_time + swap_time) / 2, iswap_time]
+    names = ['RZZ_π_6', 'RZZ_π_4', 'RZZ_π_2', 'pSWAP_π_6', 'pSWAP_π_4', 'pSWAP_π_2']
+    return gates_to_coverage(*gate_set, costs=costs, names=names)
+
+
+def synth_cost_by_zzphase_with_mirror(a, b, c):
+    cov = get_zzphase_with_mirror_coverage()
+    target = canonical_unitary(a, b, c)
+    cost, fid = coverage_lookup_cost(cov, target)
+    return cost
+
+
+@lru_cache(maxsize=1)
+def get_sqisw_with_mirror_coverage():
+    if os.path.exists(SQiSW_With_Mirror_Coverage_File):
+        with open(SQiSW_With_Mirror_Coverage_File, 'rb') as f:
+            return pickle.load(f)
+    gate_set = [iSwapGate().power(0.5), iSwapGate(), CanonicalGate(0.5, 0.25, 0.25), CXGate()]
+    costs = [
+        optimal_can_gate_duration(0.25, 0.25, 0, 1, 1, 0),
+        optimal_can_gate_duration(0.5, 0.5, 0, 1, 1, 0),
+        optimal_can_gate_duration(0.5, 0.25, 0.25, 1, 1, 0),
+        optimal_can_gate_duration(0.5, 0, 0, 1, 1, 0)
+    ]
+    return gates_to_coverage(*gate_set, costs=costs)
+
+
+def synth_cost_by_sqisw_with_mirror(a, b, c):
+    cov = get_sqisw_with_mirror_coverage()
+    target = canonical_unitary(a, b, c)
+    cost, fid = coverage_lookup_cost(cov, target)
+    return cost
+
+
+@lru_cache(maxsize=1)
+def get_het_isa_coverage():
+    if os.path.exists(Het_ISA_Coverage_File):
+        with open(Het_ISA_Coverage_File, 'rb') as f:
+            return pickle.load(f)
+    gate_set = [RZZGate(pi / 6), RZZGate(pi / 4), RZZGate(pi / 2), iSwapGate().power(0.5), iSwapGate()]
+    costs = [1 / 3, 1 / 2, 1, 0.75, 1.5]
+    raise gates_to_coverage(*gate_set, costs=costs)
+
+
+def synth_cost_by_het_isa(a, b, c):
+    cov = get_het_isa_coverage()
+    target = canonical_unitary(a, b, c)
+    cost, fid = coverage_lookup_cost(cov, target)
+    return cost
 
 
 def tket_to_qiskit(circ: pytket.Circuit) -> qiskit.QuantumCircuit:
@@ -263,7 +360,6 @@ def generate_random_layout(qreg, coupling_map, seed=None) -> Layout:
 
 def generate_trivial_layout(qreg, coupling_map) -> Layout:
     return Layout.from_intlist(list(coupling_map.physical_qubits), qreg)
-
 
 
 # from regulus.utils import arch

@@ -8,6 +8,7 @@ from qiskit.converters import dag_to_circuit
 from functools import cached_property
 from canopus.basics import half_pi
 from accel_utils import *
+from canopus.utils import *
 
 
 
@@ -17,6 +18,9 @@ class ISAType(Enum):
     ZZPhase = 'zzphase'
     SQiSW = 'sqisw'
     Canonical = 'can'
+    ZZPhaseWithMirror = 'zzphase_'
+    SQiSWWithMirror = 'sqisw_'
+    HetISA = 'het' # CX-family and iSWAP-family heterogeneous ISA
 
 
 class CouplingType(Enum):
@@ -92,6 +96,14 @@ class SynthCostEstimator:
                 cost = optimal_can_gate_duration(a, b, c, 1, 1, 0)
             else:
                 raise TypeError(f"Unsupported coupling type: {self.coupling_type}")
+        elif self.isa_type == ISAType.ZZPhaseWithMirror:
+            cost = synth_cost_by_zzphase_with_mirror(a, b, c)
+        elif self.isa_type == ISAType.SQiSWWithMirror:
+            cost = synth_cost_by_sqisw_with_mirror(a, b, c)
+        elif self.isa_type == ISAType.HetISA:
+            cost = synth_cost_by_het_isa(a, b, c)
+        else:
+            raise TypeError(f"Unsupported ISAType: {self.isa_type}")
         self._cached_gate_costs[a, b, c] = cost
         return cost
 

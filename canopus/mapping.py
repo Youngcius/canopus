@@ -7,12 +7,12 @@ from canopus.utils import generate_random_layout
 from qiskit.circuit.library import SwapGate
 from qiskit.transpiler import TranspilerError
 from qiskit.transpiler.passes import VF2Layout
-from qiskit.utils.parallel import CPU_COUNT
 from qiskit.circuit import Qubit
 from accel_utils import sort_two_objs
 from itertools import chain
 from typing import Dict, List, Tuple
 import time
+import os
 import numpy as np
 import random
 import logging
@@ -47,10 +47,10 @@ class BidirectionalMapping(TransformationPass):
                  max_iterations=5, trials=None, layout_trials=None):
         super().__init__()
         self.backend = backend
-        self.trials = CPU_COUNT if trials is None else trials
+        self.trials = min(os.cpu_count(), 10) if trials is None else trials
         self.max_iterations = max_iterations
         self.seed = seed
-        self.layout_trials = CPU_COUNT if layout_trials is None else layout_trials
+        self.layout_trials = min(os.cpu_count(), 10) if layout_trials is None else layout_trials
 
         self.coupling_map = backend.coupling_map
         self.distance_matrix = self.coupling_map.distance_matrix.astype(int)
@@ -111,8 +111,6 @@ class BidirectionalMapping(TransformationPass):
 
         self.property_set['layout'] = best_initial_layout
         self.property_set['final_layout'] = best_final_layout
-
-        # best_routed_dag.remove_all_ops_named('u')
 
         return best_routed_dag
 

@@ -193,3 +193,6 @@ cython_debug/
 *.synctex.gz
 *.fdb_latexmk
 *.fls
+
+
+/mirror-gates/
