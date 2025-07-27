@@ -1,19 +1,61 @@
 import cirq
 import pytket
 import qiskit
-from pytket import passes
+import pytket.passes
 from pytket import circuit_library
 from pytket.circuit import Op, OpType
 from pytket.extensions.cirq import cirq_to_tk
 from pytket.utils.stats import gate_counts
-from qiskit.synthesis import XXDecomposer
+from qiskit.synthesis import XXDecomposer, TwoQubitWeylDecomposition
 from canopus.basics import *
 from canopus.utils import tket_to_qiskit, qiskit_to_tket
 from accel_utils import canonical_unitary
 from typing import Union
+from qiskit.transpiler import PassManager, TransformationPass, passes
+from qiskit.dagcircuit import DAGCircuit
+from qiskit.circuit.library import UnitaryGate
 
 xx_decomposer = XXDecomposer(euler_basis="U3")
 CirqQubitPair = cirq.LineQubit.range(2)
+
+
+def rebase_to_canonical(qc: QuantumCircuit) -> QuantumCircuit:
+    return PassManager([
+        passes.Collect2qBlocks(),
+        passes.ConsolidateBlocks(force_consolidate=True),
+        CanonicalSynthesis(),
+        passes.Decompose('unitary'),
+        passes.Optimize1qGates(basis=['u'])
+    ]).run(qc)
+
+
+class CanonicalSynthesis(TransformationPass):
+    def __init__(self):
+        super().__init__()
+
+    def run(self, dag: DAGCircuit):
+        for node in dag.op_nodes():
+            if hasattr(node.op, 'to_matrix') and node.num_qubits == 2 and node.op.name == 'unitary':
+                # decomposed_circuit = self._decompose_to_canonical(node.op.to_matrix())
+                decomp = TwoQubitWeylDecomposition(node.op.to_matrix())
+                a, b, c = decomp.a / half_pi, decomp.b / half_pi, -decomp.c / half_pi
+
+                mini_dag = DAGCircuit()
+                q = QuantumRegister(2)
+                mini_dag.add_qreg(q)
+                mini_dag.apply_operation_back(UnitaryGate(Z @ decomp.K2l), [q[0]])
+                mini_dag.apply_operation_back(UnitaryGate(decomp.K2r), [q[1]])
+                mini_dag.apply_operation_back(CanonicalGate(a, b, c), [q[0], q[1]])
+                mini_dag.apply_operation_back(UnitaryGate(decomp.K1l @ Z), [q[0]])
+                mini_dag.apply_operation_back(UnitaryGate(decomp.K1r), [q[1]])
+
+                dag.substitute_node_with_dag(
+                    node,
+                    mini_dag,
+                    [q[1], q[0]]
+                )
+
+        return dag
 
 
 def rebase_to_sqisw(circ: Union[pytket.Circuit, qiskit.QuantumCircuit]) -> Union[pytket.Circuit, qiskit.QuantumCircuit]:
@@ -49,10 +91,10 @@ def _rebase_to_sqisw(circ: pytket.Circuit) -> pytket.Circuit:
     assert set(gate_counts(circ).keys()).issubset({OpType.TK1, OpType.TK2}), "Unsupported gate types {}".format(
         gate_counts(circ).keys())
     circ = circ.copy()
-    passes.RebaseCustom({OpType.ISWAP, OpType.TK1},
+    pytket.passes.RebaseCustom({OpType.ISWAP, OpType.TK1},
                         tk2_replacement=_tk2_to_sqisw,
                         tk1_replacement=circuit_library.TK1_to_U3).apply(circ)
-    passes.SquashTK1().apply(circ)
+    pytket.passes.SquashTK1().apply(circ)
     return circ
 
 
@@ -60,21 +102,21 @@ def _rebase_to_zzphase(circ: pytket.Circuit) -> pytket.Circuit:
     assert set(gate_counts(circ).keys()).issubset({OpType.TK1, OpType.TK2}), "Unsupported gate types {}".format(
         gate_counts(circ).keys())
     circ = circ.copy()
-    passes.RebaseCustom({OpType.ZZPhase, OpType.TK1},
+    pytket.passes.RebaseCustom({OpType.ZZPhase, OpType.TK1},
                         tk2_replacement=_tk2_to_zzphase,
                         tk1_replacement=circuit_library.TK1_to_U3).apply(circ)
-    passes.SquashTK1().apply(circ)
+    pytket.passes.SquashTK1().apply(circ)
     return circ
 
 
 def _rebase_to_tk2(circ: pytket.Circuit, optimize: bool = True) -> pytket.Circuit:
     """If optimize is False, some successive TK2 gates might not be coalesced; So we set it to True by default."""
     circ = circ.copy()
-    passes.DecomposeBoxes().apply(circ)
+    pytket.passes.DecomposeBoxes().apply(circ)
     if optimize:
-        passes.FullPeepholeOptimise(allow_swaps=False, target_2qb_gate=OpType.TK2).apply(circ)
-    passes.SynthesiseTK().apply(circ)
-    passes.NormaliseTK2().apply(circ)
+        pytket.passes.FullPeepholeOptimise(allow_swaps=False, target_2qb_gate=OpType.TK2).apply(circ)
+    pytket.passes.SynthesiseTK().apply(circ)
+    pytket.passes.NormaliseTK2().apply(circ)
     return circ
 
 

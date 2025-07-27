@@ -4,7 +4,8 @@ from scipy.stats import gmean
 from prettytable import PrettyTable
 
 def filter_v2flayout(result):
-    return result[~((result['cx'] == 1) & (result['zzphase'] == 1) & (result['sqisw'] == 1) & (result['can_xx'] == 1) & (result['can_xy'] == 1))]
+    return result[~(result['cx'] == 1)]
+    # return result[~((result['cx'] == 1) & (result['zzphase'] == 1) & (result['sqisw'] == 1) & (result['can_xx'] == 1) & (result['can_xy'] == 1))]
     
 
 

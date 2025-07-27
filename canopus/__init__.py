@@ -14,5 +14,5 @@ from . import mapping
 from . import basics
 
 from .backends import CanopusBackend, ISAType, CouplingType, SynthCostEstimator
-from .synthesis import rebase_to_sqisw, rebase_to_zzphase, rebase_to_tk2
+from .synthesis import rebase_to_sqisw, rebase_to_zzphase, rebase_to_tk2, rebase_to_canonical
 from .mapping import CanopusMapping, SabreMapping

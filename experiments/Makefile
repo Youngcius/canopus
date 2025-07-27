@@ -79,6 +79,9 @@ baselines:
 	@./run_sabre.sh
 
 	@echo "Running TOQM compiler ..."
+	@./bench_all_toqm.py -t chain
+	@./bench_all_toqm.py -t hhex
+	@./bench_all_toqm.py -t square
 
 	@echo "Running OLSQ compiler ..."
 

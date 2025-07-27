@@ -16,18 +16,14 @@ from rich.console import Console
 console = Console()
 
 parser = argparse.ArgumentParser(description="Canopus executable.")
-parser.add_argument('-isa', '--isa', type=str, help="Instruction Set Architecture (e.g., zzphase, sqisw, can, ftqc)")
 parser.add_argument('-t', '--topology', default=None, type=str,
                     help="NISQ backend device topology (chain, hhex, square)")
-parser.add_argument('-c', '--coupling', default=None, type=str, help="Coupling type (e.g., xx, xy)")
 args = parser.parse_args()
 
-if args.isa == 'ftqc':
-    raise NotImplementedError("FTQC ISA is not supported in this script.")
 
 benchmark_dpath = './output/logical/'  # Path to benchmark files
-output_dpath = os.path.join('./output/sabre/', args.topology,
-                            args.isa + ('' if args.coupling is None else ('_' + args.coupling)))
+output_dpath = os.path.join('./output/sabre/', args.topology)
+
 if not os.path.exists(output_dpath):
     os.makedirs(output_dpath)
 fnames = [os.path.join(benchmark_dpath, fname) for fname in natsorted(os.listdir(benchmark_dpath)) if
@@ -52,7 +48,7 @@ for fname in fnames:
     else:
         raise ValueError(f"Unsupported topology: {args.topology}")
 
-    backend = canopus.CanopusBackend(coupling_map, args.isa, args.coupling)
+    backend = canopus.CanopusBackend(coupling_map, 'cx')
     logic_circ_cost = backend.cost_estimator.eval_circuit_duration(qc)
     print_circ_info(circ, title='Logical-level optimization')
     console.print(f"Gate counts: {qc.count_ops()}")

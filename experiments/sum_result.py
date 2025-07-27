@@ -54,13 +54,13 @@ for fname in fnames:
         'program': fname.replace('.qasm', ''),
         'num_qubits': qc.num_qubits,
         'cx': cx_synth_estimator.eval_circuit_duration(qc_cx) / cx_synth_estimator.eval_circuit_duration(qc),
-        'zzphase': zzphase_synth_estimator.eval_circuit_duration(qc_zzphase) / zzphase_synth_estimator.eval_circuit_duration(qc),
-        'sqisw': sqisw_synth_estimator.eval_circuit_duration(qc_sqisw) / sqisw_synth_estimator.eval_circuit_duration(qc),
-        'can_xx': can_xx_synth_estimator.eval_circuit_duration(qc_can_xx) / can_xx_synth_estimator.eval_circuit_duration(qc),
-        'can_xy': can_xy_synth_estimator.eval_circuit_duration(qc_can_xy) / can_xy_synth_estimator.eval_circuit_duration(qc),
-        'zzphase_': zzphase_with_mirror_synth_estimator.eval_circuit_duration(qc_zzphase_) / zzphase_with_mirror_synth_estimator.eval_circuit_duration(qc),
-        'sqisw_': sqisw_with_mirror_synth_estimator.eval_circuit_duration(qc_sqisw_) / sqisw_with_mirror_synth_estimator.eval_circuit_duration(qc),
-        'het': het_synth_estimator.eval_circuit_duration(qc_het) / het_synth_estimator.eval_circuit_duration(qc)
+        'zzphase': zzphase_synth_estimator.eval_circuit_duration(qc_zzphase) / cx_synth_estimator.eval_circuit_duration(qc),
+        'sqisw': sqisw_synth_estimator.eval_circuit_duration(qc_sqisw) / cx_synth_estimator.eval_circuit_duration(qc),
+        'can_xx': can_xx_synth_estimator.eval_circuit_duration(qc_can_xx) / cx_synth_estimator.eval_circuit_duration(qc),
+        'can_xy': can_xy_synth_estimator.eval_circuit_duration(qc_can_xy) / cx_synth_estimator.eval_circuit_duration(qc),
+        'zzphase_': zzphase_with_mirror_synth_estimator.eval_circuit_duration(qc_zzphase_) / cx_synth_estimator.eval_circuit_duration(qc),
+        'sqisw_': sqisw_with_mirror_synth_estimator.eval_circuit_duration(qc_sqisw_) / cx_synth_estimator.eval_circuit_duration(qc),
+        'het': het_synth_estimator.eval_circuit_duration(qc_het) / cx_synth_estimator.eval_circuit_duration(qc)
     }, index=[0])], ignore_index=True)
 
 result.to_csv(os.path.join('./results', f'{args.compiler}-{args.topology}.csv'), index=False)
