@@ -11,7 +11,7 @@ def filter_v2flayout(result):
 
 
 ISA_TYPES = ['cx', 'zzphase', 'sqisw', 'can_xx', 'can_xy', 'zzphase_', 'sqisw_', 'het']
-COMPILERS = ['sabre', 'canopus', 'toqm']
+COMPILERS = ['sabre', 'toqm', 'canopus']
 
 
 

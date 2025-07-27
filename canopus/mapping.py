@@ -4,11 +4,12 @@ from qiskit.dagcircuit import DAGCircuit
 
 from canopus.backends import CanopusBackend, ISAType
 from canopus.utils import generate_random_layout
+from canopus.basics import *
 from qiskit.circuit.library import SwapGate
 from qiskit.transpiler import TranspilerError
 from qiskit.transpiler.passes import VF2Layout
 from qiskit.circuit import Qubit
-from accel_utils import sort_two_objs
+from accel_utils import sort_two_objs, fuzzy_equal
 from itertools import chain
 from typing import Dict, List, Tuple
 import time
@@ -398,6 +399,12 @@ class CanopusMapping(BidirectionalMapping):
             return np.mean(
                 [self.distance_matrix[layout._v2p[node.qargs[0]], layout._v2p[node.qargs[1]]] for node in nodes])
         return 0
+
+    def _is_xx_rot(self, node):
+        """Check if the node is a XX rotation gate."""
+        return (isinstance(node.op, CanonicalGate) and
+                fuzzy_equal(node.op.params[1], 0) and
+                fuzzy_equal(node.op.params[2], 0))
 
 
 class SabreMapping(BidirectionalMapping):

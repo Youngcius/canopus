@@ -21,7 +21,7 @@ parser.add_argument('-t', '--topology', default=None, type=str,
 args = parser.parse_args()
 
 
-benchmark_dpath = './output/logical/'  # Path to benchmark files
+benchmark_dpath = './output/logical/tk2/'  # Path to benchmark files
 output_dpath = os.path.join('./output/sabre/', args.topology)
 
 if not os.path.exists(output_dpath):
@@ -36,8 +36,8 @@ for fname in fnames:
 
     console.rule(f"Processing {fname}")
 
-    qc = QuantumCircuit.from_qasm_file(fname)
-    qc = canopus.rebase_to_canonical(qc)
+    circ = pytket.qasm.circuit_from_qasm(fname)
+    qc = canopus.utils.tket_to_qiskit(circ)
 
     if args.topology == "chain":
         coupling_map = canopus.utils.gene_chain_coupling_map(qc.num_qubits)

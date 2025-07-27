@@ -13,6 +13,7 @@ from . import synthesis
 from . import mapping
 from . import basics
 
+from .basics import CanonicalGate
 from .backends import CanopusBackend, ISAType, CouplingType, SynthCostEstimator
 from .synthesis import rebase_to_sqisw, rebase_to_zzphase, rebase_to_tk2
 from .synthesis import logical_optimize, rebase_to_canonical

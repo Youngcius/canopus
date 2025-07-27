@@ -26,7 +26,7 @@ args = parser.parse_args()
 
 
 
-benchmark_dpath = './output/logical/'  # Path to benchmark files
+benchmark_dpath = './output/logical/cx/'  # Path to benchmark files
 output_dpath = os.path.join('./output/toqm/', args.topology)
 if not os.path.exists(output_dpath):
     os.makedirs(output_dpath)

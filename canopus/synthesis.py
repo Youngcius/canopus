@@ -76,7 +76,6 @@ def _logical_optimize(circ: pytket.Circuit) -> pytket.Circuit:
     return circ
 
 
-
 def rebase_to_sqisw(circ: Union[pytket.Circuit, qiskit.QuantumCircuit]) -> Union[pytket.Circuit, qiskit.QuantumCircuit]:
     if isinstance(circ, pytket.Circuit):
         return _rebase_to_sqisw(circ)
