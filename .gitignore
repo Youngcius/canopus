@@ -197,3 +197,4 @@ cython_debug/
 
 mirror-gates/
 toqm/
+qasmbench-medium00/
