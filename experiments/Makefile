@@ -68,7 +68,7 @@ square_ftqc:
 
 
 canopus:
-	@echo "Testing Canopus for all topologies and ISAs ..."
+	@echo "Running Canopus for all topologies and ISAs ..."
 	@./run.sh
 
 
@@ -85,9 +85,25 @@ baselines:
 	@./bench_all_toqm.py -t hhex
 	@./bench_all_toqm.py -t square
 
-	@echo "Running OLSQ compiler ..."
-
-	@echo "Running Mirage compiler ..."
+	@echo "Running BQSKit compiler ..."
+	@./bench_all_bqskit.py -t chain -isa cx
+	@./bench_all_bqskit.py -t chain -isa zzphase
+	@./bench_all_bqskit.py -t chain -isa sqisw
+	@./bench_all_bqskit.py -t chain -isa zzphase_
+	@./bench_all_bqskit.py -t chain -isa sqisw_
+	@./bench_all_bqskit.py -t chain -isa het
+	@./bench_all_bqskit.py -t hhex -isa cx
+	@./bench_all_bqskit.py -t hhex -isa zzphase
+	@./bench_all_bqskit.py -t hhex -isa sqisw
+	@./bench_all_bqskit.py -t hhex -isa zzphase_
+	@./bench_all_bqskit.py -t hhex -isa sqisw_
+	@./bench_all_bqskit.py -t hhex -isa het
+	@./bench_all_bqskit.py -t square -isa cx
+	@./bench_all_bqskit.py -t square -isa zzphase
+	@./bench_all_bqskit.py -t square -isa sqisw
+	@./bench_all_bqskit.py -t square -isa zzphase_
+	@./bench_all_bqskit.py -t square -isa sqisw_
+	@./bench_all_bqskit.py -t square -isa het
 
 	@echo "\n✅ All baseline compilers executed successfully."
 
@@ -103,6 +119,9 @@ sum_result:
 		"python sum_result.py --compiler toqm --topology chain" \
 		"python sum_result.py --compiler toqm --topology hhex" \
 		"python sum_result.py --compiler toqm --topology square" \
+		"python sum_result.py --compiler bqskit --topology chain" \
+		"python sum_result.py --compiler bqskit --topology hhex" \
+		"python sum_result.py --compiler bqskit --topology square" \
 	); \
 	printf '%s\n' "$${commands[@]}" | parallel --bar
 

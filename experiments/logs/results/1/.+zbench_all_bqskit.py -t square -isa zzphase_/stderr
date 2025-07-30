@@ -1,0 +1,35 @@
+Traceback (most recent call last):
+  File "/Users/anan/miniconda3/lib/python3.12/site-packages/bqskit/compiler/compiler.py", line 439, in _send_recv
+    return self._recv_handle_log_error()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/anan/miniconda3/lib/python3.12/site-packages/bqskit/compiler/compiler.py", line 453, in _recv_handle_log_error
+    msg, payload = self.conn.recv()
+                   ^^^^^^^^^^^^^^^^
+  File "/Users/anan/miniconda3/lib/python3.12/multiprocessing/connection.py", line 250, in recv
+    buf = self._recv_bytes()
+          ^^^^^^^^^^^^^^^^^^
+  File "/Users/anan/miniconda3/lib/python3.12/multiprocessing/connection.py", line 430, in _recv_bytes
+    buf = self._recv(4)
+          ^^^^^^^^^^^^^
+  File "/Users/anan/miniconda3/lib/python3.12/multiprocessing/connection.py", line 399, in _recv
+    raise EOFError
+EOFError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/anan/git-projects/quantum/canopus/experiments/./bench_all_bqskit.py", line 88, in <module>
+    circ_opt = bqskit.compile(circ, model=model, max_synthesis_size=3, optimization_level=1, compiler=bqskit_compiler)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/anan/miniconda3/lib/python3.12/site-packages/bqskit/compiler/compile.py", line 636, in compile
+    out, data = compiler.compile(in_circuit, workflow, True)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/anan/miniconda3/lib/python3.12/site-packages/bqskit/compiler/compiler.py", line 397, in compile
+    result = self.result(task_id)
+             ^^^^^^^^^^^^^^^^^^^^
+  File "/Users/anan/miniconda3/lib/python3.12/site-packages/bqskit/compiler/compiler.py", line 332, in result
+    msg, payload = self._send_recv(RuntimeMessage.REQUEST, task_id)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/anan/miniconda3/lib/python3.12/site-packages/bqskit/compiler/compiler.py", line 444, in _send_recv
+    raise RuntimeError('Server connection unexpectedly closed.') from e
+RuntimeError: Server connection unexpectedly closed.

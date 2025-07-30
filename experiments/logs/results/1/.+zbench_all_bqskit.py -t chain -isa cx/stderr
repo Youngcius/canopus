@@ -1,0 +1,52 @@
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/Users/anan/miniconda3/lib/python3.12/site-packages/bqskit/runtime/attached.py", line 7, in <module>
+    from multiprocessing.connection import Connection
+  File "/Users/anan/miniconda3/lib/python3.12/multiprocessing/connection.py", line 19, in <module>
+    import tempfile
+  File "/Users/anan/miniconda3/lib/python3.12/tempfile.py", line 43, in <module>
+    import shutil as _shutil
+  File "/Users/anan/miniconda3/lib/python3.12/shutil.py", line 10, in <module>
+    import fnmatch
+  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1322, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1262, in _find_spec
+  File "<frozen importlib._bootstrap_external>", line 1528, in find_spec
+  File "<frozen importlib._bootstrap_external>", line 1502, in _get_spec
+  File "<frozen importlib._bootstrap_external>", line 1634, in find_spec
+  File "<frozen importlib._bootstrap_external>", line 161, in _path_isfile
+  File "<frozen importlib._bootstrap_external>", line 153, in _path_is_mode_type
+  File "<frozen importlib._bootstrap_external>", line 147, in _path_stat
+KeyboardInterrupt
+Traceback (most recent call last):
+  File "/Users/anan/miniconda3/lib/python3.12/site-packages/bqskit/compiler/compiler.py", line 439, in _send_recv
+    return self._recv_handle_log_error()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/anan/miniconda3/lib/python3.12/site-packages/bqskit/compiler/compiler.py", line 453, in _recv_handle_log_error
+    msg, payload = self.conn.recv()
+                   ^^^^^^^^^^^^^^^^
+  File "/Users/anan/miniconda3/lib/python3.12/multiprocessing/connection.py", line 250, in recv
+    buf = self._recv_bytes()
+          ^^^^^^^^^^^^^^^^^^
+  File "/Users/anan/miniconda3/lib/python3.12/multiprocessing/connection.py", line 430, in _recv_bytes
+    buf = self._recv(4)
+          ^^^^^^^^^^^^^
+  File "/Users/anan/miniconda3/lib/python3.12/multiprocessing/connection.py", line 395, in _recv
+    chunk = read(handle, remaining)
+            ^^^^^^^^^^^^^^^^^^^^^^^
+ConnectionResetError: [Errno 54] Connection reset by peer
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/anan/git-projects/quantum/canopus/experiments/./bench_all_bqskit.py", line 43, in <module>
+    bqskit_compiler = Compiler()
+                      ^^^^^^^^^^
+  File "/Users/anan/miniconda3/lib/python3.12/site-packages/bqskit/compiler/compiler.py", line 122, in __init__
+    self._connect_to_server(ip, port, self.p is not None)
+  File "/Users/anan/miniconda3/lib/python3.12/site-packages/bqskit/compiler/compiler.py", line 185, in _connect_to_server
+    msg, payload = self._send_recv(RuntimeMessage.CONNECT, sys.path)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/anan/miniconda3/lib/python3.12/site-packages/bqskit/compiler/compiler.py", line 444, in _send_recv
+    raise RuntimeError('Server connection unexpectedly closed.') from e
+RuntimeError: Server connection unexpectedly closed.

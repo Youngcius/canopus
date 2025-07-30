@@ -60,9 +60,9 @@ for fname in fnames:
     # Try V2fLayout first
     from qiskit.converters import circuit_to_dag
     dag = circuit_to_dag(qc)
-    v2f_pass = passes.VF2Layout(coupling_map)
-    v2f_pass.run(dag)
-    if v2f_pass.property_set.get('layout'):
+    vf2_pass = passes.VF2Layout(coupling_map)
+    vf2_pass.run(dag)
+    if vf2_pass.property_set.get('layout'):
         qasm2.dump(qc, output_fname)
         continue
 

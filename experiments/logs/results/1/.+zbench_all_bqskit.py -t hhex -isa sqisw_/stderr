@@ -1,0 +1,14 @@
+Connection refused by runtime server. Retrying in 8.0 seconds.
+Connection refused by runtime server. Retrying in 16.0 seconds.
+Connection refused by runtime server. Retrying in 32.0 seconds.
+Connection is still refused by runtime server. This may be due to the server not being started. You may want to check the server logs, by starting the compiler with "runtime_log_level" set. You can also try launching the bqskit runtime in detached mode. See the bqskit runtime documentation for more information: https://bqskit.readthedocs.io/en/latest/guides/distributing.html
+Connection refused by runtime server. Retrying in 64.0 seconds.
+Connection is still refused by runtime server. This may be due to the server not being started. You may want to check the server logs, by starting the compiler with "runtime_log_level" set. You can also try launching the bqskit runtime in detached mode. See the bqskit runtime documentation for more information: https://bqskit.readthedocs.io/en/latest/guides/distributing.html
+Connection refused by runtime server. Retrying in 128.0 seconds.
+Connection is still refused by runtime server. This may be due to the server not being started. You may want to check the server logs, by starting the compiler with "runtime_log_level" set. You can also try launching the bqskit runtime in detached mode. See the bqskit runtime documentation for more information: https://bqskit.readthedocs.io/en/latest/guides/distributing.html
+Connection refused by runtime server. Retrying in 256.0 seconds.
+Connection is still refused by runtime server. This may be due to the server not being started. You may want to check the server logs, by starting the compiler with "runtime_log_level" set. You can also try launching the bqskit runtime in detached mode. See the bqskit runtime documentation for more information: https://bqskit.readthedocs.io/en/latest/guides/distributing.html
+Connection refused by runtime server. Retrying in 512.0 seconds.
+Connection is still refused by runtime server. This may be due to the server not being started. You may want to check the server logs, by starting the compiler with "runtime_log_level" set. You can also try launching the bqskit runtime in detached mode. See the bqskit runtime documentation for more information: https://bqskit.readthedocs.io/en/latest/guides/distributing.html
+Connection refused by runtime server. Retrying in 1024.0 seconds.
+Connection is still refused by runtime server. This may be due to the server not being started. You may want to check the server logs, by starting the compiler with "runtime_log_level" set. You can also try launching the bqskit runtime in detached mode. See the bqskit runtime documentation for more information: https://bqskit.readthedocs.io/en/latest/guides/distributing.html

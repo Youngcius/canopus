@@ -1,0 +1,16 @@
+Traceback (most recent call last):
+  File "/Users/anan/git-projects/quantum/canopus/experiments/./bench_all_bqskit.py", line 89, in <module>
+    qc_opt = bqskit_to_qiskit(circ_opt)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/anan/miniconda3/lib/python3.12/site-packages/bqskit/ext/qiskit/translate.py", line 33, in bqskit_to_qiskit
+    return QuantumCircuit.from_qasm_str(OPENQASM2Language().encode(circuit))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/anan/miniconda3/lib/python3.12/site-packages/qiskit/circuit/quantumcircuit.py", line 4120, in from_qasm_str
+    return qasm2.loads(
+           ^^^^^^^^^^^^
+  File "/Users/anan/miniconda3/lib/python3.12/site-packages/qiskit/qasm2/__init__.py", line 587, in loads
+    return _parse.from_bytecode(
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/anan/miniconda3/lib/python3.12/site-packages/qiskit/qasm2/parse.py", line 243, in from_bytecode
+    for op in bc:
+qiskit.qasm2.exceptions.QASM2ParseError: "<input>:22,0: 'sqisw' is not defined in this scope"

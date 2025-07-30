@@ -1,0 +1,43 @@
+/Users/anan/git-projects/quantum/canopus/experiments/../canopus/mapping.py:438: RuntimeWarning: invalid value encountered in subtract
+  min_indices = np.where(np.abs(costs - min_cost) < 1e-8)[0]
+Traceback (most recent call last):
+  File "/Users/anan/git-projects/quantum/canopus/experiments/./bench_all.py", line 73, in <module>
+    qc_canopus = PassManager(canopus.CanopusMapping(backend, max_iterations=7)).run(qc)  # max_iterations=8
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/anan/miniconda3/lib/python3.12/site-packages/qiskit/transpiler/passmanager.py", line 464, in wrapper
+    return meth(*meth_args, **meth_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/anan/miniconda3/lib/python3.12/site-packages/qiskit/transpiler/passmanager.py", line 226, in run
+    return super().run(
+           ^^^^^^^^^^^^
+  File "/Users/anan/miniconda3/lib/python3.12/site-packages/qiskit/passmanager/passmanager.py", line 250, in run
+    _run_workflow(program=program, pass_manager=self, callback=callback, **kwargs)
+  File "/Users/anan/miniconda3/lib/python3.12/site-packages/qiskit/passmanager/passmanager.py", line 310, in _run_workflow
+    passmanager_ir, final_state = flow_controller.execute(
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/anan/miniconda3/lib/python3.12/site-packages/qiskit/passmanager/base_tasks.py", line 218, in execute
+    passmanager_ir, state = next_task.execute(
+                            ^^^^^^^^^^^^^^^^^^
+  File "/Users/anan/miniconda3/lib/python3.12/site-packages/qiskit/transpiler/basepasses.py", line 195, in execute
+    new_dag, state = super().execute(
+                     ^^^^^^^^^^^^^^^^
+  File "/Users/anan/miniconda3/lib/python3.12/site-packages/qiskit/passmanager/base_tasks.py", line 98, in execute
+    ret = self.run(passmanager_ir)
+          ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/anan/git-projects/quantum/canopus/experiments/../canopus/mapping.py", line 124, in run
+    routed_dag, initial_layout, final_layout = self._bidirectional_route(dag, initial_layout, trial_seed)
+                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/anan/git-projects/quantum/canopus/experiments/../canopus/mapping.py", line 161, in _bidirectional_route
+    routed_dag, final_layout = self._route(dag, initial_layout, seed)
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/anan/git-projects/quantum/canopus/experiments/../canopus/mapping.py", line 175, in _route
+    routed_dag, final_layout = self._route_one_trial(dag, initial_layout, trial_seed)
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/anan/git-projects/quantum/canopus/experiments/../canopus/mapping.py", line 333, in _route_one_trial
+    swap = self._find_best_swap(dag, front_layer, last_mapped_layer, commutative_pairs,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/anan/git-projects/quantum/canopus/experiments/../canopus/mapping.py", line 439, in _find_best_swap
+    swap = swap_candidates[np.random.choice(min_indices)]
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "numpy/random/mtrand.pyx", line 951, in numpy.random.mtrand.RandomState.choice
+ValueError: 'a' cannot be empty unless no samples are taken

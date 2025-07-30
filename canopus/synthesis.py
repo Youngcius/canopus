@@ -134,7 +134,7 @@ def _rebase_to_tk2(circ: pytket.Circuit, optimize: bool = True) -> pytket.Circui
     if optimize:
         pytket.passes.FullPeepholeOptimise(allow_swaps=False, target_2qb_gate=OpType.TK2).apply(circ)
     pytket.passes.SynthesiseTK().apply(circ)
-    pytket.passes.NormaliseTK2().apply(circ)
+    # pytket.passes.NormaliseTK2().apply(circ)
     return circ
 
 

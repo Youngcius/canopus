@@ -1,0 +1,33 @@
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/Users/anan/miniconda3/lib/python3.12/site-packages/bqskit/runtime/attached.py", line 110, in start_attached_server
+    server = AttachedServer(num_workers, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/anan/miniconda3/lib/python3.12/site-packages/bqskit/runtime/attached.py", line 85, in __init__
+    client_conn = self.listen_once('localhost', port)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/anan/miniconda3/lib/python3.12/site-packages/bqskit/runtime/base.py", line 393, in listen_once
+    listener = Listener((ip, port), family)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/anan/miniconda3/lib/python3.12/multiprocessing/connection.py", line 464, in __init__
+    self._listener = SocketListener(address, family, backlog)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/anan/miniconda3/lib/python3.12/multiprocessing/connection.py", line 608, in __init__
+    self._socket.bind(address)
+OSError: [Errno 48] Address already in use
+Traceback (most recent call last):
+  File "/Users/anan/git-projects/quantum/canopus/experiments/./bench_all_bqskit.py", line 89, in <module>
+    qc_opt = bqskit_to_qiskit(circ_opt)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/anan/miniconda3/lib/python3.12/site-packages/bqskit/ext/qiskit/translate.py", line 33, in bqskit_to_qiskit
+    return QuantumCircuit.from_qasm_str(OPENQASM2Language().encode(circuit))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/anan/miniconda3/lib/python3.12/site-packages/qiskit/circuit/quantumcircuit.py", line 4120, in from_qasm_str
+    return qasm2.loads(
+           ^^^^^^^^^^^^
+  File "/Users/anan/miniconda3/lib/python3.12/site-packages/qiskit/qasm2/__init__.py", line 587, in loads
+    return _parse.from_bytecode(
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/anan/miniconda3/lib/python3.12/site-packages/qiskit/qasm2/parse.py", line 243, in from_bytecode
+    for op in bc:
+qiskit.qasm2.exceptions.QASM2ParseError: "<input>:23,0: 'sqisw' is not defined in this scope"

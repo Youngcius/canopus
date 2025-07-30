@@ -38,7 +38,7 @@ if qc.num_qubits < 7:
 
 coupling_map = CouplingMap.from_line(num_qubits=qc.num_qubits)
 # coupling_map = CouplingMap.from_grid(np.ceil(np.sqrt(qc.num_qubits)).astype(int), np.ceil(np.sqrt(qc.num_qubits)).astype(int))
-backend = CanopusBackend(coupling_map, 'sqisw', 'xx')
+backend = CanopusBackend(coupling_map, 'cx', 'xx')
 
 console.print('Pulse duration: {:.4f}'.format(backend.cost_estimator.eval_circuit_duration(qc)))
 

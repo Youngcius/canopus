@@ -4,7 +4,7 @@ from qiskit.circuit import QuantumRegister, QuantumCircuit
 from qiskit.circuit.gate import Gate
 from typing import Optional
 from qiskit.circuit.parameterexpression import ParameterValueType
-from accel_utils import canonical_unitary
+from accel_utils import canonical_unitary, only_xx_rot
 
 half_pi = pi / 2
 
@@ -40,6 +40,7 @@ class CanonicalGate(Gate):
             label: Optional[str] = None, *, duration=None, unit="dt",
     ):
         super().__init__("can", 2, [a, b, c], label=label, duration=duration, unit=unit)
+        self.is_xx_rot = only_xx_rot(a, b, c)
 
     def inverse(self, annotated: bool = False):
         return CanonicalGate(-self.params[0], -self.params[1], -self.params[2])

@@ -1,0 +1,31 @@
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/Users/anan/miniconda3/lib/python3.12/site-packages/bqskit/runtime/attached.py", line 110, in start_attached_server
+    server = AttachedServer(num_workers, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/anan/miniconda3/lib/python3.12/site-packages/bqskit/runtime/attached.py", line 85, in __init__
+    client_conn = self.listen_once('localhost', port)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/anan/miniconda3/lib/python3.12/site-packages/bqskit/runtime/base.py", line 393, in listen_once
+    listener = Listener((ip, port), family)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/anan/miniconda3/lib/python3.12/multiprocessing/connection.py", line 464, in __init__
+    self._listener = SocketListener(address, family, backlog)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/anan/miniconda3/lib/python3.12/multiprocessing/connection.py", line 608, in __init__
+    self._socket.bind(address)
+OSError: [Errno 48] Address already in use
+Connection refused by runtime server. Retrying in 8.0 seconds.
+Connection refused by runtime server. Retrying in 16.0 seconds.
+Connection refused by runtime server. Retrying in 32.0 seconds.
+Connection is still refused by runtime server. This may be due to the server not being started. You may want to check the server logs, by starting the compiler with "runtime_log_level" set. You can also try launching the bqskit runtime in detached mode. See the bqskit runtime documentation for more information: https://bqskit.readthedocs.io/en/latest/guides/distributing.html
+Connection refused by runtime server. Retrying in 64.0 seconds.
+Connection is still refused by runtime server. This may be due to the server not being started. You may want to check the server logs, by starting the compiler with "runtime_log_level" set. You can also try launching the bqskit runtime in detached mode. See the bqskit runtime documentation for more information: https://bqskit.readthedocs.io/en/latest/guides/distributing.html
+Connection refused by runtime server. Retrying in 128.0 seconds.
+Connection is still refused by runtime server. This may be due to the server not being started. You may want to check the server logs, by starting the compiler with "runtime_log_level" set. You can also try launching the bqskit runtime in detached mode. See the bqskit runtime documentation for more information: https://bqskit.readthedocs.io/en/latest/guides/distributing.html
+Connection refused by runtime server. Retrying in 256.0 seconds.
+Connection is still refused by runtime server. This may be due to the server not being started. You may want to check the server logs, by starting the compiler with "runtime_log_level" set. You can also try launching the bqskit runtime in detached mode. See the bqskit runtime documentation for more information: https://bqskit.readthedocs.io/en/latest/guides/distributing.html
+Connection refused by runtime server. Retrying in 512.0 seconds.
+Connection is still refused by runtime server. This may be due to the server not being started. You may want to check the server logs, by starting the compiler with "runtime_log_level" set. You can also try launching the bqskit runtime in detached mode. See the bqskit runtime documentation for more information: https://bqskit.readthedocs.io/en/latest/guides/distributing.html
+Connection refused by runtime server. Retrying in 1024.0 seconds.
+Connection is still refused by runtime server. This may be due to the server not being started. You may want to check the server logs, by starting the compiler with "runtime_log_level" set. You can also try launching the bqskit runtime in detached mode. See the bqskit runtime documentation for more information: https://bqskit.readthedocs.io/en/latest/guides/distributing.html

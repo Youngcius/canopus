@@ -43,13 +43,15 @@ if not os.path.exists(output_dpath):
 fnames = [os.path.join(benchmark_dpath, fname) for fname in natsorted(os.listdir(benchmark_dpath)) if
           fname.endswith('.qasm')]
 
+cx_synth_cost_estimator = canopus.SynthCostEstimator('cx')
+
 for fname in fnames:
     if os.path.exists(os.path.join(output_dpath, os.path.basename(fname))):
         console.print(f"Skipping {os.path.join(output_dpath, os.path.basename(fname))}, already processed.")
         continue
 
     console.rule(f"Processing {fname}")
-    
+
     circ = pytket.qasm.circuit_from_qasm(fname)
     qc = canopus.utils.tket_to_qiskit(circ)
 
@@ -62,16 +64,21 @@ for fname in fnames:
     else:
         raise ValueError(f"Unsupported topology: {args.topology}")
 
-    backend = canopus.CanopusBackend(coupling_map, args.isa, args.coupling)
-    logic_circ_cost = backend.cost_estimator.eval_circuit_duration(qc)
+    logic_circ_cost = cx_synth_cost_estimator.eval_circuit_duration(qc)
     print_circ_info(qc, title='Logical-level optimization')
     console.print(f"Gate counts: {qc.count_ops()}")
     console.print(f"Circuit cost: {logic_circ_cost:.2f}")
 
-    qc_canopus = PassManager(canopus.CanopusMapping(backend, max_iterations=8)).run(qc)
+    backend = canopus.CanopusBackend(coupling_map, args.isa, args.coupling)
+    qc_canopus = PassManager(canopus.CanopusMapping(backend, max_iterations=7)).run(qc)  # max_iterations=8
     canopus_circ_cost = backend.cost_estimator.eval_circuit_duration(qc_canopus)
     print_circ_info(qc_canopus, title='Mapped circuit')
     console.print(f"Gate counts: {qc_canopus.count_ops()}")
     console.print(f"Circuit cost: {canopus_circ_cost:.2f}; Routing overhead: {canopus_circ_cost / logic_circ_cost:.2f}")
-    qasm2.dump(qc_canopus, os.path.join(output_dpath, os.path.basename(fname)))
-    console.print(f"Saved to {os.path.join(output_dpath, os.path.basename(fname))}")
+
+    if canopus_circ_cost < backend.cost_estimator.eval_circuit_duration(QuantumCircuit.from_qasm_file(os.path.join(output_dpath, os.path.basename(fname)))):
+        qasm2.dump(qc_canopus, os.path.join(output_dpath, os.path.basename(fname)))
+        console.print(f"Saved to {os.path.join(output_dpath, os.path.basename(fname))}", style="bold red")
+        # console.print(f"Current cost {canopus_circ_cost:.2f} is better than previous cost {backend.cost_estimator.eval_circuit_duration(QuantumCircuit.from_qasm_file(os.path.join(output_dpath, os.path.basename(fname)))):.2f}, saved.", style="bold red")
+    # else:
+    #     console.print(f"current cost {canopus_circ_cost:.2f} is not better than previous cost {backend.cost_estimator.eval_circuit_duration(QuantumCircuit.from_qasm_file(os.path.join(output_dpath, os.path.basename(fname)))):.2f}, skipping saving.", style="bold yellow")

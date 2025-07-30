@@ -1,17 +1,225 @@
-Skipping ./output/canopus/hhex/can_xy/bigadder_n18.qasm, already processed.
-Skipping ./output/canopus/hhex/can_xy/bv_n19.qasm, already processed.
-Skipping ./output/canopus/hhex/can_xy/cat_state_n22.qasm, already processed.
-Skipping ./output/canopus/hhex/can_xy/dnn_n16.qasm, already processed.
-Skipping ./output/canopus/hhex/can_xy/gcm_n13.qasm, already processed.
-Skipping ./output/canopus/hhex/can_xy/ghz_state_n23.qasm, already processed.
-Skipping ./output/canopus/hhex/can_xy/ising_n26.qasm, already processed.
-Skipping ./output/canopus/hhex/can_xy/knn_n25.qasm, already processed.
-Skipping ./output/canopus/hhex/can_xy/multiplier_n15.qasm, already processed.
-Skipping ./output/canopus/hhex/can_xy/qec9xz_n17.qasm, already processed.
-Skipping ./output/canopus/hhex/can_xy/qf21_n15.qasm, already processed.
-Skipping ./output/canopus/hhex/can_xy/qft_n18.qasm, already processed.
-Skipping ./output/canopus/hhex/can_xy/qpeexact_16.qasm, already processed.
-Skipping ./output/canopus/hhex/can_xy/qram_n20.qasm, already processed.
-Skipping ./output/canopus/hhex/can_xy/sat_n11.qasm, already processed.
-Skipping ./output/canopus/hhex/can_xy/swap_test_n25.qasm, already processed.
-Skipping ./output/canopus/hhex/can_xy/wstate_n27.qasm, already processed.
+────────────── Processing ./output/logical/tk2/bigadder_n18.qasm ───────────────
+                 Logical-level optimization                 
+┏━━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━┳━━━━━━━━━━┓
+┃ num_qubits ┃ num_gates ┃ num_2q_gates ┃ depth ┃ depth_2q ┃
+┡━━━━━━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━╇━━━━━━━━━━┩
+│ 18         │ 295       │ 114          │ 150   │ 79       │
+└────────────┴───────────┴──────────────┴───────┴──────────┘
+Gate counts: OrderedDict({'u': 181, 'can': 114})
+Circuit cost: 88.00
+                       Mapped circuit                       
+┏━━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━┳━━━━━━━━━━┓
+┃ num_qubits ┃ num_gates ┃ num_2q_gates ┃ depth ┃ depth_2q ┃
+┡━━━━━━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━╇━━━━━━━━━━┩
+│ 18         │ 412       │ 231          │ 185   │ 107      │
+└────────────┴───────────┴──────────────┴───────┴──────────┘
+Gate counts: OrderedDict({'u': 181, 'swap': 117, 'can': 114})
+Circuit cost: 92.75; Routing overhead: 1.05
+───────────────── Processing ./output/logical/tk2/bv_n19.qasm ──────────────────
+                 Logical-level optimization                 
+┏━━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━┳━━━━━━━━━━┓
+┃ num_qubits ┃ num_gates ┃ num_2q_gates ┃ depth ┃ depth_2q ┃
+┡━━━━━━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━╇━━━━━━━━━━┩
+│ 19         │ 38        │ 18           │ 20    │ 18       │
+└────────────┴───────────┴──────────────┴───────┴──────────┘
+Gate counts: OrderedDict({'u': 20, 'can': 18})
+Circuit cost: 18.00
+                       Mapped circuit                       
+┏━━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━┳━━━━━━━━━━┓
+┃ num_qubits ┃ num_gates ┃ num_2q_gates ┃ depth ┃ depth_2q ┃
+┡━━━━━━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━╇━━━━━━━━━━┩
+│ 19         │ 84        │ 64           │ 22    │ 20       │
+└────────────┴───────────┴──────────────┴───────┴──────────┘
+Gate counts: OrderedDict({'swap': 46, 'u': 20, 'can': 18})
+Circuit cost: 21.00; Routing overhead: 1.17
+───────────────── Processing ./output/logical/tk2/gcm_n13.qasm ─────────────────
+                 Logical-level optimization                 
+┏━━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━┳━━━━━━━━━━┓
+┃ num_qubits ┃ num_gates ┃ num_2q_gates ┃ depth ┃ depth_2q ┃
+┡━━━━━━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━╇━━━━━━━━━━┩
+│ 13         │ 909       │ 377          │ 661   │ 376      │
+└────────────┴───────────┴──────────────┴───────┴──────────┘
+Gate counts: OrderedDict({'u': 532, 'can': 377})
+Circuit cost: 510.00
+                       Mapped circuit                       
+┏━━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━┳━━━━━━━━━━┓
+┃ num_qubits ┃ num_gates ┃ num_2q_gates ┃ depth ┃ depth_2q ┃
+┡━━━━━━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━╇━━━━━━━━━━┩
+│ 13         │ 1104      │ 572          │ 859   │ 529      │
+└────────────┴───────────┴──────────────┴───────┴──────────┘
+Gate counts: OrderedDict({'u': 532, 'can': 377, 'swap': 195})
+Circuit cost: 371.13; Routing overhead: 0.73
+Saved to ./output/canopus/hhex/can_xy/gcm_n13.qasm
+──────────────── Processing ./output/logical/tk2/ising_n26.qasm ────────────────
+                 Logical-level optimization                 
+┏━━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━┳━━━━━━━━━━┓
+┃ num_qubits ┃ num_gates ┃ num_2q_gates ┃ depth ┃ depth_2q ┃
+┡━━━━━━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━╇━━━━━━━━━━┩
+│ 26         │ 89        │ 25           │ 5     │ 2        │
+└────────────┴───────────┴──────────────┴───────┴──────────┘
+Gate counts: OrderedDict({'u': 64, 'can': 25})
+Circuit cost: 4.00
+                       Mapped circuit                       
+┏━━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━┳━━━━━━━━━━┓
+┃ num_qubits ┃ num_gates ┃ num_2q_gates ┃ depth ┃ depth_2q ┃
+┡━━━━━━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━╇━━━━━━━━━━┩
+│ 26         │ 106       │ 42           │ 11    │ 6        │
+└────────────┴───────────┴──────────────┴───────┴──────────┘
+Gate counts: OrderedDict({'u': 64, 'can': 25, 'swap': 17})
+Circuit cost: 6.38; Routing overhead: 1.59
+───────────────── Processing ./output/logical/tk2/knn_n25.qasm ─────────────────
+                 Logical-level optimization                 
+┏━━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━┳━━━━━━━━━━┓
+┃ num_qubits ┃ num_gates ┃ num_2q_gates ┃ depth ┃ depth_2q ┃
+┡━━━━━━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━╇━━━━━━━━━━┩
+│ 25         │ 217       │ 72           │ 101   │ 50       │
+└────────────┴───────────┴──────────────┴───────┴──────────┘
+Gate counts: OrderedDict({'u': 145, 'can': 72})
+Circuit cost: 62.00
+                       Mapped circuit                       
+┏━━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━┳━━━━━━━━━━┓
+┃ num_qubits ┃ num_gates ┃ num_2q_gates ┃ depth ┃ depth_2q ┃
+┡━━━━━━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━╇━━━━━━━━━━┩
+│ 25         │ 249       │ 104          │ 126   │ 75       │
+└────────────┴───────────┴──────────────┴───────┴──────────┘
+Gate counts: OrderedDict({'u': 145, 'can': 72, 'swap': 32})
+Circuit cost: 54.50; Routing overhead: 0.88
+───────────── Processing ./output/logical/tk2/multiplier_n15.qasm ──────────────
+                 Logical-level optimization                 
+┏━━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━┳━━━━━━━━━━┓
+┃ num_qubits ┃ num_gates ┃ num_2q_gates ┃ depth ┃ depth_2q ┃
+┡━━━━━━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━╇━━━━━━━━━━┩
+│ 15         │ 482       │ 198          │ 240   │ 122      │
+└────────────┴───────────┴──────────────┴───────┴──────────┘
+Gate counts: OrderedDict({'u': 284, 'can': 198})
+Circuit cost: 133.00
+                       Mapped circuit                       
+┏━━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━┳━━━━━━━━━━┓
+┃ num_qubits ┃ num_gates ┃ num_2q_gates ┃ depth ┃ depth_2q ┃
+┡━━━━━━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━╇━━━━━━━━━━┩
+│ 15         │ 648       │ 364          │ 312   │ 189      │
+└────────────┴───────────┴──────────────┴───────┴──────────┘
+Gate counts: OrderedDict({'u': 284, 'can': 198, 'swap': 166})
+Circuit cost: 163.75; Routing overhead: 1.23
+Saved to ./output/canopus/hhex/can_xy/multiplier_n15.qasm
+─────────────── Processing ./output/logical/tk2/qec9xz_n17.qasm ────────────────
+                 Logical-level optimization                 
+┏━━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━┳━━━━━━━━━━┓
+┃ num_qubits ┃ num_gates ┃ num_2q_gates ┃ depth ┃ depth_2q ┃
+┡━━━━━━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━╇━━━━━━━━━━┩
+│ 17         │ 76        │ 32           │ 16    │ 12       │
+└────────────┴───────────┴──────────────┴───────┴──────────┘
+Gate counts: OrderedDict({'u': 44, 'can': 32})
+Circuit cost: 12.00
+                       Mapped circuit                       
+┏━━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━┳━━━━━━━━━━┓
+┃ num_qubits ┃ num_gates ┃ num_2q_gates ┃ depth ┃ depth_2q ┃
+┡━━━━━━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━╇━━━━━━━━━━┩
+│ 17         │ 114       │ 70           │ 30    │ 23       │
+└────────────┴───────────┴──────────────┴───────┴──────────┘
+Gate counts: OrderedDict({'u': 44, 'swap': 38, 'can': 32})
+Circuit cost: 21.00; Routing overhead: 1.75
+───────────────── Processing ./output/logical/tk2/qft_n18.qasm ─────────────────
+                 Logical-level optimization                 
+┏━━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━┳━━━━━━━━━━┓
+┃ num_qubits ┃ num_gates ┃ num_2q_gates ┃ depth ┃ depth_2q ┃
+┡━━━━━━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━╇━━━━━━━━━━┩
+│ 18         │ 358       │ 153          │ 65    │ 33       │
+└────────────┴───────────┴──────────────┴───────┴──────────┘
+Gate counts: OrderedDict({'u': 205, 'can': 153})
+Circuit cost: 66.00
+                       Mapped circuit                       
+┏━━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━┳━━━━━━━━━━┓
+┃ num_qubits ┃ num_gates ┃ num_2q_gates ┃ depth ┃ depth_2q ┃
+┡━━━━━━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━╇━━━━━━━━━━┩
+│ 18         │ 516       │ 311          │ 138   │ 92       │
+└────────────┴───────────┴──────────────┴───────┴──────────┘
+Gate counts: OrderedDict({'u': 205, 'swap': 158, 'can': 153})
+Circuit cost: 66.39; Routing overhead: 1.01
+─────────────── Processing ./output/logical/tk2/qpeexact_16.qasm ───────────────
+                 Logical-level optimization                 
+┏━━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━┳━━━━━━━━━━┓
+┃ num_qubits ┃ num_gates ┃ num_2q_gates ┃ depth ┃ depth_2q ┃
+┡━━━━━━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━╇━━━━━━━━━━┩
+│ 16         │ 239       │ 127          │ 77    │ 43       │
+└────────────┴───────────┴──────────────┴───────┴──────────┘
+Gate counts: OrderedDict({'can': 127, 'u': 112})
+Circuit cost: 86.00
+                       Mapped circuit                       
+┏━━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━┳━━━━━━━━━━┓
+┃ num_qubits ┃ num_gates ┃ num_2q_gates ┃ depth ┃ depth_2q ┃
+┡━━━━━━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━╇━━━━━━━━━━┩
+│ 16         │ 435       │ 323          │ 136   │ 106      │
+└────────────┴───────────┴──────────────┴───────┴──────────┘
+Gate counts: OrderedDict({'swap': 196, 'can': 127, 'u': 112})
+Circuit cost: 89.07; Routing overhead: 1.04
+Saved to ./output/canopus/hhex/can_xy/qpeexact_16.qasm
+──────────────── Processing ./output/logical/tk2/qram_n20.qasm ─────────────────
+                 Logical-level optimization                 
+┏━━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━┳━━━━━━━━━━┓
+┃ num_qubits ┃ num_gates ┃ num_2q_gates ┃ depth ┃ depth_2q ┃
+┡━━━━━━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━╇━━━━━━━━━━┩
+│ 20         │ 285       │ 110          │ 137   │ 70       │
+└────────────┴───────────┴──────────────┴───────┴──────────┘
+Gate counts: OrderedDict({'u': 175, 'can': 110})
+Circuit cost: 78.00
+                       Mapped circuit                       
+┏━━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━┳━━━━━━━━━━┓
+┃ num_qubits ┃ num_gates ┃ num_2q_gates ┃ depth ┃ depth_2q ┃
+┡━━━━━━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━╇━━━━━━━━━━┩
+│ 20         │ 400       │ 225          │ 171   │ 102      │
+└────────────┴───────────┴──────────────┴───────┴──────────┘
+Gate counts: OrderedDict({'u': 175, 'swap': 115, 'can': 110})
+Circuit cost: 82.75; Routing overhead: 1.06
+───────────────── Processing ./output/logical/tk2/sat_n11.qasm ─────────────────
+                 Logical-level optimization                 
+┏━━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━┳━━━━━━━━━━┓
+┃ num_qubits ┃ num_gates ┃ num_2q_gates ┃ depth ┃ depth_2q ┃
+┡━━━━━━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━╇━━━━━━━━━━┩
+│ 11         │ 473       │ 210          │ 338   │ 182      │
+└────────────┴───────────┴──────────────┴───────┴──────────┘
+Gate counts: OrderedDict({'u': 263, 'can': 210})
+Circuit cost: 204.00
+                       Mapped circuit                       
+┏━━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━┳━━━━━━━━━━┓
+┃ num_qubits ┃ num_gates ┃ num_2q_gates ┃ depth ┃ depth_2q ┃
+┡━━━━━━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━╇━━━━━━━━━━┩
+│ 11         │ 632       │ 369          │ 432   │ 262      │
+└────────────┴───────────┴──────────────┴───────┴──────────┘
+Gate counts: OrderedDict({'u': 263, 'can': 210, 'swap': 159})
+Circuit cost: 201.75; Routing overhead: 0.99
+Saved to ./output/canopus/hhex/can_xy/sat_n11.qasm
+────────────── Processing ./output/logical/tk2/swap_test_n25.qasm ──────────────
+                 Logical-level optimization                 
+┏━━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━┳━━━━━━━━━━┓
+┃ num_qubits ┃ num_gates ┃ num_2q_gates ┃ depth ┃ depth_2q ┃
+┡━━━━━━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━╇━━━━━━━━━━┩
+│ 25         │ 217       │ 72           │ 101   │ 50       │
+└────────────┴───────────┴──────────────┴───────┴──────────┘
+Gate counts: OrderedDict({'u': 145, 'can': 72})
+Circuit cost: 62.00
+                       Mapped circuit                       
+┏━━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━┳━━━━━━━━━━┓
+┃ num_qubits ┃ num_gates ┃ num_2q_gates ┃ depth ┃ depth_2q ┃
+┡━━━━━━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━╇━━━━━━━━━━┩
+│ 25         │ 250       │ 105          │ 125   │ 74       │
+└────────────┴───────────┴──────────────┴───────┴──────────┘
+Gate counts: OrderedDict({'u': 145, 'can': 72, 'swap': 33})
+Circuit cost: 53.00; Routing overhead: 0.85
+─────────────── Processing ./output/logical/tk2/wstate_n27.qasm ────────────────
+                 Logical-level optimization                 
+┏━━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━┳━━━━━━━━━━┓
+┃ num_qubits ┃ num_gates ┃ num_2q_gates ┃ depth ┃ depth_2q ┃
+┡━━━━━━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━╇━━━━━━━━━━┩
+│ 27         │ 183       │ 52           │ 57    │ 28       │
+└────────────┴───────────┴──────────────┴───────┴──────────┘
+Gate counts: OrderedDict({'u': 131, 'can': 52})
+Circuit cost: 28.00
+                       Mapped circuit                       
+┏━━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━┳━━━━━━━━━━┓
+┃ num_qubits ┃ num_gates ┃ num_2q_gates ┃ depth ┃ depth_2q ┃
+┡━━━━━━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━╇━━━━━━━━━━┩
+│ 27         │ 210       │ 79           │ 63    │ 32       │
+└────────────┴───────────┴──────────────┴───────┴──────────┘
+Gate counts: OrderedDict({'u': 131, 'can': 52, 'swap': 27})
+Circuit cost: 35.50; Routing overhead: 1.27
