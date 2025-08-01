@@ -1,0 +1,50 @@
+Processing ./qldpc_circ/gb_code/GBCode_[[18, 2, 5]]_Naive_CX.qasm
+────────────────────────────────────────────────────────────── Original circuit ───────────────────────────────────────────────────────────────
+DEBUG Origin Circuit: circuit depth = 11, qubit count = 36, gate count = OrderedDict([('u', 72), ('can', 72)])
+Pulse duration: 8.0000
+──────────────────────────────────────────────────────────────── SABRE mapping ────────────────────────────────────────────────────────────────
+Pulse duration: 56.0000
+Time taken for Sabre mapping: 142.8357 seconds
+─────────────────────────────────────────────────────────────── Canopus mapping ───────────────────────────────────────────────────────────────
+Pulse duration: 43.7500
+Time taken for Canopus mapping: 225.6353 seconds
+Processing ./qldpc_circ/gb_code/GBCode_[[30, 2, 5]]_Naive_CX.qasm
+────────────────────────────────────────────────────────────── Original circuit ───────────────────────────────────────────────────────────────
+DEBUG Origin Circuit: circuit depth = 11, qubit count = 60, gate count = OrderedDict([('u', 120), ('can', 120)])
+Pulse duration: 8.0000
+──────────────────────────────────────────────────────────────── SABRE mapping ────────────────────────────────────────────────────────────────
+Pulse duration: 71.2500
+Time taken for Sabre mapping: 533.3257 seconds
+─────────────────────────────────────────────────────────────── Canopus mapping ───────────────────────────────────────────────────────────────
+Pulse duration: 63.0000
+Time taken for Canopus mapping: 896.6081 seconds
+Processing ./qldpc_circ/gb_code/GBCode_[[36, 2, 6]]_Naive_CX.qasm
+────────────────────────────────────────────────────────────────── Original circuit ──────────────────────────────────────────────────────────────────
+DEBUG Origin Circuit: circuit depth = 12, qubit count = 72, gate count = OrderedDict([('u', 144), ('can', 144)])
+Pulse duration: 9.0000
+─────────────────────────────────────────────────────────────────── SABRE mapping ────────────────────────────────────────────────────────────────────
+Pulse duration: 150.5000
+Time taken for Sabre mapping: 925.6177 seconds
+────────────────────────────────────────────────────────────────── Canopus mapping ───────────────────────────────────────────────────────────────────
+Pulse duration: 78.7500
+Time taken for Canopus mapping: 1413.9596 seconds
+Processing ./qldpc_circ/bb_code/BBCode_[[18, 4, 4]]_Naive_CX.qasm
+────────────────────────────────────────────────────────────────── Original circuit ──────────────────────────────────────────────────────────────────
+DEBUG Origin Circuit: circuit depth = 12, qubit count = 36, gate count = OrderedDict([('can', 108), ('u', 81)])
+Pulse duration: 9.0000
+─────────────────────────────────────────────────────────────────── SABRE mapping ────────────────────────────────────────────────────────────────────
+Pulse duration: 121.0000
+Time taken for Sabre mapping: 278.7766 seconds
+────────────────────────────────────────────────────────────────── Canopus mapping ───────────────────────────────────────────────────────────────────
+Pulse duration: 89.5000
+Time taken for Canopus mapping: 443.0697 seconds
+Processing ./qldpc_circ/bb_code/BBCode_[[36, 4, 4]]_Naive_CX.qasm
+────────────────────────────────────────────────────────────────── Original circuit ──────────────────────────────────────────────────────────────────
+DEBUG Origin Circuit: circuit depth = 12, qubit count = 72, gate count = OrderedDict([('can', 216), ('u', 162)])
+Pulse duration: 9.0000
+─────────────────────────────────────────────────────────────────── SABRE mapping ────────────────────────────────────────────────────────────────────
+Pulse duration: 212.2500
+Time taken for Sabre mapping: 1794.0242 seconds
+────────────────────────────────────────────────────────────────── Canopus mapping ───────────────────────────────────────────────────────────────────
+Pulse duration: 139.7500
+Time taken for Canopus mapping: 2925.6083 seconds

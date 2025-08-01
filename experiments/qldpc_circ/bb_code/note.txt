@@ -1,0 +1,17 @@
+BBCode_[[72, 12, 6]]:
+IBM
+l = 6, m = 6
+a_x = "x^3 + y + y^2"
+b_x = "y^3 + x + x^2"
+
+BBCode_[[18, 4, 4]]:
+Tsinghua Dongling Deng
+l = 3, m = 3
+a_x = "x + 1 + y^2"
+b_x = "y + 1 + x^2"
+
+BBCode_[[36, 4, 6]]:
+Tsinghua Dongling Deng
+l = 6, m = 3
+a_x = "x + 1 + y"
+b_x = "x^2 + y^2 + y^3"
