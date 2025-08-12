@@ -22,9 +22,10 @@ from ldpc.bposd_decoder import BpOsdDecoder
 import beliefmatching
 from sympy import symbols, Poly
 import sympy
+import argparse
 
 
-def canopus_pass(qc, topology, isa):
+def canopus_pass(qc, topology, isa, max_iterations=10):
     if topology == "chain":
         coupling_map = canopus.utils.gene_chain_coupling_map(qc.num_qubits)
     elif topology == "hhex":
@@ -35,7 +36,7 @@ def canopus_pass(qc, topology, isa):
         raise ValueError(f"Unsupported topology: {topology}")
     
     backend = canopus.CanopusBackend(coupling_map, isa)
-    qc_mapped = PassManager(canopus.CanopusMapping(backend, max_iterations = 10)).run(qc)
+    qc_mapped = PassManager(canopus.CanopusMapping(backend, max_iterations = max_iterations)).run(qc)
     return qc_mapped
 
 
@@ -285,7 +286,7 @@ def stabilizer_measurement_circuit_hardware_cx(circuit, p, Code):
     return circuit
 
 
-def transformer_syndrome_extraction_circuit(qc_pre_stim, log_to_phys_initial, log_to_phys_final, Code, p = 0.0001, circ_name = None): 
+def transformer_syndrome_extraction_circuit(qc_pre_stim, log_to_phys_initial, log_to_phys_final, Code, p = 0.001, circ_name = None): 
     """Transforms the quantum circuit for syndrome extraction into a format suitable for Stim.
 
     Args:
@@ -476,9 +477,26 @@ def transformer_syndrome_extraction_circuit(qc_pre_stim, log_to_phys_initial, lo
     
 if __name__ == "__main__":
     shots = 10000
-    Code = codes.SteaneCode()
+    
+    
+    config = argparse.ArgumentParser()
+    config.add_argument("--code_type", type=str, required=True, help="Type of the code to use (e.g., 'SteaneCode', 'GBCodeI', 'GBCodeII', 'GBCodeIII', 'BBCodeI', 'BBCodeII', ...)")
+    config.add_argument("--topology", type=str, default="square", help="Topology of the quantum circuit (e.g., 'chain', 'hhex', 'square')")
+    config.add_argument("--p", type=float, default=1e-3, help="Physical error rate for the circuit")
+    config.add_argument("--max_iterations", type=int, default=10, help="Maximum iterations for the mapping pass")
+    config = config.parse_args()
+    
+    # Steane Code: [[7, 1, 3]]
+    Steane_Code = codes.SteaneCode()
     
     '''GB Code: 1-D gb code corresponding to arXiv:1904.02703v3'''
+    # GB Code I: [[18, 2, 5]]
+    '''
+    GBCode_[[18, 2, 5]]: 
+    L = 9
+    a_x = "x + 1"
+    b_x = "x^8 + x^4"
+    '''
     L = 9
     a_x = "x + 1"
     b_x = "x^8 + x^4"
@@ -490,12 +508,100 @@ if __name__ == "__main__":
     Hx = np.hstack((A, B))
     Hz = np.hstack((B.T, A.T))
 
-    Code = CSSCode(Hx, Hz)
+    GBCodeI = CSSCode(Hx, Hz)
     
+    # GB Code II: [[30, 2, 5]]
+    '''
+    GBCode_[[30, 2, 5]]: 
+    L = 15
+    a_x = "x^9 + x^6"
+    b_x = "x^12 + x^2"
+    '''
+    L = 15
+    a_x = "x^9 + x^6"
+    b_x = "x^12 + x^2"
+    # Create circulant matrices
+    A = create_circulant_matrix_from_string(a_x, L=L, field=2)
+    B = create_circulant_matrix_from_string(b_x, L=L, field=2)
+
+    # Define Hx and Hz
+    Hx = np.hstack((A, B))
+    Hz = np.hstack((B.T, A.T))
+
+    GBCodeII = CSSCode(Hx, Hz)
     
+    # GB Code III: [[30, 2, 5]]
+    '''
+    GBCode_[[36, 2, 6]]: 
+    L = 18
+    a_x = "x^13 + x^12"
+    b_x = "x^12 + x^7"
+    '''
+    L = 18
+    a_x = "x^13 + x^12"
+    b_x = "x^12 + x^7"
+    # Create circulant matrices
+    A = create_circulant_matrix_from_string(a_x, L=L, field=2)
+    B = create_circulant_matrix_from_string(b_x, L=L, field=2)
+
+    # Define Hx and Hz
+    Hx = np.hstack((A, B))
+    Hz = np.hstack((B.T, A.T))
+
+    GBCodeIII = CSSCode(Hx, Hz)
+    
+    # BB Code I: [[12, 2, 4]]
+    '''
+    BBCode_[[18, 4, 4]]:
+    Tsinghua Dongling Deng
+    l = 3, m = 3
+    a_x = "x + 1 + y^2"
+    b_x = "y + 1 + x^2"
+    '''
+    x, y = symbols('x y')
+    poly_a = x + 1 + y**2
+    poly_b = y + 1 + x**2
+    l = 3
+    m = 3
+    BBCodeI = codes.BBCode(orders=(l, m), poly_a=poly_a, poly_b=poly_b)
+    
+    # BB Code II: [[12, 2, 4]]
+    '''
+    BBCode_[[36, 4, 6]]:
+    Tsinghua Dongling Deng
+    l = 6, m = 3
+    a_x = "x + 1 + y"
+    b_x = "x^2 + y^2 + y^3"
+    '''
+    x, y = symbols('x y')
+    poly_a = x + 1 + y
+    poly_b = x**2 + y**2 + y**3
+    l = 6
+    m = 3
+    BBCodeII = codes.BBCode(orders=(l, m), poly_a=poly_a, poly_b=poly_b)
+    
+    # Create a dictionary to map code types to their respective code objects
+    code_dict = {
+        'SteaneCode': Steane_Code,
+        'GBCodeI': GBCodeI,
+        'GBCodeII': GBCodeII,
+        'GBCodeIII': GBCodeIII,
+        'BBCodeI': BBCodeI,
+        'BBCodeII': BBCodeII
+    }
+    
+    if config.code_type not in code_dict:
+        raise ValueError(f"Unsupported code type: {config.code_type}. Supported types are: {list(code_dict.keys())}")
+    if config.topology not in ["chain", "hhex", "square"]:
+        raise ValueError(f"Unsupported topology: {config.topology}. Supported topologies are: ['chain', 'hhex', 'square']")
+    
+    Code = code_dict[config.code_type]
+    
+    console.rule(f'Benchmarking {config.code_type}')
+
     ''' Method 1: Build and load QASM circuit directly '''
     # get the syndrome measurement circuit only
-    syndrome_measurement_circ = stabilizer_measurement_circuit_hardware_cx(stim.Circuit(), 0.001, Code)
+    syndrome_measurement_circ = stabilizer_measurement_circuit_hardware_cx(stim.Circuit(), config.p, Code)
     syndrome_measurement_circ.to_file(f"./qldpc_circ/syndrome_measurement_circ_{Code.name}.stim")
     
     # build the qasm circuit with syndrome measurement only
@@ -522,7 +628,7 @@ if __name__ == "__main__":
     # routing by Sabre
     console.rule('SABRE mapping')
     start = time.perf_counter()
-    qc_sabre = sabre_pass(qc, "square")
+    qc_sabre = sabre_pass(qc, config.topology)
     end = time.perf_counter()
     # rebase to Canonical format
     qc_sabre_rebase_tk2 = canopus.rebase_to_tk2(qc_sabre)
@@ -533,28 +639,28 @@ if __name__ == "__main__":
     # Routing by Canopus
     console.rule('Canopus mapping')
     start_cx = time.perf_counter()
-    qc_canopus_cx = canopus_pass(qc, "square", 'cx')
+    qc_canopus_cx = canopus_pass(qc, "square", 'cx', max_iterations=config.max_iterations)
     end_cx = time.perf_counter()
     start_stab = time.perf_counter()
-    qc_canopus_stab = canopus_pass(qc, "square", 'stab')
+    qc_canopus_stab = canopus_pass(qc, "square", 'stab', max_iterations=config.max_iterations)
     end_stab = time.perf_counter()
     # rebase to Canonical format
     qc_canopus_cx_rebase_tk2 = canopus.rebase_to_tk2(qc_canopus_cx)
     qc_canopus_stab_rebase_tk2 = canopus.rebase_to_tk2(qc_canopus_stab)
 
     console.print(f"Pulse duration Canopus mapping (cx_isa): {cx_cost_est.eval_circuit_duration(qc_canopus_cx_rebase_tk2):.4f}, stab_isa: {stab_isa_cost_est.eval_circuit_duration(qc_canopus_stab_rebase_tk2):.4f}")
-    console.print(f'Time taken for Canopus mapping (cx_isa):{(end_cx - start_cx):.4f} seconds, stab_isa: {(end_stab - start_stab):.4f} seconds')
+    console.print(f'Time taken for Canopus mapping (cx_isa): {(end_cx - start_cx):.4f} seconds, stab_isa: {(end_stab - start_stab):.4f} seconds')
     
     console.rule('Get circuit [initial | final] layout')
     # print(qc_canopus_cx_rebase_tk2)
     # print(qc_canopus_stab_rebase_tk2)
     
-    qc_sabre_log_to_phys_initial, qc_canopus_log_to_phys_final = get_layout(qc_sabre)
+    qc_sabre_log_to_phys_initial, qc_sabre_log_to_phys_final = get_layout(qc_sabre)
     qc_canopus_cx_log_to_phys_initial, qc_canopus_cx_log_to_phys_final = get_layout(qc_canopus_cx)
     qc_canopus_stab_log_to_phys_initial, qc_canopus_stab_log_to_phys_final = get_layout(qc_canopus_stab)
     
     print("SABRE initial layout:", qc_sabre_log_to_phys_initial)
-    print("SABRE final layout:", qc_canopus_log_to_phys_final)
+    print("SABRE final layout:", qc_sabre_log_to_phys_final)
     
     print("Canopus CX initial layout:", qc_canopus_cx_log_to_phys_initial)
     print("Canopus CX final layout:", qc_canopus_cx_log_to_phys_final)
@@ -564,7 +670,8 @@ if __name__ == "__main__":
     
     
     console.rule('Mapping circuit -> Stim circuit')
-    qc_sabre_pre_stim = canopus.synthesis.synthesize_clifford_circuit(qc_sabre_rebase_tk2)
+    qc_sabre_cx_pre_stim = canopus.synthesis.synthesize_clifford_circuit(qc_sabre_rebase_tk2)
+    qc_sabre_stab_pre_stim = canopus.synthesis.synthesize_clifford_circuit(qc_sabre_rebase_tk2, isa='stab')
     qc_canopus_cx_pre_stim = canopus.synthesis.synthesize_clifford_circuit(qc_canopus_cx_rebase_tk2)
     qc_canopus_stab_pre_stim = canopus.synthesis.synthesize_clifford_circuit(qc_canopus_stab_rebase_tk2, isa='stab')
     
@@ -576,27 +683,29 @@ if __name__ == "__main__":
     print(f"Sabre, cx_duration: {cx_cost_est.eval_circuit_duration(qc_sabre_rebase_tk2):.4f}, stab_duration: {stab_isa_cost_est.eval_circuit_duration(qc_sabre_rebase_tk2):.4f}")
     print(f"Canopus CX, cx_duration: {cx_cost_est.eval_circuit_duration(qc_canopus_cx_rebase_tk2):.4f}, stab_duration: {stab_isa_cost_est.eval_circuit_duration(qc_canopus_cx_rebase_tk2):.4f}")
 
-    print("Sabre:", qc_sabre_pre_stim.count_ops())
+    print("Sabre CX:", qc_sabre_cx_pre_stim.count_ops())
+    print("Sabre Stab:", qc_sabre_stab_pre_stim.count_ops())
     print("Canopus CX:", qc_canopus_cx_pre_stim.count_ops())
     print("Canopus Stab:", qc_canopus_stab_pre_stim.count_ops())
     
 
-    qasm_str_sabre = dumps(qc_sabre_pre_stim)
+    qasm_str_sabre_cx = dumps(qc_sabre_cx_pre_stim)
+    qasm_str_sabre_stab = dumps(qc_sabre_stab_pre_stim)
     qasm_str_canopus_cx = dumps(qc_canopus_cx_pre_stim)
     qasm_str_canopus_stab = dumps(qc_canopus_stab_pre_stim)
     # print(qasm_str_canopus_stab)
     
-
-    
-    stim_sabre = transformer_syndrome_extraction_circuit(qc_sabre_pre_stim, qc_sabre_log_to_phys_initial, qc_canopus_log_to_phys_final, Code, p=0.001, circ_name='sabre')
-    stim_canopus_cx = transformer_syndrome_extraction_circuit(qc_canopus_cx_pre_stim, qc_canopus_cx_log_to_phys_initial, qc_canopus_cx_log_to_phys_final, Code, p=0.001, circ_name='canopus_cx')
-    stim_canopus_stab = transformer_syndrome_extraction_circuit(qc_canopus_stab_pre_stim, qc_canopus_stab_log_to_phys_initial, qc_canopus_stab_log_to_phys_final, Code, p=0.001, circ_name='canopus_stab')
+    stim_sabre_cx = transformer_syndrome_extraction_circuit(qc_sabre_cx_pre_stim, qc_sabre_log_to_phys_initial, qc_sabre_log_to_phys_final, Code, p=config.p, circ_name='sabre')
+    stim_sabre_stab = transformer_syndrome_extraction_circuit(qc_sabre_stab_pre_stim, qc_sabre_log_to_phys_initial, qc_sabre_log_to_phys_final, Code, p=config.p, circ_name='sabre_stab')
+    stim_canopus_cx = transformer_syndrome_extraction_circuit(qc_canopus_cx_pre_stim, qc_canopus_cx_log_to_phys_initial, qc_canopus_cx_log_to_phys_final, Code, p=config.p, circ_name='canopus_cx')
+    stim_canopus_stab = transformer_syndrome_extraction_circuit(qc_canopus_stab_pre_stim, qc_canopus_stab_log_to_phys_initial, qc_canopus_stab_log_to_phys_final, Code, p=config.p, circ_name='canopus_stab')
 
     
     console.rule('Benchmark Logical Error Rate')
     
     decode_circ_stim_list = {
-        "sabre": stim_sabre,
+        "sabre_cx": stim_sabre_cx,
+        "sabre_stab": stim_sabre_stab,
         "canopus_cx": stim_canopus_cx,
         "canopus_stab": stim_canopus_stab
     }
