@@ -119,51 +119,51 @@ We select a set of medium-size benchmarks from QASMBench~\cite{li2023qasmbench} 
 
 
 
-\begin{figure*}[t]
+% \begin{figure*}[t]
     
-    \centering
-    \subfigure{\includegraphics[width=0.33\textwidth]{figures/results/chain_cx.pdf}}
-    \subfigure{\includegraphics[width=0.33\textwidth]{figures/results/hhex_cx.pdf}}
-    \subfigure{\includegraphics[width=0.33\textwidth]{figures/results/square_cx.pdf}}\vspace{-0.8em}
-    \subfigure{\includegraphics[width=0.33\textwidth]{figures/results/chain_zzphase.pdf}}
-    \subfigure{\includegraphics[width=0.33\textwidth]{figures/results/hhex_zzphase.pdf}}
-    \subfigure{\includegraphics[width=0.33\textwidth]{figures/results/square_zzphase.pdf}}\vspace{-0.8em}
-    \subfigure{\includegraphics[width=0.33\textwidth]{figures/results/chain_sqisw.pdf}}
-    \subfigure{\includegraphics[width=0.33\textwidth]{figures/results/hhex_sqisw.pdf}}
-    \subfigure{\includegraphics[width=0.33\textwidth]{figures/results/square_sqisw.pdf}}\vspace{-0.8em}
-    \subfigure{\includegraphics[width=0.33\textwidth]{figures/results/chain_zzphase_.pdf}}
-    \subfigure{\includegraphics[width=0.33\textwidth]{figures/results/hhex_zzphase_.pdf}}
-    \subfigure{\includegraphics[width=0.33\textwidth]{figures/results/square_zzphase_.pdf}}\vspace{-0.8em}
-    \subfigure{\includegraphics[width=0.33\textwidth]{figures/results/chain_sqisw_.pdf}}
-    \subfigure{\includegraphics[width=0.33\textwidth]{figures/results/hhex_sqisw_.pdf}}
-    \subfigure{\includegraphics[width=0.33\textwidth]{figures/results/square_sqisw_.pdf}}\vspace{-0.8em}
-    \subfigure{\includegraphics[width=0.33\textwidth]{figures/results/chain_het.pdf}}
-    \subfigure{\includegraphics[width=0.33\textwidth]{figures/results/hhex_het.pdf}}
-    \subfigure{\includegraphics[width=0.33\textwidth]{figures/results/square_het.pdf}}
+%     \centering
+%     \subfigure{\includegraphics[width=0.33\textwidth]{figures/results/chain_cx.pdf}}
+%     \subfigure{\includegraphics[width=0.33\textwidth]{figures/results/hhex_cx.pdf}}
+%     \subfigure{\includegraphics[width=0.33\textwidth]{figures/results/square_cx.pdf}}\vspace{-0.8em}
+%     \subfigure{\includegraphics[width=0.33\textwidth]{figures/results/chain_zzphase.pdf}}
+%     \subfigure{\includegraphics[width=0.33\textwidth]{figures/results/hhex_zzphase.pdf}}
+%     \subfigure{\includegraphics[width=0.33\textwidth]{figures/results/square_zzphase.pdf}}\vspace{-0.8em}
+%     \subfigure{\includegraphics[width=0.33\textwidth]{figures/results/chain_sqisw.pdf}}
+%     \subfigure{\includegraphics[width=0.33\textwidth]{figures/results/hhex_sqisw.pdf}}
+%     \subfigure{\includegraphics[width=0.33\textwidth]{figures/results/square_sqisw.pdf}}\vspace{-0.8em}
+%     \subfigure{\includegraphics[width=0.33\textwidth]{figures/results/chain_zzphase_.pdf}}
+%     \subfigure{\includegraphics[width=0.33\textwidth]{figures/results/hhex_zzphase_.pdf}}
+%     \subfigure{\includegraphics[width=0.33\textwidth]{figures/results/square_zzphase_.pdf}}\vspace{-0.8em}
+%     \subfigure{\includegraphics[width=0.33\textwidth]{figures/results/chain_sqisw_.pdf}}
+%     \subfigure{\includegraphics[width=0.33\textwidth]{figures/results/hhex_sqisw_.pdf}}
+%     \subfigure{\includegraphics[width=0.33\textwidth]{figures/results/square_sqisw_.pdf}}\vspace{-0.8em}
+%     \subfigure{\includegraphics[width=0.33\textwidth]{figures/results/chain_het.pdf}}
+%     \subfigure{\includegraphics[width=0.33\textwidth]{figures/results/hhex_het.pdf}}
+%     \subfigure{\includegraphics[width=0.33\textwidth]{figures/results/square_het.pdf}}
 
-    \caption{Detailed benchmarking results for different compilers (\sabre, \toqm, \bqskit, \canopus) across diverse topologies (columns from left to right: 1D Chain, 2D HHex, 2D Square) and quantum ISAs (rows from top to bottom: \CXISA, \ZZPhaseISA, \SQiSWISA, \ZZPhaseWithMirrorISA, \SQiSWWithMirrorISA, \HetISA). Sizes and colors of the bubbles represent the values for routing overhead (multiples of the routed and rebased circuits compared to that of prior-routing ones).}
-    \label{fig:detailed_results}
+%     \caption{Detailed benchmarking results for different compilers (\sabre, \toqm, \bqskit, \canopus) across diverse topologies (columns from left to right: 1D Chain, 2D HHex, 2D Square) and quantum ISAs (rows from top to bottom: \CXISA, \ZZPhaseISA, \SQiSWISA, \ZZPhaseWithMirrorISA, \SQiSWWithMirrorISA, \HetISA). Sizes and colors of the bubbles represent the values for routing overhead (multiples of the routed and rebased circuits compared to that of prior-routing ones).}
+%     \label{fig:detailed_results}
     
-\end{figure*}
+% \end{figure*}
 
 
 
 
 
 
-\begin{table*}[tbp]
-    \centering
-    \caption{Summarized results for the routing overhead with average (geometric-mean) values emphasized.}
-    \label{tab:summarized_results}
+% \begin{table*}[tbp]
+%     \centering
+%     \caption{Summarized results for the routing overhead with average (geometric-mean) values emphasized.}
+%     \label{tab:summarized_results}
 
-    % \setlength{\tabcolsep}{2.5pt}
-    % \begin{scriptsize}
-    % \begin{small}
-        \input{tables/result_table.tex}
-    % \end{scriptsize}
-    % \end{small}
+%     % \setlength{\tabcolsep}{2.5pt}
+%     % \begin{scriptsize}
+%     % \begin{small}
+%         \input{tables/result_table.tex}
+%     % \end{scriptsize}
+%     % \end{small}
 
-\end{table*}
+% \end{table*}
 
 
 

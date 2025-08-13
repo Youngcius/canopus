@@ -35,7 +35,7 @@ if args.isa == 'ftqc':
     raise NotImplementedError("FTQC ISA is not supported in this script.")
 
 benchmark_dpath = './output/logical/tk2/'  # Path to benchmark files
-output_dpath = os.path.join('./output/canopus_num/', args.topology,
+output_dpath = os.path.join('./output/canopus/', args.topology,
                             args.isa + ('' if args.coupling is None else ('_' + args.coupling)))
 
 if not os.path.exists(output_dpath):
@@ -77,7 +77,7 @@ for fname in fnames:
     console.print(f"Circuit cost: {canopus_circ_cost}")
     console.print(f"Routing overhead (Count): {canopus_circ_cost[0] / logic_circ_cost[0]:.2f}; Routing Overhead (Depth): {canopus_circ_cost[1] / logic_circ_cost[1]:.2f}")
 
-    if not os.path.exists(os.path.join(output_dpath, os.path.basename(fname))) or canopus_circ_cost < backend.cost_estimator.eval_circuit_duration(QuantumCircuit.from_qasm_file(os.path.join(output_dpath, os.path.basename(fname)))):
+    if not os.path.exists(os.path.join(output_dpath, os.path.basename(fname))) or canopus_circ_cost < backend.cost_estimator.eval_circuit_cost(QuantumCircuit.from_qasm_file(os.path.join(output_dpath, os.path.basename(fname)))):
         qasm2.dump(qc_canopus, os.path.join(output_dpath, os.path.basename(fname)))
         console.print(f"Saved to {os.path.join(output_dpath, os.path.basename(fname))}", style="bold red")
         # console.print(f"Current cost {canopus_circ_cost:.2f} is better than previous cost {backend.cost_estimator.eval_circuit_duration(QuantumCircuit.from_qasm_file(os.path.join(output_dpath, os.path.basename(fname)))):.2f}, saved.", style="bold red")

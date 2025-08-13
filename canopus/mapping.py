@@ -213,25 +213,20 @@ class CanopusMapping(BidirectionalMapping):
     def __init__(self, backend: CanopusBackend, seed=None,
                  max_iterations=5, trials=None, layout_trials=None,
                  comm_opt=True, init_layout_method='random', 
-                 count_driven=False, depth_driven=False):
+                 depth_driven=False):
         super().__init__(backend, seed, max_iterations, trials, layout_trials, init_layout_method)
         # self.depth_driven_rate = None
         self.average_degree = average_degree(self.coupling_map.graph)
         # self.w_degree = self.average_degree / (1.5 + self.average_degree) * np.log2(self.coupling_map.size()) / 1.5 # * 2 # 如果乘上2，可以对QFT做到optimal routing
         self.w_degree = self.average_degree / (2 + self.average_degree)  # 经验发现，这种设置效果还不错
         self.comm_opt = comm_opt
-        assert not (self.count_driven and self.depth_driven), "count_driven and depth_driven cannot be both True"
-        self.count_driven = count_driven
         self.depth_driven = depth_driven
 
     def _eval_dagcircuit_cost(self, dag):
         count_cost, depth_cost = self.backend.cost_estimator.eval_dagcircuit_cost(dag)
         if self.depth_driven:
-            return depth_cost
-        elif self.count_driven:
-            return count_cost
-        else:
-            return count_cost, depth_cost
+            return depth_cost, count_cost
+        return count_cost, depth_cost
 
     def _route_one_trial(self, dag, initial_layout, seed) -> Tuple[DAGCircuit, Layout]:
         """Given the DAG and initial layout, perform SABRE routing. Return the routed DAG and the final layout."""
@@ -364,12 +359,12 @@ class CanopusMapping(BidirectionalMapping):
                 last_mapped_layer[p0, p1] = swap_node
 
                 # update qubit_decays
-                num_searches += 1
-                if num_searches % NUM_SEARCHES_TO_RESET == 0:
-                    self.qubit_decays = dict.fromkeys(dag.qubits, INIT_DECAY)
-                else:
-                    self.qubit_decays[swap[0]] += DECAY_STEP
-                    self.qubit_decays[swap[1]] += DECAY_STEP
+                # num_searches += 1
+                # if num_searches % NUM_SEARCHES_TO_RESET == 0:
+                #     self.qubit_decays = dict.fromkeys(dag.qubits, INIT_DECAY)
+                # else:
+                #     self.qubit_decays[swap[0]] += DECAY_STEP
+                #     self.qubit_decays[swap[1]] += DECAY_STEP
 
         return routed_dag, layout
 
@@ -486,9 +481,11 @@ class CanopusMapping(BidirectionalMapping):
 
         layout = layout.copy()
         layout.swap(*swap)
+
         c1 = (self._avg_dist(front_layer, layout) - avg_dist_front) * self.backend.cost_estimator.swap_cost
         c2 = (self._avg_dist(extended_set, layout) - avg_dist_extended) * self.backend.cost_estimator.swap_cost
-        c_depth = (max(wire_durations.values()) - duration) * self.w_degree # 目前这样设置效果还不错
+        c_depth = (max(wire_durations.values()) - duration)  * self.w_degree # 目前这样设置效果还不错
+        c_gate = gate_duration
 
         # console.print('self.average_degree={}'.format(self.average_degree))
 
@@ -500,12 +497,16 @@ class CanopusMapping(BidirectionalMapping):
         # else:
         #     c2 = 0
         w_decay = max(self.qubit_decays[swap[0]], self.qubit_decays[swap[1]])
-        
-        if self.count_driven:
-            return w_decay * (c1 + EXT_WEIGHT * c2 + gate_duration)
-        if self.depth_driven:
-            return w_decay * (c1 + EXT_WEIGHT * c2 + c_depth)
-        return w_decay * (c1 + EXT_WEIGHT * c2 + (c_depth + gate_duration) * 0.5)
+
+        # console.print('c1 (front_layer) = {:.2f}, c2 (extended_set) = {:.2f}, c_depth = {:.2f}, c_g = {:.2f}'.format(c1, c2, c_depth, gate_duration))
+
+        # console.print('last v.s. front: {}'.format(len(last_mapped_layer)/len(front_layer)))
+        # if self.count_driven:
+        #     return w_decay * (c1 + EXT_WEIGHT * c2 + c_gate)
+        # if self.depth_driven:
+        #     return w_decay * (c1 + EXT_WEIGHT * c2 + c_depth)
+        # return c1 + EXT_WEIGHT * c2 + (c_depth + c_gate) # 这个设定对QFT更好
+        return c1 + EXT_WEIGHT * c2 + (c_depth + c_gate) * 0.5 # 这个设定普遍更好
 
     def _avg_dist(self, nodes, layout: Layout):
         if nodes:
