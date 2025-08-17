@@ -66,10 +66,15 @@ def get_layout(qc):
     Returns:
         Tuple[Dict[int, int], Dict[int, int]]: A tuple containing the initial and final layout mappings.
     """
-    initial_layout = qc.layout.initial_layout
-    final_layout = qc.layout.final_layout
-    log_to_phys_initial = {qc.qubits.index(q): p for q, p in initial_layout.get_virtual_bits().items()}
-    log_to_phys_final = {qc.qubits.index(q): p for q, p in final_layout.get_virtual_bits().items()}
+    if qc.layout:
+        initial_layout = qc.layout.initial_layout
+        final_layout = qc.layout.final_layout
+        log_to_phys_initial = {qc.qubits.index(q): p for q, p in initial_layout.get_virtual_bits().items()}
+        log_to_phys_final = {qc.qubits.index(q): p for q, p in final_layout.get_virtual_bits().items()}
+    else:
+        # Identity mapping: logical index i -> physical index i
+        log_to_phys_initial = {i: i for i in range(len(qc.qubits))}
+        log_to_phys_final = {i: i for i in range(len(qc.qubits))}
     return log_to_phys_initial, log_to_phys_final
 
 
@@ -917,7 +922,7 @@ if __name__ == "__main__":
     # qc = QuantumCircuit.from_qasm_file(qasm_fname)
     
     # rebase to tk2: naive optimization by tk2
-    qc = canopus.rebase_to_tk2(qc)
+    qc_rebase_tk2 = canopus.rebase_to_tk2(qc)
     
     # set cost evaluation func for duration evaluation
     cx_cost_est = canopus.SynthCostEstimator('cx')         # cx means {CX, U3} ISA
@@ -928,141 +933,59 @@ if __name__ == "__main__":
     
     console.print(f"Pulse duration before mapping (cx_isa): {cx_cost_est.eval_circuit_cost(qc)}")
     
-    # routing by Sabre
-    console.rule('SABRE mapping')
-    start = time.perf_counter()
-    qc_sabre = sabre_pass(qc, config.topology)
-    end = time.perf_counter()
-    # rebase to Canonical format
-    qc_sabre_rebase_tk2 = canopus.rebase_to_tk2(qc_sabre)
-    # console.print(f"before rebase {cx_cost_est.eval_circuit_cost(canopus.rebase_to_canonical(qc_sabre))}, after rebase {cx_cost_est.eval_circuit_cost(qc_sabre_rebase_tk2)}", style='red bold')
-
-    console.print(f"Pulse duration Sabre mapping (cx_isa): {cx_cost_est.eval_circuit_cost(qc_sabre_rebase_tk2)}, stab_isa: {stab_isa_cost_est.eval_circuit_cost(qc_sabre_rebase_tk2)}")
-    console.print(f'Time taken for Sabre mapping (cx_isa): {(end - start):.4f} seconds')
-    
-    # Routing by Canopus
-    console.rule('Canopus mapping')
-    start_cx = time.perf_counter()
-    qc_canopus_cx = canopus_pass(qc, config.topology, 'cx', max_iterations=config.max_iterations, depth_driven=config.depth_driven)
-    end_cx = time.perf_counter()
-    start_stab = time.perf_counter()
-    qc_canopus_stab = canopus_pass(qc, config.topology, 'stab', max_iterations=config.max_iterations, depth_driven=config.depth_driven)
-    end_stab = time.perf_counter()
-    # rebase to Canonical format
-    qc_canopus_cx_rebase_tk2 = canopus.rebase_to_tk2(qc_canopus_cx)
-    # console.print(f"before rebase {cx_cost_est.eval_circuit_cost(canopus.rebase_to_canonical(qc_canopus_cx))}, after rebase {cx_cost_est.eval_circuit_cost(qc_canopus_cx_rebase_tk2)}", style='red bold')
-    qc_canopus_stab_rebase_tk2 = canopus.rebase_to_tk2(qc_canopus_stab)
-    # console.print(f"before rebase {stab_isa_cost_est.eval_circuit_cost(canopus.rebase_to_canonical(qc_canopus_stab))}, after rebase {stab_isa_cost_est.eval_circuit_cost(qc_canopus_stab_rebase_tk2)}", style='red bold')
-
-    console.print(f"Pulse duration Canopus mapping (cx_isa): {cx_cost_est.eval_circuit_cost(qc_canopus_cx_rebase_tk2)}, stab_isa: {stab_isa_cost_est.eval_circuit_cost(qc_canopus_stab_rebase_tk2)}")
-    console.print(f'Time taken for Canopus mapping (cx_isa): {(end_cx - start_cx):.4f} seconds, stab_isa: {(end_stab - start_stab):.4f} seconds')
-    
-    console.rule('Get circuit [initial | final] layout')
-    # print(qc_canopus_cx_rebase_tk2)
-    # print(qc_canopus_stab_rebase_tk2)
-    
-    qc_sabre_log_to_phys_initial, qc_sabre_log_to_phys_final = get_layout(qc_sabre)
-    qc_canopus_cx_log_to_phys_initial, qc_canopus_cx_log_to_phys_final = get_layout(qc_canopus_cx)
-    qc_canopus_stab_log_to_phys_initial, qc_canopus_stab_log_to_phys_final = get_layout(qc_canopus_stab)
-    
-    print("SABRE initial layout:", qc_sabre_log_to_phys_initial)
-    print("SABRE final layout:", qc_sabre_log_to_phys_final)
-    
-    print("Canopus CX initial layout:", qc_canopus_cx_log_to_phys_initial)
-    print("Canopus CX final layout:", qc_canopus_cx_log_to_phys_final)
-    
-    print("Canopus Stab initial layout:", qc_canopus_stab_log_to_phys_initial)
-    print("Canopus Stab final layout:", qc_canopus_stab_log_to_phys_final)
-    
     
     console.rule('Mapping circuit -> Stim circuit')
-    qc_sabre_cx_pre_stim = canopus.synthesis.synthesize_clifford_circuit(qc_sabre_rebase_tk2)
-    qc_sabre_stab_pre_stim = canopus.synthesis.synthesize_clifford_circuit(qc_sabre_rebase_tk2, isa='stab')
-    qc_canopus_cx_pre_stim = canopus.synthesis.synthesize_clifford_circuit(qc_canopus_cx_rebase_tk2)
-    qc_canopus_stab_pre_stim = canopus.synthesis.synthesize_clifford_circuit(qc_canopus_stab_rebase_tk2, isa='stab')
-
-    qasm2.dump(qc_sabre_cx_pre_stim, 'qc_sabre_cx_pre_stim.qasm')
-    qasm2.dump(qc_sabre_stab_pre_stim, 'qc_sabre_stab_pre_stim.qasm')
-    qasm2.dump(qc_canopus_cx_pre_stim, 'qc_canopus_cx_pre_stim.qasm')
-    qasm2.dump(qc_canopus_stab_pre_stim, 'qc_canopus_stab_pre_stim.qasm')
+    
+    qc_log_to_phys_initial, qc_log_to_phys_final = get_layout(qc)
+    
+    qc_cx_pre_stim = canopus.synthesis.synthesize_clifford_circuit(qc_rebase_tk2)
     
     
-    # print(qc_canopus_stab_pre_stim)
-    # print(qc_canopus_cx_pre_stim)
-    # print(qc_canopus_stab_pre_stim)
-    
-    console.rule('Benchmark Circuit Duration and Gate Count')
-    print(f"Sabre, cx_duration: {cx_cost_est.eval_circuit_cost(qc_sabre_rebase_tk2)}, stab_duration: {stab_isa_cost_est.eval_circuit_cost(qc_sabre_rebase_tk2)}")
-    print(f"Canopus CX, cx_duration: {cx_cost_est.eval_circuit_cost(qc_canopus_cx_rebase_tk2)}, stab_duration: {stab_isa_cost_est.eval_circuit_cost(qc_canopus_stab_rebase_tk2)}")
-
-    print("Sabre CX:", qc_sabre_cx_pre_stim.count_ops())
-    print("Sabre Stab:", qc_sabre_stab_pre_stim.count_ops())
-    print("Canopus CX:", qc_canopus_cx_pre_stim.count_ops())
-    print("Canopus Stab:", qc_canopus_stab_pre_stim.count_ops())
-    
-
-    qasm_str_sabre_cx = dumps(qc_sabre_cx_pre_stim)
-    qasm_str_sabre_stab = dumps(qc_sabre_stab_pre_stim)
-    qasm_str_canopus_cx = dumps(qc_canopus_cx_pre_stim)
-    qasm_str_canopus_stab = dumps(qc_canopus_stab_pre_stim)
-    # print(qasm_str_canopus_stab)
-    
-    stim_sabre_cx = transformer_syndrome_extraction_circuit(qc_sabre_cx_pre_stim, qc_sabre_log_to_phys_initial, qc_sabre_log_to_phys_final, Code, p=config.p, circ_name='sabre_cx')
-    stim_sabre_stab = transformer_syndrome_extraction_circuit(qc_sabre_stab_pre_stim, qc_sabre_log_to_phys_initial, qc_sabre_log_to_phys_final, Code, p=config.p, circ_name='sabre_stab')
-    stim_canopus_cx = transformer_syndrome_extraction_circuit(qc_canopus_cx_pre_stim, qc_canopus_cx_log_to_phys_initial, qc_canopus_cx_log_to_phys_final, Code, p=config.p, circ_name='canopus_cx')
-    stim_canopus_stab = transformer_syndrome_extraction_circuit(qc_canopus_stab_pre_stim, qc_canopus_stab_log_to_phys_initial, qc_canopus_stab_log_to_phys_final, Code, p=config.p, circ_name='canopus_stab')
+    stim_qc_original_cx = transformer_syndrome_extraction_circuit(qc_cx_pre_stim, qc_log_to_phys_initial, qc_log_to_phys_final, Code, p=config.p, circ_name='original_qc')
 
     
     console.rule('Benchmark Logical Error Rate')
     
-    decode_circ_stim_list = {
-        "sabre_cx": stim_sabre_cx,
-        "sabre_stab": stim_sabre_stab,
-        "canopus_cx": stim_canopus_cx,
-        "canopus_stab": stim_canopus_stab
-    }
+    decode_circ_stim = stim_qc_original_cx
+    # decode_circ_stim = stim_sabre
+    # decode_circ_stim = stim_canopus_cx
+    # decode_circ_stim = stim_canopus_stab
     
-    for bench_circ in decode_circ_stim_list.keys():
-        decode_circ_stim = decode_circ_stim_list[bench_circ]
-        # decode_circ_stim = stim_sabre
-        # decode_circ_stim = stim_canopus_cx
-        # decode_circ_stim = stim_canopus_stab
-        
-        # sampler = stim_canopus_stab.compile_sampler()
-        sampler = decode_circ_stim.compile_detector_sampler()
-        syndrome_matrix, actual_observables = sampler.sample(shots=shots, separate_observables=True)
+    # sampler = stim_canopus_stab.compile_sampler()
+    sampler = decode_circ_stim.compile_detector_sampler()
+    syndrome_matrix, actual_observables = sampler.sample(shots=shots, separate_observables=True)
 
-        model = decode_circ_stim.detector_error_model()
-        matrices = beliefmatching.detector_error_model_to_check_matrices(model, allow_undecomposed_hyperedges=True)
-        K = matrices.observables_matrix.shape[0]
-        OUR_DECODER = BpLsdDecoder(
-            matrices.check_matrix,
-            channel_probs=matrices.priors,
-            max_iter=20,
-            lsd_order=14,
-            bp_method='product_sum',
-            lsd_method='lsd_cs',
-            schedule='serial'
-        )
-        
-        successful_decodes = 0
-        successful_decodes_logical = 0
-        
-        for i in tqdm(range(len(syndrome_matrix))):
-            corr = OUR_DECODER.decode(syndrome_matrix[i])
-            # print(i, actual_observables[i], (matrices.observables_matrix @ corr) % 2 == actual_observables[i])
-            if ((matrices.observables_matrix @ corr) % 2 == actual_observables[i]).all():
-                successful_decodes += 1
-                
-            # new method to calculate the logical accuracy
-            successful_decodes_logical += ((matrices.observables_matrix @ corr) % 2 == actual_observables[i]).sum()
-        
-        print(f"Benchmark Logical Error Rate: {bench_circ}")
-        print(f"Word Error Rate   : {shots - successful_decodes}/{shots} = {(shots - successful_decodes) / shots}")
-        print(f"Logical Error Rate: {(shots) * K - successful_decodes_logical}/{(shots) * K} = {((shots) * K - successful_decodes_logical) / ((shots) * K)}")
-        
-        # syndrome_matrix, actual_observables = sampler.sample(shots=100)  # shape: (100, num_measurements)
-        # print(syndrome_matrix)
-        # print(actual_observables)
-        # syndrome_matrix, actual_observables = sampler.sample(shots=100, separate_observables=True)
-        # print(syndrome_matrix, actual_observables)
+    model = decode_circ_stim.detector_error_model()
+    matrices = beliefmatching.detector_error_model_to_check_matrices(model, allow_undecomposed_hyperedges=True)
+    K = matrices.observables_matrix.shape[0]
+    OUR_DECODER = BpLsdDecoder(
+        matrices.check_matrix,
+        channel_probs=matrices.priors,
+        max_iter=20,
+        lsd_order=14,
+        bp_method='product_sum',
+        lsd_method='lsd_cs',
+        schedule='serial'
+    )
+    
+    successful_decodes = 0
+    successful_decodes_logical = 0
+    
+    for i in tqdm(range(len(syndrome_matrix))):
+        corr = OUR_DECODER.decode(syndrome_matrix[i])
+        # print(i, actual_observables[i], (matrices.observables_matrix @ corr) % 2 == actual_observables[i])
+        if ((matrices.observables_matrix @ corr) % 2 == actual_observables[i]).all():
+            successful_decodes += 1
+            
+        # new method to calculate the logical accuracy
+        successful_decodes_logical += ((matrices.observables_matrix @ corr) % 2 == actual_observables[i]).sum()
+    
+    print(f"Benchmark Logical Error Rate of Hardware-Agnostic Circuit: {config.code_type}")
+    print(f"Word Error Rate   : {shots - successful_decodes}/{shots} = {(shots - successful_decodes) / shots}")
+    print(f"Logical Error Rate: {(shots) * K - successful_decodes_logical}/{(shots) * K} = {((shots) * K - successful_decodes_logical) / ((shots) * K)}")
+    
+    # syndrome_matrix, actual_observables = sampler.sample(shots=100)  # shape: (100, num_measurements)
+    # print(syndrome_matrix)
+    # print(actual_observables)
+    # syndrome_matrix, actual_observables = sampler.sample(shots=100, separate_observables=True)
+    # print(syndrome_matrix, actual_observables)
