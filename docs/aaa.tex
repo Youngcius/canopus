@@ -1,0 +1,17 @@
+% --- Polished Version ---
+
+% Paragraph 1: High-level motivation and the specific problem for superconducting hardware.
+QLDPC codes are rapidly emerging as a cornerstone of experimental fault-tolerant quantum computing (FTQC) research, primarily because they promise far greater encoding efficiency than conventional surface codes~\cite{gottesman2013stabilizer, breuckmann2021quantum}. However, implementing QLDPC codes on physical hardware is a formidable challenge due to their characteristic requirement for frequent long-range interactions~\cite{panteleev2021degenerate}. While platforms like neutral-atom arrays~\cite{lin2025reuse, viszlai2023matching, pecorari2025high, xu2024constant} and trapped ions~\cite{bruzewicz2019trapped} can natively support these interactions, realizing QLDPC codes on superconducting processors with fixed, local connectivity is hampered by significant routing overheads~\cite{bravyi2024high, wang2025demonstration}.
+
+% Paragraph 2: Our key insight and how it contrasts with prior work.
+Our work demonstrates that the ISA-aware optimization engine of \canopus\ is crucial for mitigating this overhead. The key insight is to leverage a hybrid native gate set combining $\CX$ and $\iSWAP$ gates. Because stabilizer circuits are composed largely of $\CX$ gates, and $\CX$ and $\iSWAP$ are mirrored gates~\cite{cross2019validating}, there are many opportunities to "piggyback" a required $\SWAP$ operation onto a $\CX$ gate at no additional 2Q-gate cost. This systematic, automated approach contrasts with prior work such as \citet{zhou2024halma}, where a similar principle was applied manually to handle qubit defects in surface codes.
+
+% Paragraph 3: The experimental setup and methodology.
+To quantify this advantage, we perform an end-to-end evaluation and compare against \sabre, a state-of-the-art industrial routing method. We define two Instruction Set Architectures (ISAs):
+\begin{enumerate}
+    \item \textbf{\CXISA}: Uses only $\CX$ as the 2Q basis gate.
+    \item \textbf{\StabISA}: Uses both $\CX$ and $\iSWAP$ as basis gates, assuming they have an identical cost. This mirrors the physical reality of flux-tunable superconducting qubits where both gates can be native operations.
+\end{enumerate}
+We construct complete QLDPC memory circuits from~\cite{wang2025demonstration, panteleev2021degenerate} using the \code{qLDPC}~\cite{perlin2023qldpc}. After qubit routing, these stabilizer circuits are simulated under a circuit-level noise model~\cite{Dennis_2002, Acharya2022SuppressingQE} using \code{stim}~\cite{Gidney2021StimAF}, and error syndromes are decoded using the BPOSD decoder~\cite{panteleev2021degenerate, roffe2020decoding, hillmann2024localized} to determine the logical error rate.
+
+% Paragraph 4: The results and their implications.

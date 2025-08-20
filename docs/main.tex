@@ -21,7 +21,7 @@
 \usepackage{soul}
 \usepackage{quantikz}
 \usepackage{lipsum}
-
+\usepackage{pifont}
 
 
 % enable page numbers
@@ -75,6 +75,7 @@
 \newcommand{\iSWAPISA}{\code{iSWAP}}
 \newcommand{\SQiSWWithMirrorISA}{\code{SQiSW\_}}
 \newcommand{\CanISA}{\code{Can}}
+\newcommand{\StabISA}{\code{Stab}}
 
 \newcommand{\canopusGitHub}{\href{https://anonymous.4open.science/r/canopus-asplos2026-8B43}{Anynomous Github link}}
 
@@ -120,9 +121,9 @@
 \begin{abstract}
   Qubit mapping/routing is a critical compilation stage for both near-term and fault-tolerant quantum computers, yet existing scalable methods typically impose several times the routing overhead in terms of circuit depth or duration. This performance gap stems from a fundamental disconnect: compilers relies on the simplified routing model (e.g., three-$ \mathrm{CX} $-unrolled SWAP insertion), which fails to exploit the intrinsic properties of hardware-native quantum gates. 
 
-  Recent hardware breakthroughs have also enabled high-precision implementations of diverse instruction set architectures (ISAs) beyond standard $\mathrm{CX}$-based gates. Advanced ISAs such as $\mathrm{\sqrt{iSWAP}}$ and $\mathrm{ZZ}(\theta)$ offer superior circuit synthesis capabilities and inherent noise resilience. However, the absence of systematic compiler optimization strategies tailored to these advanced ISAs has prevented the community from leveraging their full capabilities.
+  Recent hardware breakthroughs have also enabled high-precision implementations of diverse instruction set architectures (ISAs) beyond standard $\mathrm{CX}$-based gates. Advanced ISAs such as $\mathrm{\sqrt{iSWAP}}$ and $\mathrm{ZZ}(\theta)$ basis gates offer superior circuit synthesis capabilities and inherent noise resilience. However, the absence of systematic compiler optimization strategies tailored to these advanced ISAs has prevented the community from leveraging their full capabilities.
 
-  To address this, we propose \canopus, a unified qubit mapping/routing framework across diverse quantum ISAs. Built upon the canonical representation of two-qubit gates, \canopus\ centers on qubit routing to perform deep co-optimization in an ISA-aware approach. \canopus\ leverages the two-qubit canonical representation and monodromy polytope theory to model the synthesis cost for more intelligent $ \mathrm{SWAP} $ search during routing. Commutation relations between two-qubit gates can be formalized through the canonical form in our findings, providing a generalized approach to commutative optimizations. Experiments show that \canopus\ consistently reduces routing overhead by 30\%-40\% compared to state-of-the-art methods across versatile ISAs and topologies. Our work also presents a coherent method for co-exploration of program patterns, quantum ISAs, and hardware topologies. We have for the first time demonstrated that advanced quantum ISAs can be efficiently utilized within a unified routing framework, paving the way for more effective co-design of quantum software and hardware.
+  To address this, we propose \canopus, a unified qubit mapping/routing framework across diverse quantum ISAs. Built upon the canonical representation of two-qubit gates, \canopus\ centers on qubit routing to perform deep co-optimization in an ISA-aware approach. \canopus\ leverages the two-qubit canonical representation and monodromy polytope theory to model the synthesis cost for more intelligent $ \mathrm{SWAP} $ search during routing. Commutation relations between two-qubit gates can also be formalized through the canonical form in our findings, providing a generalized approach to commutative optimizations. Experiments show that \canopus\ consistently reduces routing overhead by 30\%-40\% compared to state-of-the-art methods across versatile ISAs and topologies. Our work also presents a coherent method for co-exploration of program patterns, quantum ISAs, and hardware topologies. We have for the first time demonstrated that advanced quantum ISAs can be efficiently utilized within a unified routing framework, paving the way for more effective co-design of quantum software and hardware.
 
 \end{abstract}
 

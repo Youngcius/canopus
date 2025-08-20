@@ -1,69 +1,95 @@
 \section{Background}\label{sec:background}
 
+% \begin{figure}[tbp]
+%     \centering
+%     \begin{minipage}[t]{0.48\columnwidth}
+%         \centering
+%         \includegraphics[height=0.5\columnwidth,trim={0.2cm 0 0 0.2cm},clip]{figures/qubit_mapping.pdf}
+%         \caption{\small Mapping/routing to resolve physical-qubit topology constraints via $ \SWAP $ insertion.}
+%         \label{fig:qubit_mapping}
+%     \end{minipage}
+%     \hfill
+%     \begin{minipage}[t]{0.48\columnwidth}
+%         \centering
+%         \includegraphics[height=0.5\columnwidth,trim={0.5cm 0.5cm 0.5cm 0.5cm}]{figures/weyl_chamber.pdf}
+%         \caption{\small Geometric illustration of canonical gates confined to the Weyl chamber.}
+%         \label{fig:weyl_chamber}
+%     \end{minipage}
+% \end{figure}
 
 
+% execute logical, long-range 2Q gates on physical qubits, through finding a good initial logical-to-physical layout  and dynamically remapping qubits by inserting $ \SWAP $ gate to route qubit states to near-neighbor positions step by step.
 
-\begin{figure}[tbp]
-    \centering
-    \begin{minipage}[t]{0.48\columnwidth}
-        \centering
-        \includegraphics[height=0.5\columnwidth,trim={0.2cm 0 0 0.2cm},clip]{figures/qubit_mapping.pdf}
-        \caption{\small Mapping/routing to resolve physical-qubit topology constraints via $ \SWAP $ insertion.}
-        \label{fig:qubit_mapping}
-    \end{minipage}
-    \hfill
-    \begin{minipage}[t]{0.48\columnwidth}
-        \centering
-        \includegraphics[height=0.5\columnwidth,trim={0.5cm 0.5cm 0.5cm 0.5cm}]{figures/weyl_chamber.pdf}
-        \caption{\small Geometric illustration of canonical gates confined to the Weyl chamber.}
-        \label{fig:weyl_chamber}
-    \end{minipage}
-\end{figure}
-
-\footnote{For convenient visualization}
 
 
 \subsection{Qubit mapping/routing}
 
-Qubit placement and routing ... for connectivity-limited devices
+\begin{figure}[tbp]
+    \centering
+    \includegraphics[width=0.9\columnwidth,trim={0.3cm 0 0 0},clip]{figures/qubit_mapping.pdf}
+    \caption{Mapping/routing to resolve topology constraints via $ \SWAP $ insertion. With the initial mapping $ \{q_i: Q_i\} $ (upper right), $ g_3 $ is not hardware compliant. Both $\SWAP_{q_0, q_1}$ and $ \SWAP_{q_1,q_2} $ are sufficient to make $ g_3 $ executable.}
+    \label{fig:qubit_mapping}
+\end{figure}
+
+Real quantum hardware typically restrict 2Q gate executing on adjacent qubits whereas algorithms often assume arbitrary interactions. To execute quantum circuits on these topology-constrained hardware, logical qubits must be first mapped to physical qubit positions, namely the initial mapping. In most cases, even an optimal initial mapping cannot guarantee all logical 2Q gates are mapped on physically connected qubit pairs. The common solution is to dynamically alert logical-to-physical qubit mappings by inserting $ \SWAP $ gates, as a $ \SWAP $ gate exchanges state subspaces of two operand qubits, such that non-adjacent logical qubit states could be moved next to each other. Therefore, the qubit placement and routing problem takes a logical circuit and hardware coupling graph as the input, outputs a transformed circuit within which each 2Q gate is hardware compliant, with the initial and final logical-to-physical mappings. An example is depicted in \Cref{fig:qubit_mapping}.
 
 
-\subsection{Quantum gates realization in diverse ISAs}
+
+\subsection{Canonical description of 2Q gates}
+
+\begin{figure}[tbp]
+    \centering
+    \includegraphics[width=0.8\columnwidth]{figures/weyl_chamber.pdf}
+    \caption{Geometric illustration of canonical gates confined to the Weyl chamber.}
+    % \caption{Geometric illustration of canonical gates confined to the Weyl chamber. E.g., $ \CX/\mathrm{CZ}/\mathrm{CR} \sim \Can(1/2,0,0)$; $ \SQiSW \sim \Can(1/4, 1/4,0)$; $ \pSWAP(\pi/6,0,0)\sim\Can(1/2,1/2,1/3) $, $ \ECP\sim\Can(1/2,1/4,/1/4) $. $ \CX $ family: $ \Can(a,0,0) $; $ \iSWAP $ family: $ \Can(a,a,0) $, $ \pSWAP $ family: $ \Can(1/2, 1/2, c) $.}
+    \label{fig:weyl_chamber}
+\end{figure}
 
 
-
+Any 2Q gate can be represented by a 4x4 unitary matrix in $ \mathbf{SU}(4) $, with its canonical form defined as:
 \begin{definition}[Canonical gate]
     Any 2Q gate $ U \in \mathbf{SU}(4)$ can be expressed by the composition of its unique \emph{canonical} form
     \begin{align}
         \Can(a,b,c) := e^{-i \frac{\pi}{2}(a\, XX + b\, YY + c\, ZZ)},\, \frac{1}{2} \geq a \geq b \geq \lvert c \rvert
         % U = (A_0\otimes A_1) \Can(a,b,c) (B_0\otimes B_1) = (A_0\otimes A_1) e^{-i \frac{\pi}{2}(a\, XX + b\, YY + c\, ZZ)} (B_0\otimes B_1)
     \end{align}
-    sandwiched by local 1Q gates such that we call \emph{$ U $ is locally equivalent to the canonical form $ \Can(a,b,c) $}. %  $ U = (A_0\otimes A_1) \Can(a,b,c) (B_0\otimes B_1) $.
+    sandwiched by local 1Q gates such that we call $ U $ is locally equivalent to the canonical form $ \Can(a,b,c) $. %  $ U = (A_0\otimes A_1) \Can(a,b,c) (B_0\otimes B_1) $.
 \end{definition}
-
-
-Canonical representation is ubiquitous as an effective ... 
-
-\ZY{It is ubiquitously used in many quantum computing task ...}
-
-
-
-
-Although there are other conventions .... 
-This definition aligns with the \code{TK2} operation definition in \tket, ...
+The canonical coefficients $ (a,b,c) $ are confined to a tetrahedron known as \emph{Weyl chamber}, which provides a geometric representation of all local equivalence classes of 2Q gates~\cite{zhang2003geometric}. \Cref{fig:weyl_chamber} visualizes some common 2Q gates within the Weyl chamber. For instance:
+\begin{itemize}
+    % \item The $\CX$, $\CZ$, and $\mathrm{CR}$ gates are all locally equivalent to $\Can(1/2,0,0)$.
+    \item $\CX$, $\CZ$, and $\mathrm{CR}$ are all equivalent to $\Can(\frac{1}{2},0,0)$.
+    \item $ \CX $ family: $ \XX(\theta) \sim \YY(\theta) \sim \ZZ(\theta) \sim \Can(\frac{\theta}{\pi}, 0, 0) $.
+    \item Param-$\SWAP$ family: $\pSWAP(\theta)\sim\Can(\frac{1}{2}, \frac{1}{2}, \frac{1}{2}-\frac{\theta}{\pi})$.
+\end{itemize}
+In practice, the canonical form is acquired by the KAK decomposition~\cite{tucci2005introduction} and have been ubiquitously used in quantum computing~\cite{zhang2003geometric,bullock2003arbitrary,zulehner2019compiling,chen2024one}.
 
 
 
-\Cref{fig:weyl_chamber} .....
+
+
+% Although there are other conventions .... 
+% This definition aligns with the \code{TK2} operation definition in \tket, ...
+
+
+\subsection{Gate realization cost on hardware}
+
+The transformed circuits via qubit routing will ultimately be converted into basis gates for execution on hardware. Basis gate refers to those natively implemented and calibrated on physical platforms. It could be $ \CX $-equivalent ones like IBM's Cross-Resonance gate~\cite{rigetti2010fully} or $ \iSWAP $-family gates like $ \SQiSW $ and $ \iSWAP $ on flux-tunable transmons~\cite{huang2023quantum,arute2019quantum}. The realization cost of basis gates involves multiple aspects, including the benchmarked fidelity, gate duration, calibration efficiency, etc. For example, gates with shorter duration are more likely to achieve high fidelity, as qubit decoherence dominates the noise source; although some gate schemes can now natively implements more basis gates~\cite{chen2025efficient,nguyen2024programmable}, those requiring simple pulse control are more likely to be calibrated in high precision, such as the $ \iSWAP $ family on flux-tunable transmons.
+
+% ---specifically, the canonical coordinate is proportional to the coupling Hamiltonian coupling coefficients---are more likely to 
+
+
+% as the half evolution of $ \iSWAP $, $ \SQiSW $ gate is more easily to be implemented in higher fidelity 
+
+
+% 当考虑native gate的形式，就不能 。。。
+
+For those 2Q gates that are not natively implemented, they must be synthesized by native gates. Such that their realization cost is determined by what basis gates are required to synthesize them. For example, any 2Q gates can be minimally synthesized by 3 $ \CX $ gates, except for $ \Can(a,b,0) $ for which the required $ \CX $ count is 2. Conventionally, $ \SWAP $ is regarded as 3 times that of $ \CX $ realization cost, while it can also be synthesized by \dquote{1 $ \CX $ + 1 $ \iSWAP $} or \dquote{3 $ \SQiSW $} gates. The monodromy polytopes theory was proposed to determine the optimal synthesis cost for any 2Q gates given a specific set of basis gates, through analysis of invariants of canonical gates~\cite{peterson2020fixed}. By means of that, every unique \dquote{coverage} that a specific 2Q circuit template composed of selected basis gates (order does not matter) and arbitrary 1Q gates, corresponds to a polytope within the Weyl chamber. For instance, the coverage area for the circuit template with 3 $ \SQiSW $ involved is a small tetrahedron confined to $ \left\{1/2\geq a \geq b + \lvert c \rvert \right\} $~\cite{huang2023quantum}.
 
 
 
-\begin{align}
-    \pSWAP(\theta) \sim \Can(\frac{1}{2},\frac{1}{2},\frac{1}{2}-\frac{\theta}{\pi})
-\end{align}
 
 
+% Conventional iSWAP better than CZ ... however now CZ is dedicatedly implemented with better fidelity than iSWAP
 
-\begin{align}
-    \XX(\theta) = \Can(\frac{\theta}{\pi},0,0) \sim \YY(\theta) \sim \ZZ(\theta)
-\end{align}
+
