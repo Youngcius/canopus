@@ -31,7 +31,6 @@ class CanonicalGate(Gate):
 
     .. math::
         \mathrm{Can}(a, b, c) = e^{- i \frac{\pi}{2}(a XX + b YY + c ZZ)} where 0.5 ≥ a ≥ b ≥ |c|
-        
     """
 
     def __init__(

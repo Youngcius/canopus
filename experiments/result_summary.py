@@ -25,8 +25,6 @@ fnames = natsorted(os.listdir(benchmark_dpath))
 cx_synth_estimator = canopus.SynthCostEstimator('cx')
 zzphase_synth_estimator = canopus.SynthCostEstimator('zzphase')
 sqisw_synth_estimator = canopus.SynthCostEstimator('sqisw')
-can_xx_synth_estimator = canopus.SynthCostEstimator('can', 'xx')
-can_xy_synth_estimator = canopus.SynthCostEstimator('can', 'xy')
 zzphase_with_mirror_synth_estimator = canopus.SynthCostEstimator('zzphase_')
 sqisw_with_mirror_synth_estimator = canopus.SynthCostEstimator('sqisw_')
 het_synth_estimator = canopus.SynthCostEstimator('het')
@@ -35,11 +33,11 @@ output_dpath = os.path.join('./output/', args.compiler, args.topology)
 
 result_count = pd.DataFrame(columns=[
     'program', 'num_qubits',
-    'cx', 'zzphase', 'sqisw', 'zzphase_', 'sqisw_', 'het', 'can_xx', 'can_xy',
+    'cx', 'zzphase', 'sqisw', 'zzphase_', 'sqisw_', 'het',
 ])
 result_depth = pd.DataFrame(columns=[
     'program', 'num_qubits',
-    'cx', 'zzphase', 'sqisw', 'zzphase_', 'sqisw_', 'het', 'can_xx', 'can_xy',
+    'cx', 'zzphase', 'sqisw', 'zzphase_', 'sqisw_', 'het',
 ])
 
 # Read QASM files and summarize results
@@ -50,8 +48,6 @@ for fname in fnames:
         qc_cx = QuantumCircuit.from_qasm_file(os.path.join(output_dpath, 'cx', fname))
         qc_zzphase = QuantumCircuit.from_qasm_file(os.path.join(output_dpath, 'zzphase', fname))
         qc_sqisw = QuantumCircuit.from_qasm_file(os.path.join(output_dpath, 'sqisw', fname))
-        qc_can_xx = QuantumCircuit.from_qasm_file(os.path.join(output_dpath, 'can_xx', fname))
-        qc_can_xy = QuantumCircuit.from_qasm_file(os.path.join(output_dpath, 'can_xy', fname))
         qc_zzphase_ = QuantumCircuit.from_qasm_file(os.path.join(output_dpath, 'zzphase_', fname))
         qc_sqisw_ = QuantumCircuit.from_qasm_file(os.path.join(output_dpath, 'sqisw_', fname))
         qc_het = QuantumCircuit.from_qasm_file(os.path.join(output_dpath, 'het', fname))
@@ -62,8 +58,6 @@ for fname in fnames:
         qc_zzphase_ = QuantumCircuit.from_qasm_file(os.path.join(output_dpath, 'zzphase_', fname))
         qc_sqisw_ = QuantumCircuit.from_qasm_file(os.path.join(output_dpath, 'sqisw_', fname))
         qc_het = QuantumCircuit.from_qasm_file(os.path.join(output_dpath, 'het', fname))
-        qc_can_xx = qc_cx
-        qc_can_xy = qc_cx
     else:
         qc_cx = QuantumCircuit.from_qasm_file(os.path.join(output_dpath, fname))
         if 'cx' in qc_cx.count_ops().keys(): # if it is not rebased to canonical
@@ -73,8 +67,6 @@ for fname in fnames:
         qc_zzphase_ = qc_cx
         qc_sqisw_ = qc_cx
         qc_het = qc_cx
-        qc_can_xx = qc_cx
-        qc_can_xy = qc_cx
 
     count0, depth0 = cx_synth_estimator.eval_circuit_cost(qc)
     count_cx, depth_cx = cx_synth_estimator.eval_circuit_cost(qc_cx)
@@ -83,8 +75,6 @@ for fname in fnames:
     count_zzphase_, depth_zzphase_ = zzphase_with_mirror_synth_estimator.eval_circuit_cost(qc_zzphase_)
     count_sqisw_, depth_sqisw_ = sqisw_with_mirror_synth_estimator.eval_circuit_cost(qc_sqisw_)
     count_het, depth_het = het_synth_estimator.eval_circuit_cost(qc_het)
-    count_can_xx, depth_can_xx = can_xx_synth_estimator.eval_circuit_cost(qc_can_xx)
-    count_can_xy, depth_can_xy = can_xy_synth_estimator.eval_circuit_cost(qc_can_xy)
 
     result_count = pd.concat([result_count, pd.DataFrame({
         'program': fname.replace('.qasm', '').rsplit('_n', 1)[0],
@@ -95,8 +85,6 @@ for fname in fnames:
         'zzphase_': count_zzphase_ / count0,
         'sqisw_': count_sqisw_ / count0,
         'het': count_het / count0,
-        'can_xx': count_can_xx / count0,
-        'can_xy': count_can_xy / count0
     }, index=[0])], ignore_index=True)
 
 
@@ -109,8 +97,6 @@ for fname in fnames:
         'zzphase_': depth_zzphase_ / depth0,
         'sqisw_': depth_sqisw_ / depth0,
         'het': depth_het / depth0,
-        'can_xx': depth_can_xx / depth0,
-        'can_xy': depth_can_xy / depth0
     }, index=[0])], ignore_index=True)
 
 result_count.to_csv(os.path.join('./results', f'{args.compiler}-{args.topology}-count.csv'), index=False)

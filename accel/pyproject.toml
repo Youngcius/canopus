@@ -14,6 +14,6 @@ classifiers = [
 ]
 
 [tool.maturin]
-# 指定 Python 源码目录
+# Specify the Python source code directory
 python-source = "python"
-# maturin 会自动打包 python/ 目录下的内容
+# maturin will automatically package the content in the python/ directory

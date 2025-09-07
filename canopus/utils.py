@@ -197,6 +197,7 @@ def tket_to_qiskit(circ: pytket.Circuit) -> qiskit.QuantumCircuit:
             OpType.Tdg,
             OpType.TK1,
             OpType.U3,
+            OpType.CX,
             OpType.SWAP,
             OpType.TK2,
             OpType.ISWAP,
@@ -227,6 +228,8 @@ def tket_to_qiskit(circ: pytket.Circuit) -> qiskit.QuantumCircuit:
             elif cmd.op.type == OpType.U3:
                 theta, phi, lam = np.array(cmd.op.params) * pi
                 qc.u(theta, phi, lam, cmd.qubits[0].index[0])
+            elif cmd.op.type == OpType.CX:
+                qc.cx(cmd.qubits[0].index[0], cmd.qubits[1].index[0])
             elif cmd.op.type == OpType.SWAP:
                 q0, q1 = sort_two_ints(cmd.qubits[0].index[0], cmd.qubits[1].index[0])
                 qc.swap(q0, q1)
@@ -240,7 +243,6 @@ def tket_to_qiskit(circ: pytket.Circuit) -> qiskit.QuantumCircuit:
                 q0, q1 = sort_two_ints(cmd.qubits[0].index[0], cmd.qubits[1].index[0])
                 qc.append(CanonicalGate(*cmd.op.params), [q0, q1])
     else:
-        warnings.warn(f"Unsupported pytket circuit type: {set(gate_counts(circ).keys())} for native conversion")
         qc = qiskit.QuantumCircuit.from_qasm_str(pytket.qasm.circuit_to_qasm_str(circ))
 
     return qc
@@ -248,7 +250,6 @@ def tket_to_qiskit(circ: pytket.Circuit) -> qiskit.QuantumCircuit:
 
 def qiskit_to_tket(qc: qiskit.QuantumCircuit) -> pytket.Circuit:
     """The self-implemented conversion function holds the high-level semantics of some customized Gate instances"""
-    # return
     circ = pytket.Circuit(qc.num_qubits, qc.num_clbits)
     if set(qc.count_ops().keys()).issubset(
         {
@@ -736,22 +737,3 @@ Manhattan_Edges = [
 ]
 
 Manhattan = CouplingMap(Manhattan_Edges)
-
-
-# def to_pydag(qc: qiskit.QuantumCircuit) -> rx.PyDAG:
-#     """Convert a qiskit.QuantumCircuit to a rustworkx.PyDAG instance, for better complexity than qiskit built-in circuit_to_dag"""
-#     dag = rx.PyDAG(multigraph=False)
-#     ops = qc.data
-#     dag.add_nodes_from(ops)
-#     op_to_idx = {dag[idx] for idx in dag.node_indices()}
-#     while ops:
-#         op = ops.pop(0)
-#         qargs = set(op.qubits)
-#         for op_opt in ops:  # traverse the subsequent optional gates
-#             qargs_opt = set(op_opt.qubits)
-#             if dependent_qubits := qargs_opt & qargs:
-#                 dag.add_edge(op_to_idx[op], op_to_idx[op_opt], {'qubits': list(dependent_qubits)})
-#                 qargs -= qargs_opt
-#             if not qargs:
-#                 break
-#     return dag

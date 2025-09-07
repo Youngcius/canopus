@@ -1,6 +1,7 @@
 import pandas as pd
 from plotnine import *
 import warnings
+import os
 import matplotlib.pyplot as plt
 warnings.filterwarnings("ignore")
 
@@ -44,7 +45,7 @@ def plot_bubbleheatmap_chart(topology, isa, cost_metric='count', title=None, sav
     if title is None:
         title = f'{topology.title()} topology - {isa.upper()} ISA'
 
-    # 获取数据
+    # Obtain data
     programs = globals()[f'result_sabre_{topology}_{cost_metric}']['program']
     res_sabre = globals()[f'result_sabre_{topology}_{cost_metric}'][isa]
     res_toqm = globals()[f'result_toqm_{topology}_{cost_metric}'][isa]
@@ -56,7 +57,7 @@ def plot_bubbleheatmap_chart(topology, isa, cost_metric='count', title=None, sav
     if cost_metric == 'depth': # blue series
         colors=[ '#deebf7', '#c6dbef', '#9ecae1', '#6baed6', '#4292c6', '#2171b5', '#08519c', '#08306b']
 
-    # 创建数据框
+    # Create data frame
     df = pd.DataFrame({
         'Program': programs,
         'Sabre': res_sabre,
@@ -65,83 +66,88 @@ def plot_bubbleheatmap_chart(topology, isa, cost_metric='count', title=None, sav
         'Canopus': res_canopus
     })
 
-    # 转换为长格式
+    # Convert to long format
     df = df.melt(id_vars='Program', var_name='Compiler', value_name='Cost')
 
-    # 设置排序：程序按原顺序，编译器按指定顺序（从上到下）
+    # Set sorting: programs in original order, compilers in specified order (from top to bottom)
     df['Program'] = pd.Categorical(df['Program'], categories=programs, ordered=True)
-    # 为了让Sabre在顶部，需要反转y轴的顺序
+    # To put Sabre at the top, we need to reverse the order of the y-axis
     df['Compiler'] = pd.Categorical(df['Compiler'], 
                                 categories=['Canopus', 'BQSKit', 'TOQM', 'Sabre'], 
                                 ordered=True)
 
     p = (ggplot(df, aes(x='Program', y='Compiler')) +
         
-        # 添加背景矩阵网格 - 不使用任何aes映射
+        # Add background matrix grid - do not use any aes mapping
         geom_tile(alpha=0.03, color='lightgray', linetype='solid') +
         
-        # 气泡点 - 在这里指定size和fill映射
+        # Bubble points - specify size and fill mappings here
         geom_point(aes(size='Cost', fill='Cost'), shape='o', alpha=0.8) +
         
-        # 优美的配色方案
+        # Beautiful color scheme
         scale_fill_gradientn(colors=colors, name=f'Overhead',) +
 
         # scale_fill_gradient2(high="#377EB8", low="#E41A1C", name='Cost') +
         
-        # 调整气泡大小范围
+        # Adjust bubble size range
         scale_size_continuous(range=(4, 18), name=f'Overhead') +
         
-        # 标题和标签
+        # Title and labels
         labs(title=title, x='', y='') +
 
         guides(size=False) +
 
-        # 主题设置
+        # Theme settings
         theme_minimal() +
         theme(
-            # 旋转x轴标签
+            # Rotate x-axis labels
             axis_text_x=element_text(rotation=15, hjust=2, size=10),
             axis_text_y=element_text(size=11),
 
             text=element_text(family='Comic Sans MS'),
             
-            # 图例设置
+            # Legend settings
             legend_position='right',
             legend_title=element_text(size=11),
             legend_text=element_text(size=10),
 
-            # legend_key_height=0.8,  # 相对高度（0~1，1表示与图形等高）
-            # legend_margin=0,  # 去除边距
-            legend_box_spacing=0.008,  # 减少图例与主图的间距
-            # legend_key_width=20,  # 图例键的大小
-            legend_key_height=150,  # 图例键的高度
+            # legend_key_height=0.8,  # Relative height (0~1, 1 means as high as the graph)
+            # legend_margin=0,
+            legend_box_spacing=0.008,  # Reduce the spacing between legend and main graph
+            # legend_key_width=20,  # Legend key size
+            legend_key_height=150,  # Legend key height
 
     
             
-            # 标题设置
+            # Title settings
             plot_title=element_text(size=12, face='bold'),
             axis_title=element_text(size=12),
             
-            # 面板设置
+            # Panel settings
             panel_grid_major=element_blank(),
             panel_grid_minor=element_blank(),
             panel_border=element_rect(color='gray', fill='none'),
             
-            # 图形大小
+            # Graph size
             figure_size=(8, 3)
         ) +
         
-        # 确保显示所有刻度
+        # Ensure all ticks are displayed
         scale_x_discrete(expand=(0.02, 0.02)) +
         scale_y_discrete(expand=(0.02, 0.02))
     )
 
     if savefig:
-        p.save(f'../figures/{topology}_{isa}_{cost_metric}.pdf')
+        p.save(f'../figures/routing_overhead/{topology}_{isa}_{cost_metric}.pdf')
 
     return p
 
 if __name__ == '__main__':
+    if not os.path.exists('../figures/routing_overhead'):
+        os.makedirs('../figures/routing_overhead')
+
+    print('--------------------------------')
+    print('In terms of count cost ...')
     plot_bubbleheatmap_chart('chain', 'cx', cost_metric='count', savefig=True);
     plot_bubbleheatmap_chart('chain', 'zzphase', cost_metric='count', savefig=True);
     plot_bubbleheatmap_chart('chain', 'sqisw', cost_metric='count', savefig=True);
@@ -162,3 +168,28 @@ if __name__ == '__main__':
     plot_bubbleheatmap_chart('square', 'zzphase_', cost_metric='count', savefig=True);
     plot_bubbleheatmap_chart('square', 'sqisw_', cost_metric='count', savefig=True);
     plot_bubbleheatmap_chart('square', 'het', cost_metric='count', savefig=True);
+    print('Plotting completed')
+    
+    print('--------------------------------')
+    print('In terms of depth cost ...')
+    plot_bubbleheatmap_chart('chain', 'cx', cost_metric='depth', savefig=True);
+    plot_bubbleheatmap_chart('chain', 'zzphase', cost_metric='depth', savefig=True);
+    plot_bubbleheatmap_chart('chain', 'sqisw', cost_metric='depth', savefig=True);
+    plot_bubbleheatmap_chart('chain', 'zzphase_', cost_metric='depth', savefig=True);
+    plot_bubbleheatmap_chart('chain', 'sqisw_', cost_metric='depth', savefig=True);
+    plot_bubbleheatmap_chart('chain', 'het', cost_metric='depth', savefig=True);
+    
+    plot_bubbleheatmap_chart('hhex', 'cx', cost_metric='depth', savefig=True);
+    plot_bubbleheatmap_chart('hhex', 'zzphase', cost_metric='depth', savefig=True);
+    plot_bubbleheatmap_chart('hhex', 'sqisw', cost_metric='depth', savefig=True);
+    plot_bubbleheatmap_chart('hhex', 'zzphase_', cost_metric='depth', savefig=True);
+    plot_bubbleheatmap_chart('hhex', 'sqisw_', cost_metric='depth', savefig=True);
+    plot_bubbleheatmap_chart('hhex', 'het', cost_metric='depth', savefig=True);
+    
+    plot_bubbleheatmap_chart('square', 'cx', cost_metric='depth', savefig=True);
+    plot_bubbleheatmap_chart('square', 'zzphase', cost_metric='depth', savefig=True);
+    plot_bubbleheatmap_chart('square', 'sqisw', cost_metric='depth', savefig=True);
+    plot_bubbleheatmap_chart('square', 'zzphase_', cost_metric='depth', savefig=True);
+    plot_bubbleheatmap_chart('square', 'sqisw_', cost_metric='depth', savefig=True);
+    plot_bubbleheatmap_chart('square', 'het', cost_metric='depth', savefig=True);
+    print('Plotting completed')

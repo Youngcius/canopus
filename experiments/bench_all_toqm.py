@@ -35,8 +35,9 @@ fnames = [os.path.join(benchmark_dpath, fname) for fname in natsorted(os.listdir
           fname.endswith('.qasm')]
 
 for fname in fnames:
-    if os.path.exists(os.path.join(output_dpath, os.path.basename(fname))):
-        console.print(f"Skipping {os.path.join(output_dpath, os.path.basename(fname))}, already processed.")
+    output_fname = os.path.join(output_dpath, os.path.basename(fname))
+    if os.path.exists(output_fname):
+        console.print(f"Skipping {output_fname}, already processed.")
         continue
 
     console.rule(f"Processing {fname}")
@@ -54,8 +55,6 @@ for fname in fnames:
         coupling_map = canopus.utils.gene_square_coupling_map(qc.num_qubits)
     else:
         raise ValueError(f"Unsupported topology: {args.topology}")
-    
-    output_fname = os.path.join(output_dpath, os.path.basename(fname))
 
     # Try V2fLayout first
     from qiskit.converters import circuit_to_dag
@@ -67,7 +66,7 @@ for fname in fnames:
         continue
 
     # Call the TOQM executable
-    os.system(f'./mapper {fname} {coupling_file} {TOQM_FLAGS} > {output_fname}')
+    os.system(f'./toqm_mapper {fname} {coupling_file} {TOQM_FLAGS} > {output_fname}')
     # Replace 'swp ' with 'swap ' in the output file
     with open(output_fname, 'r') as f:
         content = f.read()

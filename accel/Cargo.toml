@@ -1,14 +1,20 @@
 [package]
+# The name of the package
 name = "accel_utils"
 version = "0.1.0"
 edition = "2024"
 
 [lib]
+# The name of the library
 name = "accel_utils"
-crate-type = ["cdylib"]  # 编译为动态库
+crate-type = ["cdylib"]  # Compile to dynamic library
 
 [dependencies]
+# PyO3 is a library for writing Python extensions in Rust
 pyo3 = { version = "0.25.1", features = ["extension-module"] }
+# NumPy is a library for scientific computing
 numpy = "0.25.0"
+# ndarray is a library for numerical computing
 ndarray = "0.16.1"
+# num-complex is a library for complex numbers
 num-complex = "0.4"

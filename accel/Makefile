@@ -2,28 +2,28 @@
 
 .PHONY: build install clean test
 
-# 构建开发版本
+# Build development version
 build:
 	maturin develop --release
 	@./post_build.sh
 
-# 构建生产版本
+# Build production version
 install:
-	maturin build --release
+	maturin build --release --interpreter $(shell which python)
 	pip install target/wheels/*.whl --force-reinstall
 
-# 清理构建文件
+# Clean build artifacts
 clean:
 	cargo clean
 	rm -rf target/
 	rm -rf build/
 	rm -rf dist/
 
-# 运行测试
+# Run tests
 test: build
 	cd .. && python test_accel_utils.py
 
-# 显示帮助
+# Show help
 help:
 	@echo "Available targets:"
 	@echo "  build    - Build development version with type hints"

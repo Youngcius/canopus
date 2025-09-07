@@ -5,12 +5,9 @@ import numpy as np
 import pytket
 import pytket.passes
 import qiskit
-import qiskit.quantum_info as qi
-from accel_utils import canonical_unitary, check_weyl_coord, fuzzy_equal, fuzzy_less
-from pytket import circuit_library
+from typing import List
+from accel_utils import check_weyl_coord, fuzzy_equal, fuzzy_less
 from pytket.circuit import OpType
-from pytket.extensions.cirq import cirq_to_tk
-from pytket.utils.stats import gate_counts
 from qiskit import QuantumCircuit, QuantumRegister
 from qiskit.circuit.library import (
     CXGate,
@@ -32,7 +29,6 @@ from qiskit.converters import circuit_to_dag
 from qiskit.dagcircuit import DAGCircuit
 from qiskit.synthesis import TwoQubitWeylDecomposition, XXDecomposer
 from qiskit.transpiler import PassManager, TransformationPass, passes
-from qiskit.transpiler.passes import Optimize1qGatesDecomposition
 
 from canopus.backends import ISAType
 from canopus.basics import CanonicalGate, X, Y, Z, half_pi, pi
@@ -41,8 +37,19 @@ from canopus.utils import qiskit_to_tket, tket_to_qiskit
 xx_decomposer = XXDecomposer(euler_basis="U3")
 CirqQubitPair = cirq.LineQubit.range(2)
 
+from qiskit.circuit import Gate
+from monodromy.coverage import coverage_lookup_cost, gates_to_coverage
+
+def rebase_to_custom(qc: QuantumCircuit, gate_set: List[Gate], costs: List[float], names: List[str]) -> QuantumCircuit:
+    """Rebase the circuit to a customized gate set"""
+    cov = gates_to_coverage(*gate_set, costs=costs, names=names)
+
+    # TODO
+    raise NotImplementedError("Rebase to custom gate set is not implemented yet")
+
 
 def rebase_to_canonical(qc: QuantumCircuit) -> QuantumCircuit:
+    """Rebase the circuit to gate set {Can, U3}"""
     return PassManager(
         [
             passes.Collect2qBlocks(),
@@ -55,6 +62,7 @@ def rebase_to_canonical(qc: QuantumCircuit) -> QuantumCircuit:
 
 
 def normalize_canonical(qc: QuantumCircuit) -> QuantumCircuit:
+    """Normalize canonical coordinate to be within {0.5 ≥ a ≥ b ≥ |c|}"""
     return PassManager(
         [
             CanonicalSynthesis(),
@@ -64,6 +72,7 @@ def normalize_canonical(qc: QuantumCircuit) -> QuantumCircuit:
 
 
 def rebase_to_sqisw(qc: QuantumCircuit) -> QuantumCircuit:
+    """Rebase the circuit to gate set {√iSWAP, U3}"""
     return PassManager(
         [
             passes.Collect2qBlocks(),
@@ -75,6 +84,7 @@ def rebase_to_sqisw(qc: QuantumCircuit) -> QuantumCircuit:
 
 
 def rebase_to_zzphase(qc: QuantumCircuit) -> QuantumCircuit:
+    """Rebase the circuit to gate set {ZZ(π/6), ZZ(π/4), ZZ(π/2), U3}"""
     return PassManager(
         [
             passes.Collect2qBlocks(),
@@ -199,6 +209,7 @@ class ZZPhaseSynthesis(TransformationPass):
 def logical_optimize(
     circ: Union[pytket.Circuit, qiskit.QuantumCircuit],
 ) -> Union[pytket.Circuit, qiskit.QuantumCircuit]:
+    """Logical-level optimization by TKet. Returned circuit is in {CX, U3}"""
     if isinstance(circ, pytket.Circuit):
         return _logical_optimize(circ)
     elif isinstance(circ, qiskit.QuantumCircuit):
@@ -208,38 +219,16 @@ def logical_optimize(
 
 
 def _logical_optimize(circ: pytket.Circuit) -> pytket.Circuit:
-    """If optimize is False, some successive TK2 gates might not be coalesced; So we set it to True by default."""
     circ = circ.copy()
     pytket.passes.DecomposeBoxes().apply(circ)
     pytket.passes.FullPeepholeOptimise(allow_swaps=False).apply(circ)
     return circ
 
 
-def rebase_to_sqisw_by_tket(
-    circ: Union[pytket.Circuit, qiskit.QuantumCircuit],
-) -> Union[pytket.Circuit, qiskit.QuantumCircuit]:
-    if isinstance(circ, pytket.Circuit):
-        return _rebase_to_sqisw(circ)
-    elif isinstance(circ, qiskit.QuantumCircuit):
-        return tket_to_qiskit(_rebase_to_sqisw(qiskit_to_tket(circ)))
-    else:
-        raise TypeError(f"Unsupported circuit type: {type(circ)}. Expected pytket.Circuit or qiskit.QuantumCircuit.")
-
-
-def rebase_to_zzphase_by_tket(
-    circ: Union[pytket.Circuit, qiskit.QuantumCircuit],
-) -> Union[pytket.Circuit, qiskit.QuantumCircuit]:
-    if isinstance(circ, pytket.Circuit):
-        return _rebase_to_zzphase(circ)
-    elif isinstance(circ, qiskit.QuantumCircuit):
-        return tket_to_qiskit(_rebase_to_zzphase(qiskit_to_tket(circ)))
-    else:
-        raise TypeError(f"Unsupported circuit type: {type(circ)}. Expected pytket.Circuit or qiskit.QuantumCircuit.")
-
-
 def rebase_to_tk2(
     circ: Union[pytket.Circuit, qiskit.QuantumCircuit], optimize: bool = True
 ) -> Union[pytket.Circuit, qiskit.QuantumCircuit]:
+    """Logical-level optimization by TKet and rebase the circuit to {TK2, U3}"""
     if isinstance(circ, pytket.Circuit):
         return _rebase_to_tk2(circ, optimize)
     elif isinstance(circ, qiskit.QuantumCircuit):
@@ -248,56 +237,15 @@ def rebase_to_tk2(
         raise TypeError(f"Unsupported circuit type: {type(circ)}. Expected pytket.Circuit or qiskit.QuantumCircuit.")
 
 
-def _rebase_to_sqisw(circ: pytket.Circuit) -> pytket.Circuit:
-    assert set(gate_counts(circ).keys()).issubset({OpType.TK1, OpType.TK2}), "Unsupported gate types {}".format(
-        gate_counts(circ).keys()
-    )
-    circ = circ.copy()
-    pytket.passes.RebaseCustom(
-        {OpType.ISWAP, OpType.TK1}, tk2_replacement=_tk2_to_sqisw, tk1_replacement=circuit_library.TK1_to_U3
-    ).apply(circ)
-    pytket.passes.SquashTK1().apply(circ)
-    return circ
-
-
-def _rebase_to_zzphase(circ: pytket.Circuit) -> pytket.Circuit:
-    assert set(gate_counts(circ).keys()).issubset({OpType.TK1, OpType.TK2}), "Unsupported gate types {}".format(
-        gate_counts(circ).keys()
-    )
-    circ = circ.copy()
-    pytket.passes.RebaseCustom(
-        {OpType.ZZPhase, OpType.TK1}, tk2_replacement=_tk2_to_zzphase, tk1_replacement=circuit_library.TK1_to_U3
-    ).apply(circ)
-    pytket.passes.SquashTK1().apply(circ)
-    return circ
-
-
 def _rebase_to_tk2(circ: pytket.Circuit, optimize: bool = True) -> pytket.Circuit:
     """If optimize is False, some successive TK2 gates might not be coalesced; So we set it to True by default."""
     circ = circ.copy()
     pytket.passes.DecomposeBoxes().apply(circ)
     if optimize:
         pytket.passes.FullPeepholeOptimise(allow_swaps=False, target_2qb_gate=OpType.TK2).apply(circ)
-    pytket.passes.SynthesiseTK().apply(circ)  # or, else: ... SynthesiseTK().apply(circ) ???
+    pytket.passes.SynthesiseTK().apply(circ)  # or, else: ... SynthesiseTK().apply(circ)
     # pytket.passes.NormaliseTK2().apply(circ) # This function might result in other 1Q gates (e.g., X, Z) other than U3
     return circ
-
-
-def _tk2_to_sqisw(a, b, c) -> pytket.Circuit:
-    u = canonical_unitary(a, b, c)
-    ops = cirq.two_qubit_matrix_to_sqrt_iswap_operations(*CirqQubitPair, u, atol=1e-12)
-    circ = cirq_to_tk(cirq.Circuit(ops))
-    return circ
-
-
-def _tk2_to_zzphase(a, b, c) -> pytket.Circuit:
-    """Optimal decomposition of TK2 gate into [ZZPhase(1/3), ZZPhase(1/2), ZZPhase(1)]."""
-    qc = xx_decomposer(
-        qi.Operator(canonical_unitary(a, b, c)).reverse_qargs(),
-        # basis_fidelity=0.995, approximate=True,
-        approximate=False,
-    )
-    return qiskit_to_tket(qc)
 
 
 def synthesize_clifford_circuit(qc: QuantumCircuit, isa="cx") -> QuantumCircuit:
@@ -392,7 +340,7 @@ class CliffordSynthesis(TransformationPass):
                 else:
                     raise ValueError("Only support Clifford2Q canonical gates")
 
-        dag = Optimize1qGatesDecomposition(basis=["rz", "sx"]).run(dag)
+        dag = passes.Optimize1qGatesDecomposition(basis=["rz", "sx"]).run(dag)
         dag = self.replace_clifford_rz_with_s_z(dag)
         return dag
 

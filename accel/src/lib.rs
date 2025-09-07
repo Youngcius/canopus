@@ -182,7 +182,7 @@ fn sort_two_objs(
             let val_a = key_fn.call1((&a,))?;
             let val_b = key_fn.call1((&b,))?;
 
-            let should_swap: bool = val_b.lt(&val_a)?; // 等价于 `val_b < val_a`
+            let should_swap: bool = val_b.lt(&val_a)?; // Equivalent to `val_b < val_a`
 
             if should_swap {
                 Ok((b.unbind(), a.unbind()))
@@ -191,7 +191,7 @@ fn sort_two_objs(
             }
         }
         None => {
-            let should_swap: bool = b.lt(&a)?; // 等价于 `b < a`
+            let should_swap: bool = b.lt(&a)?; // Equivalent to `b < a`
 
             if should_swap {
                 Ok((b.unbind(), a.unbind()))
@@ -275,7 +275,7 @@ fn canonical_unitary(py: Python, a: f64, b: f64, c: f64) -> PyResult<PyObject> {
     Ok(matrix.into_pyarray(py).into())
 }
 
-/// Python 模块入口
+/// Python module entry
 #[pymodule]
 fn accel_utils(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(fuzzy_equal, m)?)?;

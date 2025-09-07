@@ -31,8 +31,9 @@ fnames = [os.path.join(benchmark_dpath, fname) for fname in natsorted(os.listdir
 
 cx_synth_cost_estimator = canopus.SynthCostEstimator('cx')
 for fname in fnames:
-    if os.path.exists(os.path.join(output_dpath, os.path.basename(fname))):
-        console.print(f"Skipping {os.path.join(output_dpath, os.path.basename(fname))}, already processed.")
+    output_fname = os.path.join(output_dpath, os.path.basename(fname))
+    if os.path.exists(output_fname):
+        console.print(f"Skipping {output_fname}, already processed.")
         continue
 
     console.rule(f"Processing {fname}")
@@ -52,13 +53,15 @@ for fname in fnames:
     logic_circ_cost = cx_synth_cost_estimator.eval_circuit_cost(qc)
     print_circ_info(qc, title='Logical-level optimization')
     console.print(f"Gate counts: {qc.count_ops()}")
-    console.print(f"Circuit cost: {logic_circ_cost:.2f}")
+    console.print(f"Circuit cost: {logic_circ_cost}")
 
     backend = canopus.CanopusBackend(coupling_map)
     qc_sabre = PassManager(canopus.SabreMapping(backend)).run(qc)
     sabre_circ_cost = cx_synth_cost_estimator.eval_circuit_cost(qc_sabre)
     print_circ_info(qc_sabre, title='Mapped circuit')
     console.print(f"Gate counts: {qc_sabre.count_ops()}")
-    console.print(f"Circuit cost: {sabre_circ_cost:.2f}; Routing overhead: {sabre_circ_cost / logic_circ_cost:.2f}")
-    qasm2.dump(qc_sabre, os.path.join(output_dpath, os.path.basename(fname)))
-    console.print(f"Saved to {os.path.join(output_dpath, os.path.basename(fname))}")
+    console.print(f"Circuit cost: {sabre_circ_cost}")
+    console.print(f"Routing overhead (Count): {sabre_circ_cost[0] / logic_circ_cost[0]:.2f}; Routing Overhead (Depth): {sabre_circ_cost[1] / logic_circ_cost[1]:.2f}")
+    
+    qasm2.dump(qc_sabre, output_fname)
+    console.print(f"Saved to {output_fname}")

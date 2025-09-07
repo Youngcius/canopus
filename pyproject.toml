@@ -24,13 +24,13 @@ name = "canopus"
 version = "0.1.0"
 
 # A short, one-line description of the project.
-description = "Canopus (Canonical Optimized Placement Utility Suite) is a qubit mapping/routing framework tailored to advanced quantum ISAs."
+description = "Canopus (Canonical Optimized Placement Utility Suite) is an ISA-aware qubit mapping/routing framework tailored to diverse quantum ISAs."
 
 # Path to your README file. Its content will be used as the project's homepage on PyPI.
 readme = "README.md"
 
 # The Python versions your project supports.
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 
 # The project's license. Using an SPDX identifier is recommended.
 # Common choices: "MIT", "Apache-2.0", "GPL-3.0-or-later"
