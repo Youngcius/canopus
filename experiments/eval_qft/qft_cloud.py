@@ -17,7 +17,7 @@ from rich.console import Console
 console = Console()
 
 
-TOKEN = 'arS6k_KG_M4QxzK6oDnAajNNBrneH8XTVJZXiMYSv4lk' # ! My API
+TOKEN = ... # ! My API
 
 service = QiskitRuntimeService(
     channel="ibm_cloud",

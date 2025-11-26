@@ -199,3 +199,4 @@ mirror-gates/
 toqm/
 *.tmp*
 docs/
+logs/
