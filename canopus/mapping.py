@@ -386,18 +386,22 @@ class CanopusMapping(BidirectionalMapping):
         swap_candidates = list(swap_candidates)
 
         extended_set = []
-        tmp_front_layer = front_layer.copy()
-        tmp_required_predecessors = required_predecessors.copy()
-        while len(extended_set) < EXT_SIZE and tmp_front_layer:
-            new_tmp_front_layer = []
-            for node in tmp_front_layer:
+        _front_layer = front_layer.copy()
+        _required_predecessors = required_predecessors.copy()
+        while len(extended_set) < EXT_SIZE and _front_layer:
+            tmp_front_layer = []
+            for node in _front_layer:
+                if node.num_qubits == 2:
+                    extended_set.append(node)
+                    if len(extended_set) >= EXT_SIZE:
+                        break
                 for successor in dag.op_successors(node):
-                    tmp_required_predecessors[successor] -= 1
-                    if tmp_required_predecessors[successor] == 0:
-                        new_tmp_front_layer.append(successor)
-                        if node.num_qubits == 2:
-                            extended_set.append(node)
-            tmp_front_layer = new_tmp_front_layer
+                    _required_predecessors[successor] -= 1
+                    if _required_predecessors[successor] == 0:
+                        tmp_front_layer.append(successor)
+            if len(extended_set) >= EXT_SIZE:
+                break
+            _front_layer = tmp_front_layer
 
         duration = max(wire_durations.values())
         avg_dist_front = self._avg_dist(front_layer, layout)
@@ -588,18 +592,22 @@ class SabreMapping(BidirectionalMapping):
         swap_candidates = list(swap_candidates)
 
         extended_set = []
-        tmp_front_layer = front_layer.copy()
-        tmp_required_predecessors = required_predecessors.copy()
-        while len(extended_set) < EXT_SIZE and tmp_front_layer:
-            new_tmp_front_layer = []
-            for node in tmp_front_layer:
+        _front_layer = front_layer.copy()
+        _required_predecessors = required_predecessors.copy()
+        while len(extended_set) < EXT_SIZE and _front_layer:
+            tmp_front_layer = []
+            for node in _front_layer:
+                if node.num_qubits == 2:
+                    extended_set.append(node)
+                    if len(extended_set) >= EXT_SIZE:
+                        break
                 for successor in dag.op_successors(node):
-                    tmp_required_predecessors[successor] -= 1
-                    if tmp_required_predecessors[successor] == 0:
-                        new_tmp_front_layer.append(successor)
-                        if node.num_qubits == 2:
-                            extended_set.append(node)
-            tmp_front_layer = new_tmp_front_layer
+                    _required_predecessors[successor] -= 1
+                    if _required_predecessors[successor] == 0:
+                        tmp_front_layer.append(successor)
+            if len(extended_set) >= EXT_SIZE:
+                break
+            _front_layer = tmp_front_layer
 
         costs = np.array([self._heuristic_cost(front_layer, extended_set, layout, swap) for swap in swap_candidates])
         min_cost = np.min(costs)
