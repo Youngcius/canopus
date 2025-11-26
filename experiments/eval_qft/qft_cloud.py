@@ -17,14 +17,13 @@ from rich.console import Console
 console = Console()
 
 
-TOKEN = ... # ! My API
+TOKEN = 'arS6k_KG_M4QxzK6oDnAajNNBrneH8XTVJZXiMYSv4lk' # ! My API
 
 service = QiskitRuntimeService(
     channel="ibm_cloud",
     token = TOKEN
 )
 
-# 验证连接是否成功
 print("Available backends:")
 backends = service.backends()
 for backend in backends:
@@ -111,20 +110,20 @@ if __name__ == '__main__':
         canopus.utils.print_circ_info(qft_canopus_zzphase, title='qft_canopus_zzphase')
         canopus.utils.print_circ_info(qft_canopus_zzphase_submitted, title='qft_canopus_zzphase_submitted')
 
-        shots = max(2**n * 10, 4096)
-        console.print('SHOTS={}'.format(shots))
-        job_qft_qiskit_cx = submit_job(qft_qiskit_cx_submitted, torino_cx, shots)
-        job_qft_canopus_cx = submit_job(qft_canopus_cx_submitted, torino_cx, shots)
-        job_qft_canopus_zzphase = submit_job(qft_canopus_zzphase_submitted, torino_zzphase, shots)
+    #     shots = max(2**n * 10, 4096)
+    #     console.print('SHOTS={}'.format(shots))
+    #     job_qft_qiskit_cx = submit_job(qft_qiskit_cx_submitted, torino_cx, shots)
+    #     job_qft_canopus_cx = submit_job(qft_canopus_cx_submitted, torino_cx, shots)
+    #     job_qft_canopus_zzphase = submit_job(qft_canopus_zzphase_submitted, torino_zzphase, shots)
 
 
-        job_ids[n] = {
-            'qiskit_cx': job_qft_qiskit_cx.job_id(),
-            'canopus_cx': job_qft_canopus_cx.job_id(),
-            'canopus_zzphase': job_qft_canopus_zzphase.job_id()
-        }
+    #     job_ids[n] = {
+    #         'qiskit_cx': job_qft_qiskit_cx.job_id(),
+    #         'canopus_cx': job_qft_canopus_cx.job_id(),
+    #         'canopus_zzphase': job_qft_canopus_zzphase.job_id()
+    #     }
 
-    json.dump(job_ids, open('qft_cloud_job_ids.json', 'w'), indent=2)
+    # json.dump(job_ids, open('qft_cloud_job_ids.json', 'w'), indent=2)
 
 
 
