@@ -39,9 +39,9 @@ cx_synth_cost_estimator = canopus.SynthCostEstimator('cx')
 
 for fname in fnames:
     output_fname = os.path.join(output_dpath, os.path.basename(fname))
-    if os.path.exists(output_fname):
-        console.print(f"Skipping {output_fname}, already processed.")
-        continue
+    # if os.path.exists(output_fname):
+    #     console.print(f"Skipping {output_fname}, already processed.")
+    #     continue
 
     console.rule(f"Processing {fname}")
 

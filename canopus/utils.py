@@ -573,35 +573,68 @@ def gene_hhex_coupling_map(size):
 
 def crop_coupling_map(coupling_map, crop_size, seed=None):
     """This function wille be computationally expensive for if the coupling_map.size() is much larger than crop_size"""
-    assert crop_size <= coupling_map.size(), "Crop size must be less than or equal to the coupling map size."
-    np.random.seed(seed)
+    if crop_size > coupling_map.size():
+        raise ValueError("Crop size must be less than or equal to the coupling map size.")
+    rng = np.random.default_rng(seed)
     node_list = rx.connected_subgraphs(coupling_map.graph.to_undirected(), crop_size)
     subgraphs = [coupling_map.graph.subgraph(nodes) for nodes in node_list]
     edge_numbers = [g.num_edges() for g in subgraphs]
-    physical_qubits = node_list[edge_numbers.index(max(edge_numbers))]
-
-    # physical_qubits = connected_subgraphs[np.random.choice(len(connected_subgraphs))]
-    # while True:
-    #     print('...')
-    #     np.random.shuffle(all_physical_qubits)
-    #     physical_qubits = all_physical_qubits[:crop_size]
-    #     if rx.is_connected(coupling_map.graph.to_undirected().subgraph(physical_qubits)):
-    #         print('Found a connected subgraph with size:', crop_size)
-    #         break
+    max_edges = max(edge_numbers)
+    physical_qubits_candidates = [nodes for nodes, edge_count in zip(node_list, edge_numbers) if edge_count == max_edges]
+    if len(physical_qubits_candidates) == 1:
+        physical_qubits = physical_qubits_candidates[0]
+    else:
+        physical_qubits = physical_qubits_candidates[rng.integers(len(physical_qubits_candidates))]
     return CouplingMap(coupling_map.graph.subgraph(physical_qubits).edge_list())
 
 
+# def generate_random_layout(qreg, coupling_map, seed=None) -> Layout:
+#     assert qreg.size == coupling_map.size(), "Qreg and coupling map size must be equal"
+#     rng = np.random.default_rng(seed)
+#     physical_qubits = list(coupling_map.physical_qubits)
+#     rng.shuffle(physical_qubits)
+#     # return {logical_qubits[i]: p for i, p in enumerate(physical_qubits)}
+#     return Layout.from_intlist(physical_qubits, qreg)
+
 def generate_random_layout(qreg, coupling_map, seed=None) -> Layout:
-    assert qreg.size == coupling_map.size(), "Qreg and coupling map size must be equal"
-    np.random.seed(seed)
-    physical_qubits = list(coupling_map.physical_qubits)
-    np.random.shuffle(physical_qubits)
-    # return {logical_qubits[i]: p for i, p in enumerate(physical_qubits)}
+    rng = np.random.default_rng(seed)
+    start_node = rng.integers(0, coupling_map.size())
+    physical_qubits = _pick_connected_nodes(coupling_map.graph.to_undirected(), start_node, qreg.size)
+    rng.shuffle(physical_qubits)
     return Layout.from_intlist(physical_qubits, qreg)
 
 
 def generate_trivial_layout(qreg, coupling_map) -> Layout:
-    return Layout.from_intlist(list(coupling_map.physical_qubits), qreg)
+    # return Layout.from_intlist(list(coupling_map.physical_qubits), qreg)
+    physical_qubits = _pick_connected_nodes(coupling_map.graph.to_undirected(), 0, qreg.size)
+    return Layout.from_intlist(physical_qubits, qreg)
+
+
+def _pick_connected_nodes(g: rx.PyGraph, start_node: int, k: int) -> list[int]:
+    """Pick k connected nodes from the coupling graph (rustworkx.PyGraph instance)."""
+    if k <= 0:
+        return []
+    elif k > g.num_nodes():
+        raise ValueError("k must be less than or equal to the number of nodes in the graph.")
+    elif k == g.num_nodes():
+        return list(range(g.num_nodes()))
+    else:
+        class _KNodeCollector(rx.visit.BSFVisitor):
+            def __init__(self, k: int):
+                super().__init__()
+                self.k = k
+                self.nodes = []  # node indices
+
+            def discover_vertex(self, v):
+                self.nodes.append(v)
+                if len(self.nodes) >= self.k:
+                    raise rx.visit.StopSearch
+        
+        collector = _KNodeCollector(k)
+        rx.graph_bfs_search(g, [start_node], collector)
+        if len(collector.nodes) < k:
+            raise ValueError("The graph is not connected enough to collect k nodes.")
+        return collector.nodes
 
 
 def gate_from_qiskit_to_bqskit(g: Gate):
