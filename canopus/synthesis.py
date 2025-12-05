@@ -57,15 +57,15 @@ def rebase_to_custom(qc: QuantumCircuit,
 class CustomSynthesis(TransformationPass):
     def __init__(self, gate_set: list[Gate]=None, costs: list[float]=None, names: list[str]=None, coverage: list[CircuitPolytope]=None, seed: int=None):
         super().__init__()
-        if coverage:
-            self.coverage = coverage
-        else:
-            self._compute_coverage()
         self._isa_config= {name: gate for name, gate in zip(names, gate_set, strict=True)}
         self._isa_config_bqskit = {name: gate_from_qiskit_to_bqskit(gate) for name, gate in zip(names, gate_set, strict=True)}
         self._costs = costs
         self.seed = seed if seed is not None else 2025
-        
+        if coverage:
+            self.coverage = coverage
+        else:
+            self._compute_coverage()
+ 
     def _compute_coverage(self):
         self.coverage = gates_to_coverage(*self._isa_config.values(), costs=self._costs, names=self._isa_config.keys())
     
