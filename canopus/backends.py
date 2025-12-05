@@ -8,6 +8,7 @@ from accel_utils import (
     sort_two_ints,
     synth_cost_by_cx,
     synth_cost_by_sqisw,
+    synth_cost_by_b
 )
 from qiskit import QuantumCircuit
 from qiskit.converters import circuit_to_dag
@@ -36,7 +37,7 @@ class ISAType(Enum):
     SQiSWWithMirror = "sqisw_"
     HetISA = "het"  # CX-family and iSWAP-family heterogeneous ISA
     StabilizerISA = "stab"
-
+    B = 'b'
 
 class CouplingType(Enum):
     XX = "xx"
@@ -110,6 +111,8 @@ class SynthCostEstimator:
             cost = synth_cost_by_zzphase(a, b, c)
         elif self.isa_type == ISAType.SQiSW:
             cost = synth_cost_by_sqisw(a, b, c)
+        elif self.isa_type == ISAType.B:
+            cost = synth_cost_by_b(a, b, c)
         elif self.isa_type == ISAType.Canonical:
             if self.coupling_type == CouplingType.XX:
                 cost = optimal_can_gate_duration(a, b, c, 1, 0, 0) / CX_AshN_Time_XX

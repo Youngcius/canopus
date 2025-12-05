@@ -1,8 +1,11 @@
+import numpy as np
 import qiskit.quantum_info as qi
 from math import pi
 from qiskit.circuit import QuantumRegister, QuantumCircuit
+from qiskit.circuit._utils import with_gate_array
 from qiskit.circuit.gate import Gate
 from qiskit.circuit.parameterexpression import ParameterValueType
+from qiskit.circuit.singleton import SingletonGate, stdlib_singleton_key
 from accel_utils import canonical_unitary, only_xx_rot
 
 half_pi = pi / 2
@@ -101,3 +104,46 @@ class CanonicalGate(Gate):
         if isinstance(other, CanonicalGate):
             return self._compare_parameters(other)
         return False
+
+
+@with_gate_array([
+    [np.cos(pi / 8), 0, 0, 1j * np.sin(pi / 8)],
+    [0, np.cos(3 * pi / 8), 1j * np.sin(3 * pi / 8), 0],
+    [0, 1j * np.sin(3 * pi / 8), np.cos(3 * pi / 8), 0],
+    [1j * np.sin(pi / 8), 0, 0, np.cos(pi / 8)],
+])
+class BGate(SingletonGate):
+    r"""B gate.
+
+    A fixed two-qubit entangling gate with canonical coordinates
+    :math:`\left(-\frac{1}{2}, -\frac{1}{4}, 0\right)`.
+
+    Matrix representation:
+
+    .. math::
+
+        B =
+            \begin{pmatrix}
+                \cos\frac{\pi}{8} & 0 & 0 & i\sin\frac{\pi}{8} \\
+                0 & \cos\frac{3\pi}{8} & i\sin\frac{3\pi}{8} & 0 \\
+                0 & i\sin\frac{3\pi}{8} & \cos\frac{3\pi}{8} & 0 \\
+                i\sin\frac{\pi}{8} & 0 & 0 & \cos\frac{\pi}{8}
+            \end{pmatrix}
+    """
+
+    _singleton_lookup_key = stdlib_singleton_key()
+
+    def __init__(self, label: str | None = None):
+        super().__init__("b", 2, [], label=label)
+
+    def _define(self):
+        """Decompose into a canonical gate with parameters (-1/2, -1/4, 0)."""
+        qc = QuantumCircuit(2, name=self.name)
+        qc.append(CanonicalGate(-0.5, -0.25, 0), [0, 1])
+        self.definition = qc
+
+    def power(self, exponent: float, annotated: bool = False):
+        return CanonicalGate(-0.5 * exponent, -0.25 * exponent, 0)
+
+    def __eq__(self, other):
+        return isinstance(other, BGate)

@@ -35,6 +35,7 @@ __all__ = [
     'sort_two_objs',
     'synth_cost_by_cx',
     'synth_cost_by_sqisw',
+    'synth_cost_by_b',
     'only_xx_rot',
     'canonical_unitary',
 ]

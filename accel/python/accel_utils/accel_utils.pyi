@@ -20,6 +20,7 @@ def fuzzy_equal(a: float, b: float, atol: float | None = None) -> bool:
     """
     ...
 
+
 def fuzzy_greater_equal(a: float, b: float, atol: float | None = None) -> bool:
     """
     Check if a is greater than or approximately equal to b within tolerance.
@@ -33,6 +34,7 @@ def fuzzy_greater_equal(a: float, b: float, atol: float | None = None) -> bool:
         True if a > b or |a - b| < atol
     """
     ...
+
 
 def fuzzy_greater(a: float, b: float, atol: float | None = None) -> bool:
     """
@@ -48,6 +50,7 @@ def fuzzy_greater(a: float, b: float, atol: float | None = None) -> bool:
     """
     ...
 
+
 def fuzzy_less_equal(a: float, b: float, atol: float | None = None) -> bool:
     """
     Check if a is less than or approximately equal to b within tolerance.
@@ -61,6 +64,7 @@ def fuzzy_less_equal(a: float, b: float, atol: float | None = None) -> bool:
         True if a < b or |a - b| < atol
     """
     ...
+
 
 def fuzzy_less(a: float, b: float, atol: float | None = None) -> bool:
     """
@@ -94,12 +98,12 @@ def check_weyl_coord(a: float, b: float, c: float) -> bool:
 
 
 def optimal_can_gate_duration(
-    a: float, 
-    b: float, 
-    c: float, 
-    gx: float, 
-    gy: float, 
-    gz: float
+        a: float,
+        b: float,
+        c: float,
+        gx: float,
+        gy: float,
+        gz: float
 ) -> float:
     """
     Calculate optimal canonical gate duration in the AshN gate scheme.
@@ -115,6 +119,7 @@ def optimal_can_gate_duration(
         Weyl coordinate must be normalized to satisfy 0.5 >= a >= b >= |c|
     """
     ...
+
 
 def mirror_weyl_coord(a: float, b: float, c: float) -> tuple[float, float, float]:
     """
@@ -145,7 +150,7 @@ def sort_two_floats(a: float, b: float, key: callable = None) -> tuple[float, fl
         Tuple sorted in ascending order
     """
     ...
-    
+
 
 def sort_two_ints(a: int, b: int, key: callable = None) -> tuple[int, int]:
     """
@@ -177,7 +182,7 @@ def sort_two_objs(a: Any, b: Any, key: Callable = None) -> tuple[Any, Any]:
     ...
 
 
-def synth_cost_by_cx(a:float, b:float, c:float) -> float:
+def synth_cost_by_cx(a: float, b: float, c: float) -> float:
     """Synthesis cost with the CX ISA"""
     ...
 
@@ -187,10 +192,14 @@ def synth_cost_by_sqisw(a: float, b: float, c: float) -> float:
     ...
 
 
-def only_xx_rot(a:float, b:float, c:float) -> bool:
-    """If the canonical gate is only an XX rotation (b and c are zero) """
+def synth_cost_by_b(a: float, b: float, c: float) -> float:
+    """Synthesis cost with the B ISA"""
     ...
 
+
+def only_xx_rot(a: float, b: float, c: float) -> bool:
+    """If the canonical gate is only an XX rotation (b and c are zero) """
+    ...
 
 
 def canonical_unitary(a: float, b: float, c: float) -> np.ndarray:

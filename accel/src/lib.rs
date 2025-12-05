@@ -4,7 +4,6 @@ use numpy::IntoPyArray;
 use pyo3::prelude::*;
 use std::f64::consts::{FRAC_PI_2, PI};
 
-
 // define the global variable ATOL: f64 = 1e-8;
 const ATOL: f64 = 1e-8;
 
@@ -83,7 +82,6 @@ fn optimal_can_gate_duration(a: f64, b: f64, c: f64, gx: f64, gy: f64, gz: f64) 
     let z = c * FRAC_PI_2;
 
     let coupling_strength = gx + gy + gz.abs();
-
 
     // calculate tau1
     let tau0 = x / gx;
@@ -247,6 +245,18 @@ fn synth_cost_by_sqisw(a: f64, b: f64, c: f64) -> f64 {
 }
 
 #[pyfunction]
+fn synth_cost_by_b(a: f64, b: f64, c: f64) -> f64 {
+    assert!(
+        check_weyl_coord(a, b, c),
+        "Weyl coordinate must be normalized to satisfy 0.5 >= a >= b >= |c|"
+    );
+    if (a - 0.5).abs() < ATOL && (b - 0.25).abs() < ATOL && c.abs() < ATOL {
+        return 1.0;
+    }
+    2.0
+}
+
+#[pyfunction]
 fn only_xx_rot(a: f64, b: f64, c: f64) -> bool {
     return b.abs() < ATOL && c.abs() < ATOL;
 }
@@ -291,6 +301,7 @@ fn accel_utils(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(sort_two_objs, m)?)?;
     m.add_function(wrap_pyfunction!(synth_cost_by_cx, m)?)?;
     m.add_function(wrap_pyfunction!(synth_cost_by_sqisw, m)?)?;
+    m.add_function(wrap_pyfunction!(synth_cost_by_b, m)?)?;
     m.add_function(wrap_pyfunction!(only_xx_rot, m)?)?;
     m.add_function(wrap_pyfunction!(canonical_unitary, m)?)?;
     Ok(())
