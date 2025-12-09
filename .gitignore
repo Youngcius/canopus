@@ -200,3 +200,6 @@ toqm/
 *.tmp*
 docs/
 logs/
+
+experiments/
+rebuttal*

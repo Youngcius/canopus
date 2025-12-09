@@ -1,14 +1,14 @@
 from enum import Enum
 from functools import cached_property
 
-from accel_utils import (
+from canopus.utils._accel import (
     mirror_weyl_coord,
     only_xx_rot,
     optimal_can_gate_duration,
     sort_two_ints,
     synth_cost_by_cx,
     synth_cost_by_sqisw,
-    synth_cost_by_b
+    synth_cost_by_b,
 )
 from qiskit import QuantumCircuit
 from qiskit.converters import circuit_to_dag
@@ -37,7 +37,8 @@ class ISAType(Enum):
     SQiSWWithMirror = "sqisw_"
     HetISA = "het"  # CX-family and iSWAP-family heterogeneous ISA
     StabilizerISA = "stab"
-    B = 'b'
+    B = "b"
+
 
 class CouplingType(Enum):
     XX = "xx"
@@ -95,7 +96,7 @@ class SynthCostEstimator:
     def iswap_cost(self):
         """Cost of a single ISWAP gate."""
         return self.eval_gate_cost(0.5, 0.5, 0.0)
-    
+
     @cached_property
     def sqisw_cost(self):
         """Cost of a single SQiSW gate."""

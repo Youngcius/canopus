@@ -3,7 +3,7 @@ import pickle
 from collections import Counter
 from functools import lru_cache
 from math import pi
-from typing import Callable
+from collections.abc import Callable
 
 import numpy as np
 import cirq
@@ -15,7 +15,13 @@ import qiskit.qasm2
 import qiskit.quantum_info as qi
 import rustworkx as rx
 from bqskit.ir import gates as bqskit_gates
-from accel_utils import canonical_unitary, check_weyl_coord, optimal_can_gate_duration, sort_two_ints, fuzzy_less
+from canopus.utils._accel import (
+    canonical_unitary,
+    check_weyl_coord,
+    optimal_can_gate_duration,
+    sort_two_ints,
+    fuzzy_less,
+)
 from monodromy.coverage import coverage_lookup_cost, gates_to_coverage
 from prettytable import PrettyTable
 from pytket import OpType
@@ -189,23 +195,23 @@ def synth_cost_by_stabilizer_isa(a, b, c):
 def tket_to_qiskit(circ: pytket.Circuit) -> qiskit.QuantumCircuit:
     """The self-implemented conversion function holds the high-level semantics of some customized Gate instances"""
     if set(gate_counts(circ).keys()).issubset(
-            {
-                OpType.X,
-                OpType.Y,
-                OpType.Z,
-                OpType.H,
-                OpType.S,
-                OpType.T,
-                OpType.Sdg,
-                OpType.Tdg,
-                OpType.TK1,
-                OpType.U3,
-                OpType.CX,
-                OpType.SWAP,
-                OpType.TK2,
-                OpType.ISWAP,
-                OpType.ZZPhase,
-            }
+        {
+            OpType.X,
+            OpType.Y,
+            OpType.Z,
+            OpType.H,
+            OpType.S,
+            OpType.T,
+            OpType.Sdg,
+            OpType.Tdg,
+            OpType.TK1,
+            OpType.U3,
+            OpType.CX,
+            OpType.SWAP,
+            OpType.TK2,
+            OpType.ISWAP,
+            OpType.ZZPhase,
+        }
     ):
         qc = qiskit.QuantumCircuit(circ.n_qubits, circ.n_bits)
         for cmd in circ.get_commands():
@@ -260,25 +266,25 @@ def qiskit_to_tket(qc: qiskit.QuantumCircuit) -> pytket.Circuit:
     """The self-implemented conversion function holds the high-level semantics of some customized Gate instances"""
     circ = pytket.Circuit(qc.num_qubits, qc.num_clbits)
     if set(qc.count_ops().keys()).issubset(
-            {
-                "x",
-                "y",
-                "z",
-                "h",
-                "s",
-                "t",
-                "sdg",
-                "tdg",
-                "u3",
-                "u",
-                "cx",
-                "swap",
-                "can",
-                "iswap",
-                "rzz",
-                "rzx",
-                "xx_plus_yy",
-            }
+        {
+            "x",
+            "y",
+            "z",
+            "h",
+            "s",
+            "t",
+            "sdg",
+            "tdg",
+            "u3",
+            "u",
+            "cx",
+            "swap",
+            "can",
+            "iswap",
+            "rzz",
+            "rzx",
+            "xx_plus_yy",
+        }
     ):
         for instr in qc.data:
             qubits = [q._index for q in (instr.qubits)]
@@ -385,8 +391,8 @@ def layer_circuit(qc: qiskit.QuantumCircuit, fuse_1q: bool = False) -> list[list
     if fuse_1q:
         front_layer = []
         while front_layer_1q := front_layer_from_circuit(
-                qiskit.QuantumCircuit.from_instructions(instructions, qubits=qreg),
-                lambda instr: instr.operation.num_qubits == 1,
+            qiskit.QuantumCircuit.from_instructions(instructions, qubits=qreg),
+            lambda instr: instr.operation.num_qubits == 1,
         ):
             front_layer.extend(front_layer_1q)
             for instr in front_layer_1q:
@@ -400,8 +406,8 @@ def layer_circuit(qc: qiskit.QuantumCircuit, fuse_1q: bool = False) -> list[list
             instructions.remove(instr)
         if fuse_1q:
             while front_layer_1q := front_layer_from_circuit(
-                    qiskit.QuantumCircuit.from_instructions(instructions, qubits=qreg),
-                    lambda instr: instr.operation.num_qubits == 1,
+                qiskit.QuantumCircuit.from_instructions(instructions, qubits=qreg),
+                lambda instr: instr.operation.num_qubits == 1,
             ):
                 front_layer.extend(front_layer_1q)
                 for instr in front_layer_1q:
@@ -491,14 +497,14 @@ def canonical_coordinate(u: np.ndarray) -> tuple[float, float, float]:
     return decomp.a / half_pi, decomp.b / half_pi, -decomp.c / half_pi
 
 
-def canonical_decompose(u: np.ndarray, return_weyl_coord: bool = True) -> tuple[
-    tuple[np.ndarray, np.ndarray], tuple[np.ndarray, np.ndarray],
-    tuple[float, float, float]]:
+def canonical_decompose(
+    u: np.ndarray, return_weyl_coord: bool = True
+) -> tuple[tuple[np.ndarray, np.ndarray], tuple[np.ndarray, np.ndarray], tuple[float, float, float]]:
     r"""
     Decompose a 4x4 unitary matrix into two pairs of single-qubit gates and three interaction coefficients.
-    - If return_weyl_coord is True: returned coord is Weyl coordinate defined in 
+    - If return_weyl_coord is True: returned coord is Weyl coordinate defined in
         (x, y, z) ~ e^{-i (x XX + y YY + z ZZ)} where (x, y, z) ∈ {π/4 ≥ x ≥ y ≥ |z| ≥ 0}
-    - If return_weyl_coord is False: returned coord is KAK coefficients defined in 
+    - If return_weyl_coord is False: returned coord is KAK coefficients defined in
         (x, y, z) ~ e^{i (x XX + y YY + z ZZ)} where (x, y, z) ∈ {π/4 ≥ x ≥ y ≥ |z| ≥ 0}
     """
     res = cirq.kak_decomposition(u)
@@ -586,8 +592,9 @@ def crop_coupling_map(coupling_map, crop_size, seed=None):
     subgraphs = [coupling_map.graph.subgraph(nodes) for nodes in node_list]
     edge_numbers = [g.num_edges() for g in subgraphs]
     max_edges = max(edge_numbers)
-    physical_qubits_candidates = [nodes for nodes, edge_count in zip(node_list, edge_numbers) if
-                                  edge_count == max_edges]
+    physical_qubits_candidates = [
+        nodes for nodes, edge_count in zip(node_list, edge_numbers) if edge_count == max_edges
+    ]
     if len(physical_qubits_candidates) == 1:
         physical_qubits = physical_qubits_candidates[0]
     else:
@@ -602,6 +609,7 @@ def crop_coupling_map(coupling_map, crop_size, seed=None):
 #     rng.shuffle(physical_qubits)
 #     # return {logical_qubits[i]: p for i, p in enumerate(physical_qubits)}
 #     return Layout.from_intlist(physical_qubits, qreg)
+
 
 def generate_random_layout(qreg, coupling_map, seed=None) -> Layout:
     rng = np.random.default_rng(seed)
@@ -626,6 +634,7 @@ def _pick_connected_nodes(g: rx.PyGraph, start_node: int, k: int) -> list[int]:
     elif k == g.num_nodes():
         return list(range(g.num_nodes()))
     else:
+
         class _KNodeCollector(rx.visit.BSFVisitor):
             def __init__(self, k: int):
                 super().__init__()
@@ -658,11 +667,11 @@ def gate_from_qiskit_to_bqskit(g: Gate):
         return bqskit_gates.RYYGate(g.params[0] * pi)
     elif isinstance(g, RZZGate):
         return bqskit_gates.RZZGate(g.params[0] * pi)
-    elif isinstance(g, iSwapGate) or (isinstance(g, XXPlusYYGate) and g.params[0] == - pi):
+    elif isinstance(g, iSwapGate) or (isinstance(g, XXPlusYYGate) and g.params[0] == -pi):
         return bqskit_gates.ISwapGate()
     elif isinstance(g, BGate):
         return bqskit_gates.BGate()
-    elif isinstance(g, SQiSWGate) or (isinstance(g, XXPlusYYGate) and g.params[0] == - half_pi):
+    elif isinstance(g, SQiSWGate) or (isinstance(g, XXPlusYYGate) and g.params[0] == -half_pi):
         return bqskit_gates.SqrtISwapGate()
     else:
         raise ValueError(f"Unsupported gate type: {type(g)}")

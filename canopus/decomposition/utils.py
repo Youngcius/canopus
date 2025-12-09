@@ -17,19 +17,20 @@ _one_qubit_decomposer = OneQubitEulerDecomposer("U3")
 @dataclass
 class _QiskitKAKDecomposition:
     """Lightweight wrapper around Qiskit's KAK (Cartan) decomposition.
-    
+
     The KAK decomposition expresses a two-qubit unitary U as:
         U = exp(i*phase) * (K1l ⊗ K1r) @ Can(a,b,c) @ (K2l ⊗ K2r)
-    
+
     where Can(a,b,c) = exp(-i * (a*XX + b*YY + c*ZZ)) is the canonical gate,
     and K1, K2 are single-qubit operations.
-    
+
     Attributes:
         a, b, c: Interaction coefficients in radians (Weyl chamber coordinates).
         single_qubit_operations_before: (K2l, K2r) applied before the canonical gate.
         single_qubit_operations_after: (K1l, K1r) applied after the canonical gate.
         global_phase: Global phase factor in radians.
     """
+
     a: float
     b: float
     c: float
@@ -50,10 +51,10 @@ class _QiskitKAKDecomposition:
 
 def _kak_from_unitary(unitary: np.ndarray) -> _QiskitKAKDecomposition:
     """Compute the KAK decomposition of a two-qubit unitary.
-    
+
     Args:
         unitary: A 4x4 unitary matrix.
-    
+
     Returns:
         A QiskitKAKDecomposition containing the decomposition parameters.
     """
@@ -70,32 +71,32 @@ def _kak_from_unitary(unitary: np.ndarray) -> _QiskitKAKDecomposition:
 
 def _kak_canonicalize_vector(x: float, y: float, z: float, atol: float = 1e-9) -> _QiskitKAKDecomposition:
     """Canonicalize a KAK vector and compute the required single-qubit transformations.
-    
+
     Given non-canonical Weyl coordinates (x, y, z), this function produces:
     - Canonical coordinates (x2, y2, z2) satisfying: 0 ≤ |z2| ≤ y2 ≤ x2 ≤ π/4
     - Single-qubit matrices (before and after) such that:
       exp(i*(x*XX + y*YY + z*ZZ)) = (a1⊗a0) @ Can(x2,y2,z2) @ (b1⊗b0) @ global_phase
-    
+
     This is essential for the 3-√iSWAP decomposition which uses non-canonical
     split points that need to be transformed to match the actual gate structure.
-    
+
     Algorithm based on Cirq's kak_canonicalize_vector.
-    
+
     Args:
         x, y, z: Non-canonical interaction coefficients.
         atol: Tolerance for deciding when x ≈ π/4.
-    
+
     Returns:
         A QiskitKAKDecomposition with canonical coordinates and fixup matrices.
     """
     phase = [complex(1)]  # Accumulated global phase
-    left = [np.eye(2, dtype=complex), np.eye(2, dtype=complex)]   # Per-qubit left (after) factors
+    left = [np.eye(2, dtype=complex), np.eye(2, dtype=complex)]  # Per-qubit left (after) factors
     right = [np.eye(2, dtype=complex), np.eye(2, dtype=complex)]  # Per-qubit right (before) factors
     v = [x, y, z]  # Remaining XX/YY/ZZ interaction vector
 
     # These special-unitary matrices flip the X, Y, and Z axes respectively
     flippers = [
-        np.array([[0, 1], [1, 0]], dtype=complex) * 1j,   # X flipper
+        np.array([[0, 1], [1, 0]], dtype=complex) * 1j,  # X flipper
         np.array([[0, -1j], [1j, 0]], dtype=complex) * 1j,  # Y flipper
         np.array([[1, 0], [0, -1]], dtype=complex) * 1j,  # Z flipper
     ]
@@ -110,7 +111,7 @@ def _kak_canonicalize_vector(x: float, y: float, z: float, atol: float = 1e-9) -
     def shift(k: int, step: int):
         """Shift strength by π/2 (equivalent to local ops, e.g., exp(iπ/2·XX) ∝ XX)."""
         v[k] += step * np.pi / 2
-        phase[0] *= 1j ** step
+        phase[0] *= 1j**step
         right[0] = flippers[k] ** (step % 4) @ right[0]
         right[1] = flippers[k] ** (step % 4) @ right[1]
 
@@ -181,14 +182,14 @@ def _kak_canonicalize_vector(x: float, y: float, z: float, atol: float = 1e-9) -
 
 def _kak_from_coords(x: float, y: float, z: float, canonicalize: bool = True) -> _QiskitKAKDecomposition:
     """Create a KAK decomposition from Weyl coordinates.
-    
+
     Args:
         x, y, z: Interaction coefficients (Weyl chamber coordinates).
         canonicalize: If True, canonicalize non-canonical coordinates and compute
                       the required single-qubit transformations. If False, just
                       return identity single-qubit operations (only valid for
                       already-canonical coordinates).
-    
+
     Returns:
         A QiskitKAKDecomposition with appropriate single-qubit operations.
     """
@@ -208,9 +209,9 @@ def _kak_from_coords(x: float, y: float, z: float, canonicalize: bool = True) ->
 
 def _append_single_qubit_from_matrix(qc: QuantumCircuit, matrix: np.ndarray, qubit: int) -> None:
     """Append a single-qubit gate to a circuit from its unitary matrix.
-    
+
     Uses U3 (Euler angle) decomposition to synthesize the gate.
-    
+
     Args:
         qc: The quantum circuit to append to.
         matrix: A 2x2 unitary matrix.

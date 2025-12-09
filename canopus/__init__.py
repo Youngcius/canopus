@@ -7,6 +7,7 @@
 
 Canopus (Canonical-Optimized Placement Utility Suite) enables qubit mapping/routing tailored to advanced quantum ISAs.
 """
+
 from . import backends, basics, mapping, synthesis, utils, decomposition
 from .backends import CanopusBackend, CouplingType, ISAType, SynthCostEstimator
 from .basics import CanonicalGate, SQiSWGate, BGate

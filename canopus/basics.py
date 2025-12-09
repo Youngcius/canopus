@@ -7,17 +7,17 @@ from qiskit.circuit.gate import Gate
 from qiskit.circuit.library import XXPlusYYGate
 from qiskit.circuit.parameterexpression import ParameterValueType
 from qiskit.circuit.singleton import SingletonGate, stdlib_singleton_key
-from accel_utils import canonical_unitary, only_xx_rot
+from canopus.utils._accel import canonical_unitary, only_xx_rot
 
 half_pi = pi / 2
 
-X = qi.Pauli('X').to_matrix()
-Y = qi.Pauli('Y').to_matrix()
-Z = qi.Pauli('Z').to_matrix()
-I = qi.Pauli('I').to_matrix()
-XX = qi.Pauli('XX').to_matrix()
-YY = qi.Pauli('YY').to_matrix()
-ZZ = qi.Pauli('ZZ').to_matrix()
+X = qi.Pauli("X").to_matrix()
+Y = qi.Pauli("Y").to_matrix()
+Z = qi.Pauli("Z").to_matrix()
+I = qi.Pauli("I").to_matrix()
+XX = qi.Pauli("XX").to_matrix()
+YY = qi.Pauli("YY").to_matrix()
+ZZ = qi.Pauli("ZZ").to_matrix()
 
 
 class CanonicalGate(Gate):
@@ -36,11 +36,7 @@ class CanonicalGate(Gate):
         \mathrm{Can}(a, b, c) = e^{- i \frac{\pi}{2}(a XX + b YY + c ZZ)} where 0.5 ≥ a ≥ b ≥ |c|
     """
 
-    def __init__(
-            self,
-            a: ParameterValueType, b: ParameterValueType, c: ParameterValueType,
-            label: str | None = None
-    ):
+    def __init__(self, a: ParameterValueType, b: ParameterValueType, c: ParameterValueType, label: str | None = None):
         super().__init__("can", 2, [a, b, c], label=label)
         self.is_xx_rot = only_xx_rot(a, b, c)
 
@@ -107,12 +103,14 @@ class CanonicalGate(Gate):
         return False
 
 
-@with_gate_array([
-    [1, 0, 0, 0],
-    [0, 1 / np.sqrt(2), 1j / np.sqrt(2), 0],
-    [0, 1j / np.sqrt(2), 1 / np.sqrt(2), 0],
-    [0, 0, 0, 1],
-])
+@with_gate_array(
+    [
+        [1, 0, 0, 0],
+        [0, 1 / np.sqrt(2), 1j / np.sqrt(2), 0],
+        [0, 1j / np.sqrt(2), 1 / np.sqrt(2), 0],
+        [0, 0, 0, 1],
+    ]
+)
 class SQiSWGate(SingletonGate):
     r"""The square root two qubit swap and phase iSWAP gate.
 
@@ -145,12 +143,14 @@ class SQiSWGate(SingletonGate):
         return isinstance(other, SQiSWGate)
 
 
-@with_gate_array([
-    [np.cos(pi / 8), 0, 0, 1j * np.sin(pi / 8)],
-    [0, np.cos(3 * pi / 8), 1j * np.sin(3 * pi / 8), 0],
-    [0, 1j * np.sin(3 * pi / 8), np.cos(3 * pi / 8), 0],
-    [1j * np.sin(pi / 8), 0, 0, np.cos(pi / 8)],
-])
+@with_gate_array(
+    [
+        [np.cos(pi / 8), 0, 0, 1j * np.sin(pi / 8)],
+        [0, np.cos(3 * pi / 8), 1j * np.sin(3 * pi / 8), 0],
+        [0, 1j * np.sin(3 * pi / 8), np.cos(3 * pi / 8), 0],
+        [1j * np.sin(pi / 8), 0, 0, np.cos(pi / 8)],
+    ]
+)
 class BGate(SingletonGate):
     r"""B gate.
 

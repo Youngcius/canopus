@@ -31,19 +31,55 @@ canopus/ # Canopus implementation
 ├── basics.py # Customized Qiskit CanonicalGate
 ├── mapping.py # CanopusMapping pass based on qiskit.transpiler.TransformationPass
 ├── synthesis.py # Synthesis passes (e.g., rebase to {Can, U3}, rebase to Clifford, rebase to SQiSW)
-└── utils.py # Other utils (e.g., polytope coverage, circuit conversion)
+├── utils/ # Utilities module
+│   ├── _accel.cpython-*.so # Rust-accelerated functions (compiled)
+│   ├── _accel.pyi # Type stubs for Rust functions
+│   └── _core.py # Python utilities (e.g., polytope coverage, circuit conversion)
+└── decomposition/ # Gate decomposition module
 
-accel/  # Rust-accelerated utils
-├── python # Python interface
-│   └── accel_utils
-│       └── __init__.py
-└── src # Rust implementation
-    └── lib.rs
+src/ # Rust source code
+└── lib.rs # PyO3 bindings for performance-critical functions
+```
+
+### Installation
+
+**Prerequisites**: Python 3.10+, Rust toolchain (for building from source)
+
+#### For Users (Production)
+
+```bash
+pip install .
+```
+
+This will automatically compile the Rust extension and install the complete package.
+
+#### For Developers
+
+First, install [maturin](https://github.com/PyO3/maturin) and [poethepoet](https://github.com/nat-n/poethepoet):
+
+```bash
+pip install maturin poethepoet
+```
+
+Then use the following task commands:
+
+| Command | Description |
+|---------|-------------|
+| `poe dev` | Build and install in development mode |
+| `poe clean` | Clean all build artifacts (Rust + Python) |
+| `poe rebuild` | Clean and rebuild from scratch |
+| `poe build` | Build wheel for distribution |
+| `poe test` | Run tests |
+| `poe fmt` | Format code with ruff |
+| `poe lint` | Lint code with ruff |
+
+**Quick start for development:**
+
+```bash
+poe dev  # Build Rust extension and install in editable mode
 ```
 
 ### Usage
-
-First, run `cd accel && make install` to install Rust-accelerated `accel_utils` package.
 
 [./examples/](./examples/) contains some introductory examples:
 

@@ -1,4 +1,4 @@
-use ndarray::{Array2, array};
+use ndarray::{array, Array2};
 use num_complex::Complex64;
 use numpy::IntoPyArray;
 use pyo3::prelude::*;
@@ -262,7 +262,7 @@ fn only_xx_rot(a: f64, b: f64, c: f64) -> bool {
 }
 
 #[pyfunction]
-fn canonical_unitary(py: Python, a: f64, b: f64, c: f64) -> PyResult<PyObject> {
+fn canonical_unitary<'py>(py: Python<'py>, a: f64, b: f64, c: f64) -> PyResult<Bound<'py, numpy::PyArray2<Complex64>>> {
     let zero = r!(0.0);
     let x = a * FRAC_PI_2;
     let y = b * FRAC_PI_2;
@@ -282,12 +282,12 @@ fn canonical_unitary(py: Python, a: f64, b: f64, c: f64) -> PyResult<PyObject> {
         [i!(-1.0) * eim * sinm, zero, zero, eim * cosm]
     ];
 
-    Ok(matrix.into_pyarray(py).into())
+    Ok(matrix.into_pyarray(py))
 }
 
 /// Python module entry
 #[pymodule]
-fn accel_utils(m: &Bound<'_, PyModule>) -> PyResult<()> {
+fn _accel(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(fuzzy_equal, m)?)?;
     m.add_function(wrap_pyfunction!(fuzzy_greater_equal, m)?)?;
     m.add_function(wrap_pyfunction!(fuzzy_greater, m)?)?;

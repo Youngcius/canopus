@@ -1,6 +1,5 @@
 from scipy import linalg
-from accel_utils import *
-import numpy as np
+from canopus.utils import *
 import cirq
 from canopus.basics import *
 from scipy.stats import unitary_group
@@ -8,11 +7,14 @@ from canopus.utils import canonical_decompose
 
 
 def test_canonical_unitary():
-    coords = np.stack((
-        np.random.uniform(0, 0.5, size=1000),
-        np.random.uniform(0, 0.5, size=1000),
-        np.random.uniform(-0.5, 0.5, size=1000)
-    ), axis=1)
+    coords = np.stack(
+        (
+            np.random.uniform(0, 0.5, size=1000),
+            np.random.uniform(0, 0.5, size=1000),
+            np.random.uniform(-0.5, 0.5, size=1000),
+        ),
+        axis=1,
+    )
 
     for i in range(1000):
         a, b, c = coords[i]

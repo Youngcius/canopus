@@ -1,84 +1,52 @@
 # ==============================================================================
 # BUILD SYSTEM CONFIGURATION
 #
-# This section is mandatory. It tells pip and other build frontends how to
-# build your project. For pure Python projects, use setuptools.
+# Using maturin for mixed Rust + Python projects.
 # ==============================================================================
 [build-system]
-requires = ["setuptools>=61.0", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["maturin>=1.0,<2.0"]
+build-backend = "maturin"
 
 # ==============================================================================
 # PROJECT METADATA (PEP 621)
-#
-# This section contains the core metadata for your package, which will be
-# displayed on PyPI.
 # ==============================================================================
 [project]
-# The name of your package on PyPI. It must be unique. Hyphens are recommended.
 name = "canopus"
-
-# The version of your package.
-# You can hardcode it here or load it dynamically from a file.
-# If left empty, maturin will default to using the version from your Cargo.toml.
 version = "0.1.0"
-
-# A short, one-line description of the project.
 description = "Canopus (Canonical Optimized Placement Utility Suite) is an ISA-aware qubit mapping/routing framework tailored to diverse quantum ISAs."
-
-# Path to your README file. Its content will be used as the project's homepage on PyPI.
 readme = "README.md"
-
-# The Python versions your project supports.
 requires-python = ">=3.10"
-
-# The project's license. Using an SPDX identifier is recommended.
-# Common choices: "MIT", "Apache-2.0", "GPL-3.0-or-later"
-# Maturin can automatically infer this if it's defined in your Cargo.toml.
 license = { file = "LICENSE" }
-
-# List of authors.
 authors = [
     { name = "Youngcius", email = "your-email@example.com" },
-    # { name = "Another Author", email = "another@example.com" },
 ]
-
-# Keywords describing your project, which help with discovery on PyPI.
-keywords = ["scientific-computing", "task-scheduling", "rust", "high-performance"]
-
-# PyPI Trove classifiers, providing structured metadata for your package.
-# For a full list, see: https://pypi.org/classifiers/
+keywords = ["quantum-computing", "qubit-mapping", "quantum-isa", "rust", "high-performance"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Rust",
     "Operating System :: OS Independent",
-    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Scientific/Engineering :: Physics",
 ]
 
-# Runtime dependencies. These are packages required for your project to run.
-
+# ==============================================================================
+# MATURIN CONFIGURATION
+# ==============================================================================
+[tool.maturin]
+# Build the Rust extension as canopus.utils._accel
+module-name = "canopus.utils._accel"
+# Include Python source files
+python-source = "."
+# Features to enable
+features = ["pyo3/extension-module"]
 
 # ==============================================================================
-# SETUPTOOLS CONFIGURATION
-# ==============================================================================
-[tool.setuptools.packages.find]
-where = ["."]
-include = ["canopus*"]
-exclude = ["tests*", "examples*", "docs*"]
-
-# ==============================================================================
-# OPTIONAL DEPENDENCIES / EXTRAS
-#
-# Define sets of dependencies for specific features (e.g., for testing, development).
-# Users can install these via 'pip install canopus[test,dev]'.
+# OPTIONAL DEPENDENCIES
 # ==============================================================================
 [project.optional-dependencies]
 test = [
@@ -86,16 +54,15 @@ test = [
     "pytest-cov",
 ]
 dev = [
-    "canopus[test]", # Automatically includes the 'test' dependencies
-    "ruff",         # Linter and formatter
-    "mypy",         # Static type checker
-    "ipykernel",    # For Jupyter Notebook support
+    "canopus[test]",
+    "ruff",
+    "mypy",
+    "ipykernel",
+    "maturin",
 ]
 
 # ==============================================================================
 # PROJECT URLS
-#
-# A list of links related to your project.
 # ==============================================================================
 [project.urls]
 Homepage = "https://github.com/Youngcius/canopus"
@@ -103,47 +70,47 @@ Repository = "https://github.com/Youngcius/canopus"
 "Bug Tracker" = "https://github.com/Youngcius/canopus/issues"
 
 # ==============================================================================
-# CONSOLE SCRIPTS
-#
-# Defines console scripts that will be created when the package is installed.
-# ==============================================================================
-# [project.scripts]
-# your-cli-command = "your_package.cli:main"
-
-# ==============================================================================
 # DEVELOPMENT TOOLS CONFIGURATION
 # ==============================================================================
 
-# --- Ruff (Linter and Formatter) ---
 [tool.ruff]
-# The Python source directories to check.
 src = ["canopus"]
 line-length = 120
 
 [tool.ruff.lint]
-# Select the rule sets to enable.
-# E, W: pycodestyle | F: Pyflakes | I: isort | UP: pyupgrade | B: flake8-bugbear
 select = ["E", "W", "F", "I", "UP", "B"]
 
 [tool.ruff.format]
-# Configure code formatting options.
 quote-style = "double"
 indent-style = "space"
-skip-magic-trailing-comma = false
 line-ending = "lf"
 
-
-# --- Pytest (Test Runner) ---
 [tool.pytest.ini_options]
 minversion = "6.0"
 addopts = "-ra -q --color=yes"
-testpaths = [
-    "tests",
-]
+testpaths = ["tests"]
 
-# --- MyPy (Static Type Checker) ---
 [tool.mypy]
-python_version = "3.8"
+python_version = "3.10"
 warn_return_any = true
 warn_unused_configs = true
-ignore_missing_imports = true # Ignore import errors for libraries without type stubs.
+ignore_missing_imports = true
+
+# ==============================================================================
+# PROJECT SCRIPTS (via PDM/Hatch style using poe)
+# ==============================================================================
+[tool.poe.tasks]
+# Clean all build artifacts
+clean = { shell = "cargo clean && rm -f canopus/utils/_accel*.so && rm -rf __pycache__ canopus/**/__pycache__ .pytest_cache .mypy_cache .ruff_cache" }
+# Build in development mode
+dev = { shell = "maturin develop --release" }
+# Build wheel for distribution
+build = { shell = "maturin build --release" }
+# Clean and rebuild
+rebuild = { shell = "poe clean && poe dev" }
+# Run tests
+test = { shell = "pytest" }
+# Format code
+fmt = { shell = "ruff format canopus tests" }
+# Lint code
+lint = { shell = "ruff check canopus tests" }

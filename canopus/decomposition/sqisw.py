@@ -29,7 +29,7 @@ def _in_0_region(x: float, y: float, z: float, weyl_tol: float = 1e-8) -> bool:
 
 def _in_1sqisw_region(x: float, y: float, z: float, weyl_tol: float = 1e-8) -> bool:
     """Check if the gate can be implemented with exactly 1 √iSWAP.
-    
+
     The √iSWAP gate has canonical coordinates (pi/8, pi/8, 0).
     """
     return abs(x - np.pi / 8) <= weyl_tol and abs(y - np.pi / 8) <= weyl_tol and abs(z) <= weyl_tol
@@ -49,10 +49,10 @@ def _in_3sqisw_region(x: float, y: float, z: float, weyl_tol: float = 1e-8) -> b
 
 
 def _decomp_0_matrices(
-        kak: _QiskitKAKDecomposition, atol: float = 1e-8
+    kak: _QiskitKAKDecomposition, atol: float = 1e-8
 ) -> tuple[list[tuple[np.ndarray, np.ndarray]], complex]:
     """Decompose a local gate (0 √iSWAP).
-    
+
     For local gates, just compose the before and after single-qubit operations.
     """
     return [
@@ -64,10 +64,10 @@ def _decomp_0_matrices(
 
 
 def _decomp_1sqisw_matrices(
-        kak: _QiskitKAKDecomposition, atol: float = 1e-8
+    kak: _QiskitKAKDecomposition, atol: float = 1e-8
 ) -> tuple[list[tuple[np.ndarray, np.ndarray]], complex]:
     """Decompose using exactly 1 √iSWAP gate.
-    
+
     Structure: [before_0, before_1] - √iSWAP - [after_0, after_1]
     """
     return [
@@ -77,14 +77,14 @@ def _decomp_1sqisw_matrices(
 
 
 def _decomp_2sqisw_matrices(
-        kak: _QiskitKAKDecomposition, atol: float = 1e-8
+    kak: _QiskitKAKDecomposition, atol: float = 1e-8
 ) -> tuple[list[tuple[np.ndarray, np.ndarray]], complex]:
     """Decompose using exactly 2 √iSWAP gates.
-    
+
     Implements the 2-√iSWAP branch (Algorithm 1, if-branch) from arXiv:2105.06074.
-    
+
     Structure: [e0,e1] - √iSWAP - [c0,c1] - √iSWAP - [d0,d1]
-    
+
     The intermediate single-qubit gates (c0, c1) are computed analytically,
     then fixup gates are derived by comparing with the actual KAK decomposition.
     """
@@ -99,15 +99,12 @@ def _decomp_2sqisw_matrices(
         return -1 if v < 0 else 1
 
     # Compute intermediate rotation angles (from the paper's formulas)
-    _c = np.clip(
-        np.sin(x + y - z) * np.sin(x - y + z) * np.sin(-x - y - z) * np.sin(-x + y + z), 0, 1
-    )
+    _c = np.clip(np.sin(x + y - z) * np.sin(x - y + z) * np.sin(-x - y - z) * np.sin(-x + y + z), 0, 1)
     alpha = safe_arccos(np.cos(2 * x) - np.cos(2 * y) + np.cos(2 * z) + 2 * np.sqrt(_c))
     beta = safe_arccos(np.cos(2 * x) - np.cos(2 * y) + np.cos(2 * z) - 2 * np.sqrt(_c))
     _4ccs = 4 * (np.cos(x) * np.cos(z) * np.sin(y)) ** 2
     gamma = safe_arccos(
-        nonzero_sign(z)
-        * np.sqrt(_4ccs / (_4ccs + np.clip(np.cos(2 * x) * np.cos(2 * y) * np.cos(2 * z), 0, 1)))
+        nonzero_sign(z) * np.sqrt(_4ccs / (_4ccs + np.clip(np.cos(2 * x) * np.cos(2 * y) * np.cos(2 * z), 0, 1)))
     )
 
     # Intermediate single-qubit gates
@@ -130,13 +127,13 @@ def _decomp_2sqisw_matrices(
 
 
 def _decomp_3sqisw_matrices(
-        kak: _QiskitKAKDecomposition, atol: float = 1e-8
+    kak: _QiskitKAKDecomposition, atol: float = 1e-8
 ) -> tuple[list[tuple[np.ndarray, np.ndarray]], complex]:
     """Decompose using 3 √iSWAP gates (universal construction).
-    
+
     Implements the 3-√iSWAP construction by splitting into 1-√iSWAP + 2-√iSWAP pieces.
     The split point is chosen based on the position in the Weyl chamber.
-    
+
     Structure: [h0,h1] - √iSWAP - [e0@g0, e1@g1] - √iSWAP - [c0,c1] - √iSWAP - [d0,d1]
     """
     x, y, z = kak.interaction_coefficients
@@ -171,26 +168,26 @@ def _decomp_3sqisw_matrices(
 
 
 def _single_qubit_matrices_with_sqisw(
-        kak: _QiskitKAKDecomposition,
-        atol: float = 1e-8,
+    kak: _QiskitKAKDecomposition,
+    atol: float = 1e-8,
 ) -> tuple[list[tuple[np.ndarray, np.ndarray]], complex]:
     """Select the optimal √iSWAP decomposition based on Weyl chamber region.
-    
+
     Automatically chooses the minimum number of √iSWAP gates needed:
     - 0 gates: local (identity-like) operations
     - 1 gate: gates equivalent to √iSWAP up to single-qubit gates
     - 2 gates: gates in the "easy" region of the Weyl chamber
     - 3 gates: universal fallback for any two-qubit gate
-    
+
     Args:
         kak: The KAK decomposition of the target unitary.
         atol: Absolute tolerance for region detection.
-    
+
     Returns:
         A tuple of:
         - List of (mat0, mat1) pairs for single-qubit gates (one pair per layer)
         - Global phase factor
-    
+
     References:
         https://arxiv.org/abs/2105.06074 (Algorithm 1)
     """
@@ -211,17 +208,17 @@ def _single_qubit_matrices_with_sqisw(
 
 def two_qubit_unitary_to_sqisw_circuit(unitary: np.ndarray, atol: float = 1e-12) -> QuantumCircuit:
     """Synthesize a 2-qubit unitary into {√iSWAP, 1q} gates.
-    
+
     Args:
         unitary: A 4x4 unitary matrix representing the two-qubit gate.
                  The matrix is assumed to be in standard math convention (q0 ⊗ q1),
                  i.e., the first qubit corresponds to the leftmost tensor factor.
         atol: Absolute tolerance for numerical comparisons.
-    
+
     Returns:
         A QuantumCircuit implementing the unitary using √iSWAP gates and single-qubit gates.
         The circuit satisfies: Operator(qc.reverse_bits()).data ≈ unitary
-    
+
     References:
         Quantum Instruction Set Design for Performance
         https://arxiv.org/abs/2105.06074
