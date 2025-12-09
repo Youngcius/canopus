@@ -27,7 +27,7 @@ from qiskit.synthesis import TwoQubitWeylDecomposition
 from qiskit.transpiler import CouplingMap, Layout
 from rich.console import Console
 
-from canopus.basics import CanonicalGate, BGate, half_pi, X, Y, Z
+from canopus.basics import CanonicalGate, BGate, SQiSWGate, half_pi, X, Y, Z
 
 console = Console()
 
@@ -233,18 +233,23 @@ def tket_to_qiskit(circ: pytket.Circuit) -> qiskit.QuantumCircuit:
                 qc.u(theta, phi, lam, cmd.qubits[0].index[0])
             elif cmd.op.type == OpType.CX:
                 qc.cx(cmd.qubits[0].index[0], cmd.qubits[1].index[0])
-            elif cmd.op.type == OpType.SWAP:
+            else:
                 q0, q1 = sort_two_ints(cmd.qubits[0].index[0], cmd.qubits[1].index[0])
-                qc.swap(q0, q1)
-            elif cmd.op.type == OpType.ISWAP:
-                q0, q1 = sort_two_ints(cmd.qubits[0].index[0], cmd.qubits[1].index[0])
-                qc.append(XXPlusYYGate(-cmd.op.params[0] * pi), [q0, q1])
-            elif cmd.op.type == OpType.ZZPhase:
-                q0, q1 = sort_two_ints(cmd.qubits[0].index[0], cmd.qubits[1].index[0])
-                qc.rzz(cmd.op.params[0] * pi, q0, q1)
-            elif cmd.op.type == OpType.TK2:
-                q0, q1 = sort_two_ints(cmd.qubits[0].index[0], cmd.qubits[1].index[0])
-                qc.append(CanonicalGate(*cmd.op.params), [q0, q1])
+                if cmd.op.type == OpType.SWAP:
+                    qc.swap(q0, q1)
+                elif cmd.op.type == OpType.ISWAPMax:
+                    qc.iswap(q0, q1)
+                elif cmd.op.type == OpType.ISWAP:
+                    if np.allclose(cmd.op.params[0], 1):
+                        qc.iswap(q0, q1)
+                    elif np.allclose(cmd.op.params[0], 0.5):
+                        qc.append(SQiSWGate(), [q0, q1])
+                    else:
+                        qc.append(XXPlusYYGate(-cmd.op.params[0] * pi), [q0, q1])
+                elif cmd.op.type == OpType.ZZPhase:
+                    qc.rzz(cmd.op.params[0] * pi, q0, q1)
+                elif cmd.op.type == OpType.TK2:
+                    qc.append(CanonicalGate(*cmd.op.params), [q0, q1])
     else:
         qc = qiskit.QuantumCircuit.from_qasm_str(pytket.qasm.circuit_to_qasm_str(circ))
 
@@ -292,6 +297,8 @@ def qiskit_to_tket(qc: qiskit.QuantumCircuit) -> pytket.Circuit:
                 circ.ZZPhase(instr.operation.params[0] / pi, *qubits)
             elif instr.operation.name == "iswap":
                 circ.ISWAPMax(*qubits)
+            elif instr.operation.name == "sqisw":
+                circ.ISWAP((-instr.operation.params[0] / pi / 2), *qubits)
             elif instr.operation.name == "xx_plus_yy":
                 circ.ISWAP((-instr.operation.params[0] / pi), *qubits)
             elif instr.operation.name == "x":
@@ -321,7 +328,7 @@ def qiskit_to_tket(qc: qiskit.QuantumCircuit) -> pytket.Circuit:
 
 
 def qc2mat(qc: qiskit.QuantumCircuit) -> np.ndarray:
-    return qi.Operator(qc.reverse_bits()).data
+    return qi.Operator(qc).reverse_qargs().to_matrix()
 
 
 def is_canonical_normalized(qc: qiskit.QuantumCircuit) -> bool:
@@ -651,11 +658,11 @@ def gate_from_qiskit_to_bqskit(g: Gate):
         return bqskit_gates.RYYGate(g.params[0] * pi)
     elif isinstance(g, RZZGate):
         return bqskit_gates.RZZGate(g.params[0] * pi)
-    elif isinstance(g, iSwapGate):
+    elif isinstance(g, iSwapGate) or (isinstance(g, XXPlusYYGate) and g.params[0] == - pi):
         return bqskit_gates.ISwapGate()
     elif isinstance(g, BGate):
         return bqskit_gates.BGate()
-    elif isinstance(g, XXPlusYYGate) and g.params[0] == - half_pi:
+    elif isinstance(g, SQiSWGate) or (isinstance(g, XXPlusYYGate) and g.params[0] == - half_pi):
         return bqskit_gates.SqrtISwapGate()
     else:
         raise ValueError(f"Unsupported gate type: {type(g)}")

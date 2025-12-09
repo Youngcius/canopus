@@ -39,6 +39,12 @@ if __name__ == "__main__":
     print('Pulse-level circuit duration:', evaluator.eval_circuit_cost(qc_sqisw))
     assert compare_unitaries(canopus.utils.qc2mat(qc), canopus.utils.qc2mat(qc_sqisw))
 
+    console.print("B-based circuit:")
+    circ_b = canopus.rebase_to_b(qc)
+    print(circ_b.draw())
+    print('Pulse-level circuit duration:', evaluator.eval_circuit_cost(circ_b))
+    assert compare_unitaries(canopus.utils.qc2mat(qc), canopus.utils.qc2mat(circ_b))
+
     circ_zzphase = rebase_to_zzphase(qc)
     console.rule("ZZPhase-based circuit:")
     print(circ_zzphase.draw())

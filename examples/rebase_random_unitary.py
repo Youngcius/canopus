@@ -9,13 +9,10 @@ import numpy as np
 from pytket.utils import compare_unitaries
 from qiskit.circuit.library import UnitaryGate
 from rich.console import Console
-from canopus.synthesis import rebase_to_sqisw, rebase_to_zzphase
 from canopus.backends import SynthCostEstimator
 from regulus.utils.functions import infidelity
 
 console = Console()
-
-
 
 
 def random_su4_circuit():
@@ -39,13 +36,19 @@ if __name__ == "__main__":
     print(tk2_circ.draw())
     print('Pulse-level circuit duration:', evaluator.eval_circuit_cost(tk2_circ))
 
-    circ_sqisw = rebase_to_sqisw(qc)
+    circ_sqisw = canopus.rebase_to_sqisw(qc)
     console.rule("SQiSW-based circuit:")
     print(circ_sqisw.draw())
     print('Pulse-level circuit duration:', evaluator.eval_circuit_cost(circ_sqisw))
     assert compare_unitaries(canopus.utils.qc2mat(qc), canopus.utils.qc2mat(circ_sqisw))
 
-    circ_zzphase = rebase_to_zzphase(qc)
+    circ_b = canopus.rebase_to_b(qc)
+    console.rule("B-based circuit:")
+    print(circ_b.draw())
+    print('Pulse-level circuit duration:', evaluator.eval_circuit_cost(circ_b))
+    assert compare_unitaries(canopus.utils.qc2mat(qc), canopus.utils.qc2mat(circ_b))
+
+    circ_zzphase = canopus.rebase_to_zzphase(qc)
     console.rule("ZZPhase-based circuit (qiskit-optimal decomposition):")
     print(circ_zzphase.draw())
     print('Pulse-level circuit duration:', evaluator.eval_circuit_cost(circ_zzphase))

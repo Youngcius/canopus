@@ -4,6 +4,7 @@ from math import pi
 from qiskit.circuit import QuantumRegister, QuantumCircuit
 from qiskit.circuit._utils import with_gate_array
 from qiskit.circuit.gate import Gate
+from qiskit.circuit.library import XXPlusYYGate
 from qiskit.circuit.parameterexpression import ParameterValueType
 from qiskit.circuit.singleton import SingletonGate, stdlib_singleton_key
 from accel_utils import canonical_unitary, only_xx_rot
@@ -104,6 +105,44 @@ class CanonicalGate(Gate):
         if isinstance(other, CanonicalGate):
             return self._compare_parameters(other)
         return False
+
+
+@with_gate_array([
+    [1, 0, 0, 0],
+    [0, 1 / np.sqrt(2), 1j / np.sqrt(2), 0],
+    [0, 1j / np.sqrt(2), 1 / np.sqrt(2), 0],
+    [0, 0, 0, 1],
+])
+class SQiSWGate(SingletonGate):
+    r"""The square root two qubit swap and phase iSWAP gate.
+
+    The SqrtISwap gate is given by the following unitary:
+
+    .. math::
+
+        \begin{pmatrix}
+        1 & 0 & 0 & 0 \\
+        0 & \frac{1}{\sqrt{2}} & \frac{i}{\sqrt{2}} & 0 \\
+        0 & \frac{i}{\sqrt{2}} & \frac{1}{\sqrt{2}} & 0 \\
+        0 & 0 & 0 & 1 \\
+        \end{pmatrix}
+    """
+
+    _singleton_lookup_key = stdlib_singleton_key()
+
+    def __init__(self, label: str | None = None):
+        super().__init__("sqisw", 2, [], label=label)
+
+    def _define(self):
+        qc = QuantumCircuit(2, name=self.name)
+        qc.append(XXPlusYYGate(-np.pi / 2), [0, 1])
+        self.definition = qc
+
+    def power(self, exponent: float, annotated: bool = False):
+        return XXPlusYYGate(-np.pi / 2 * exponent)
+
+    def __eq__(self, other):
+        return isinstance(other, SQiSWGate)
 
 
 @with_gate_array([

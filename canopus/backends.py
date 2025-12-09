@@ -95,6 +95,16 @@ class SynthCostEstimator:
     def iswap_cost(self):
         """Cost of a single ISWAP gate."""
         return self.eval_gate_cost(0.5, 0.5, 0.0)
+    
+    @cached_property
+    def sqisw_cost(self):
+        """Cost of a single SQiSW gate."""
+        return self.eval_gate_cost(0.25, 0.25, 0.0)
+
+    @cached_property
+    def b_cost(self):
+        """Cost of a single B gate."""
+        return self.eval_gate_cost(0.5, 0.25, 0.0)
 
     @cached_property
     def swap_cost(self):
@@ -171,6 +181,10 @@ class SynthCostEstimator:
                 gate_duration = self.cx_cost
             elif node.op.name == "iswap":
                 gate_duration = self.iswap_cost
+            elif node.op.name == "sqisw":
+                gate_duration = self.sqisw_cost
+            elif node.op.name == "b":
+                gate_duration = self.b_cost
             elif node.op.name == "rzz" or node.op.name == "rzx":
                 gate_duration = self.cx_cost * node.op.params[0] / half_pi
             elif node.op.name == "xx_plus_yy":

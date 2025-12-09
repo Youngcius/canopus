@@ -9,7 +9,6 @@ from qiskit.circuit.random import random_circuit
 from accel_utils import canonical_unitary
 from canopus.basics import CanonicalGate
 
-
 Z = np.array([[1, 0], [0, -1]], dtype=np.complex128)
 
 qc_demo = qasm2.loads("""
@@ -93,6 +92,11 @@ def test_sqisw_synthesis():
     assert is_equiv_unitary(qc2mat(qc_demo), qc2mat(qc))
 
 
+def test_b_synthesis():
+    qc = canopus.rebase_to_b(qc_demo)
+    assert is_equiv_unitary(qc2mat(qc_demo), qc2mat(qc))
+
+
 def test_zzphase_synthesis():
     qc = canopus.rebase_to_zzphase(qc_demo)
     assert is_equiv_unitary(qc2mat(qc_demo), qc2mat(qc))
@@ -102,9 +106,9 @@ def test_custom_synthesis():
     from qiskit.circuit.library import iSwapGate
 
     qc = random_circuit(4, 30, 2)
-    qc_rebased = canopus.synthesis.rebase_to_custom(qc, 
-        gate_set=[iSwapGate().power(0.5), CanonicalGate(0.5, 0.25, 0.25)], 
-        costs=[1, 1.25], 
-        names=['sqisw', 'ecp'],
-        seed=123)
+    qc_rebased = canopus.synthesis.rebase_to_custom(qc,
+                                                    gate_set=[iSwapGate().power(0.5), CanonicalGate(0.5, 0.25, 0.25)],
+                                                    costs=[1, 1.25],
+                                                    names=['sqisw', 'ecp'],
+                                                    seed=123)
     assert canopus.utils.is_equiv_unitary(canopus.utils.qc2mat(qc), canopus.utils.qc2mat(qc_rebased))
