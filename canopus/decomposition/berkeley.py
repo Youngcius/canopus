@@ -45,8 +45,6 @@ def _decompose_interaction_into_two_b_gates_ignoring_single_qubit_ops(
 
     Note: The algorithm uses qubits labeled a=0, b=1 following Cirq's convention.
     """
-    # Reference: Minimum construction of two-qubit quantum operations (quant-ph/0312193)
-    # Any two-qubit gate can be decomposed as: B - 1q gates - B
 
     # Compute intermediate rotation parameters
     r = (np.sin(y) * np.cos(z)) ** 2

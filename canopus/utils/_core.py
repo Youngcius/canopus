@@ -507,6 +507,7 @@ def canonical_decompose(
     - If return_weyl_coord is False: returned coord is KAK coefficients defined in
         (x, y, z) ~ e^{i (x XX + y YY + z ZZ)} where (x, y, z) ∈ {π/4 ≥ x ≥ y ≥ |z| ≥ 0}
     """
+    # TODO: use Qiskit's TwoQubitWeylDecomposition instead
     res = cirq.kak_decomposition(u)
     coord = res.interaction_coefficients
     b1, b2 = res.single_qubit_operations_before
@@ -600,15 +601,6 @@ def crop_coupling_map(coupling_map, crop_size, seed=None):
     else:
         physical_qubits = physical_qubits_candidates[rng.integers(len(physical_qubits_candidates))]
     return CouplingMap(coupling_map.graph.subgraph(physical_qubits).edge_list())
-
-
-# def generate_random_layout(qreg, coupling_map, seed=None) -> Layout:
-#     assert qreg.size == coupling_map.size(), "Qreg and coupling map size must be equal"
-#     rng = np.random.default_rng(seed)
-#     physical_qubits = list(coupling_map.physical_qubits)
-#     rng.shuffle(physical_qubits)
-#     # return {logical_qubits[i]: p for i, p in enumerate(physical_qubits)}
-#     return Layout.from_intlist(physical_qubits, qreg)
 
 
 def generate_random_layout(qreg, coupling_map, seed=None) -> Layout:

@@ -161,8 +161,7 @@ class BGate(SingletonGate):
 
     .. math::
 
-        B =
-            \begin{pmatrix}
+        B = \begin{pmatrix}
                 \cos\frac{\pi}{8} & 0 & 0 & i\sin\frac{\pi}{8} \\
                 0 & \cos\frac{3\pi}{8} & i\sin\frac{3\pi}{8} & 0 \\
                 0 & i\sin\frac{3\pi}{8} & \cos\frac{3\pi}{8} & 0 \\

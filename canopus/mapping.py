@@ -653,6 +653,7 @@ class SabreMapping(BidirectionalMapping):
 
 
 def build_required_predecessors(dag):
+    """Build a dictionary that maps each node in the DAG to the number of its predecessors"""
     required_predecessors = {}
     for node in dag.topological_op_nodes():
         required_predecessors[node] = len(list(dag.op_predecessors(node)))
@@ -660,6 +661,7 @@ def build_required_predecessors(dag):
 
 
 def build_required_successors(dag):
+    """Build a dictionary that maps each node in the DAG to the number of its successors"""
     required_successors = {}
     for node in dag.topological_op_nodes():
         required_successors[node] = len(list(dag.op_successors(node)))
