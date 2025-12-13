@@ -22,12 +22,12 @@ from canopus.decomposition.utils import (
 )
 
 
-def _in_0_region(x: float, y: float, z: float, weyl_tol: float = 1e-8) -> bool:
+def _in_0_region(x: float, y: float, z: float, weyl_tol: float = 1e-12) -> bool:
     """Check if the gate is local (no entanglement, 0 √iSWAP needed)."""
     return abs(x) <= weyl_tol and abs(y) <= weyl_tol and abs(z) <= weyl_tol
 
 
-def _in_1sqisw_region(x: float, y: float, z: float, weyl_tol: float = 1e-8) -> bool:
+def _in_1sqisw_region(x: float, y: float, z: float, weyl_tol: float = 1e-12) -> bool:
     """Check if the gate can be implemented with exactly 1 √iSWAP.
 
     The √iSWAP gate has canonical coordinates (pi/8, pi/8, 0).
@@ -35,21 +35,21 @@ def _in_1sqisw_region(x: float, y: float, z: float, weyl_tol: float = 1e-8) -> b
     return abs(x - np.pi / 8) <= weyl_tol and abs(y - np.pi / 8) <= weyl_tol and abs(z) <= weyl_tol
 
 
-def _in_2sqisw_region(x: float, y: float, z: float, weyl_tol: float = 1e-8) -> bool:
+def _in_2sqisw_region(x: float, y: float, z: float, weyl_tol: float = 1e-12) -> bool:
     """Check if the gate can be implemented with exactly 2 √iSWAP gates.
-    
+
     This corresponds to the region where x + tol >= y + |z| in the Weyl chamber.
     """
     return x + weyl_tol >= y + abs(z)
 
 
-def _in_3sqisw_region(x: float, y: float, z: float, weyl_tol: float = 1e-8) -> bool:
+def _in_3sqisw_region(x: float, y: float, z: float, weyl_tol: float = 1e-12) -> bool:
     """Any gate can be implemented with 3 √iSWAP gates (universal fallback)."""
     return True
 
 
 def _decomp_0_matrices(
-    kak: _QiskitKAKDecomposition, atol: float = 1e-8
+    kak: _QiskitKAKDecomposition, atol: float = 1e-12
 ) -> tuple[list[tuple[np.ndarray, np.ndarray]], complex]:
     """Decompose a local gate (0 √iSWAP).
 
@@ -64,7 +64,7 @@ def _decomp_0_matrices(
 
 
 def _decomp_1sqisw_matrices(
-    kak: _QiskitKAKDecomposition, atol: float = 1e-8
+    kak: _QiskitKAKDecomposition, atol: float = 1e-12
 ) -> tuple[list[tuple[np.ndarray, np.ndarray]], complex]:
     """Decompose using exactly 1 √iSWAP gate.
 
@@ -77,7 +77,7 @@ def _decomp_1sqisw_matrices(
 
 
 def _decomp_2sqisw_matrices(
-    kak: _QiskitKAKDecomposition, atol: float = 1e-8
+    kak: _QiskitKAKDecomposition, atol: float = 1e-12
 ) -> tuple[list[tuple[np.ndarray, np.ndarray]], complex]:
     """Decompose using exactly 2 √iSWAP gates.
 
@@ -127,7 +127,7 @@ def _decomp_2sqisw_matrices(
 
 
 def _decomp_3sqisw_matrices(
-    kak: _QiskitKAKDecomposition, atol: float = 1e-8
+    kak: _QiskitKAKDecomposition, atol: float = 1e-12
 ) -> tuple[list[tuple[np.ndarray, np.ndarray]], complex]:
     """Decompose using 3 √iSWAP gates (universal construction).
 
@@ -169,7 +169,7 @@ def _decomp_3sqisw_matrices(
 
 def _single_qubit_matrices_with_sqisw(
     kak: _QiskitKAKDecomposition,
-    atol: float = 1e-8,
+    atol: float = 1e-12,
 ) -> tuple[list[tuple[np.ndarray, np.ndarray]], complex]:
     """Select the optimal √iSWAP decomposition based on Weyl chamber region.
 

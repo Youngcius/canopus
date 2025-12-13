@@ -7,9 +7,10 @@ including KAK decomposition wrappers and single-qubit gate synthesis.
 
 from dataclasses import dataclass
 import numpy as np
+import cirq
 from qiskit import QuantumCircuit
 from qiskit.circuit.library import UGate
-from qiskit.synthesis import TwoQubitWeylDecomposition, OneQubitEulerDecomposer
+from qiskit.synthesis import OneQubitEulerDecomposer
 
 _one_qubit_decomposer = OneQubitEulerDecomposer("U3")
 
@@ -50,7 +51,13 @@ class _QiskitKAKDecomposition:
 
 
 def _kak_from_unitary(unitary: np.ndarray) -> _QiskitKAKDecomposition:
-    """Compute the KAK decomposition of a two-qubit unitary.
+    """Compute a Cirq-style KAK decomposition of a two-qubit unitary.
+
+    Cirq's ``kak_decomposition`` is used instead of Qiskit's Weyl decomposition
+    because it canonicalizes edge cases (e.g. x = y = π/4) in the same gauge
+    assumed by the √iSWAP synthesis algorithm. Qiskit's decomposition can return
+    interaction vectors with a different sign convention in those regions, which
+    breaks the downstream analytical formulas.
 
     Args:
         unitary: A 4x4 unitary matrix.
@@ -58,14 +65,17 @@ def _kak_from_unitary(unitary: np.ndarray) -> _QiskitKAKDecomposition:
     Returns:
         A QiskitKAKDecomposition containing the decomposition parameters.
     """
-    decomp = TwoQubitWeylDecomposition(unitary)
+    # ! NOTE: This function must be based on Cirq's KAK decomposition instead of Qiskit's
+    #       ! cause they have different conventions for edge cases of Weyl chamber coordinates.
+    #       ! When x≥y≥|z|，x=π/4, Cirq ensures z≥0
+    decomp = cirq.kak_decomposition(unitary, rtol=0, atol=1e-12)
     return _QiskitKAKDecomposition(
-        a=decomp.a,
-        b=decomp.b,
-        c=decomp.c,
-        single_qubit_operations_before=(decomp.K2l, decomp.K2r),
-        single_qubit_operations_after=(decomp.K1l, decomp.K1r),
-        global_phase=float(decomp.global_phase),
+        a=decomp.interaction_coefficients[0],
+        b=decomp.interaction_coefficients[1],
+        c=decomp.interaction_coefficients[2],
+        single_qubit_operations_before=decomp.single_qubit_operations_before,
+        single_qubit_operations_after=decomp.single_qubit_operations_after,
+        global_phase=float(np.angle(decomp.global_phase)),
     )
 
 

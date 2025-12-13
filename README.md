@@ -83,9 +83,11 @@ poe dev  # Build Rust extension and install in editable mode
 
 [./examples/](./examples/) contains some introductory examples:
 
+- [`routing.ipynb`](./examples/routing.ipynb) to test Canopus routing functionality in detail
+- [`rebasing.ipynb`](./examples/rebasing.ipynb) to test optimal ISA rebase functionality (e.g., `B` gate, `√iSWAP`, and arbitrary gate set) in detail
 - `python route_demo.py` to test the routing effect by Sabre and Canopus on a demo circuit
 - `python route_qft.py <n>` to test the routing effect by Sabre and Canopus for the n-qubit QFT kernel
-- `python rebase_random_unitary.py` to test the rebase passes for arbitrary ISAs
+- `python rebase_xxx.py` to test the rebase passes for arbitrary ISAs
 
 
 ### Evaluation artifact

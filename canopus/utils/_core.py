@@ -29,7 +29,6 @@ from pytket.utils.stats import gate_counts
 from qiskit.circuit import Gate
 from qiskit.circuit import CircuitInstruction
 from qiskit.circuit.library import CXGate, RZZGate, XXPlusYYGate, iSwapGate
-from qiskit.synthesis import TwoQubitWeylDecomposition
 from qiskit.transpiler import CouplingMap, Layout
 from rich.console import Console
 
@@ -493,36 +492,34 @@ def canonical_coordinate(u: np.ndarray) -> tuple[float, float, float]:
     Returns:
         (a, b, c) ~ e^{- i \frac{\pi}{2}(a XX + b YY + c ZZ)} where 0.5 ≥ a ≥ b ≥ |c|
     """
-    decomp = TwoQubitWeylDecomposition(u)
-    return decomp.a / half_pi, decomp.b / half_pi, -decomp.c / half_pi
+    # Use the Cirq-based KAK to stay in the same gauge as our decomposition code
+    a, b, c = cirq.kak_vector(u) / half_pi
+    return a, b, -c
 
 
 def canonical_decompose(
-    u: np.ndarray, return_weyl_coord: bool = True
+    u: np.ndarray,
 ) -> tuple[tuple[np.ndarray, np.ndarray], tuple[np.ndarray, np.ndarray], tuple[float, float, float]]:
     r"""
     Decompose a 4x4 unitary matrix into two pairs of single-qubit gates and three interaction coefficients.
     - If return_weyl_coord is True: returned coord is Weyl coordinate defined in
-        (x, y, z) ~ e^{-i (x XX + y YY + z ZZ)} where (x, y, z) ∈ {π/4 ≥ x ≥ y ≥ |z| ≥ 0}
-    - If return_weyl_coord is False: returned coord is KAK coefficients defined in
-        (x, y, z) ~ e^{i (x XX + y YY + z ZZ)} where (x, y, z) ∈ {π/4 ≥ x ≥ y ≥ |z| ≥ 0}
+        (x, y, z) ~ e^{-i \frac{\pi}{2} (x XX + y YY + z ZZ)} where (x, y, z) ∈ {π/4 ≥ x ≥ y ≥ |z| ≥ 0}
     """
-    # TODO: use Qiskit's TwoQubitWeylDecomposition instead
     res = cirq.kak_decomposition(u)
     coord = res.interaction_coefficients
-    b1, b2 = res.single_qubit_operations_before
-    a1, a2 = res.single_qubit_operations_after
-    if return_weyl_coord:
-        coord = (coord[0], coord[1], -coord[2])
-        a1 = a1 @ Z
-        b1 = Z @ b1
-        if np.isclose(coord[0], np.pi / 4) and fuzzy_less(coord[2], 0):
-            coord = (coord[0], coord[1], -coord[2])
-            a1 = a1 @ X
-            a2 = a2 @ Z
-            b2 = Y @ b2
+    b0, b1 = res.single_qubit_operations_before
+    a0, a1 = res.single_qubit_operations_after
 
-    return (a1, a2), (b1, b2), coord
+    a, b, c = (coord[0] / half_pi, coord[1] / half_pi, -coord[2] / half_pi)
+    a0 = a0 @ Z
+    b0 = Z @ b0
+    if np.isclose(a, 0.5) and fuzzy_less(c, 0):
+        c = -c
+        a0 = a0 @ X
+        a1 = a1 @ Z
+        b1 = Y @ b1
+
+    return (a0, a1), (b0, b1), (a, b, c)
 
 
 def match_global_phase(a: np.ndarray, b: np.ndarray) -> tuple[np.ndarray, np.ndarray]:

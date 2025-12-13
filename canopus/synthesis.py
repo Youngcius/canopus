@@ -1,10 +1,8 @@
-from dataclasses import dataclass
-
 import numpy as np
 import pytket
 import pytket.passes
 import qiskit
-from canopus.utils import check_weyl_coord, fuzzy_equal, fuzzy_less
+from math import pi
 
 from pytket.circuit import OpType
 from qiskit import QuantumCircuit, QuantumRegister
@@ -23,13 +21,14 @@ from qiskit.circuit.library import (
 )
 from qiskit.converters import circuit_to_dag
 from qiskit.dagcircuit import DAGCircuit
-from qiskit.synthesis import TwoQubitWeylDecomposition, XXDecomposer
+from qiskit.synthesis import XXDecomposer
 from qiskit.transpiler import PassManager, TransformationPass, passes
 
 from canopus.backends import ISAType
-from canopus.basics import CanonicalGate, X, Y, Z, half_pi, pi
+from canopus.basics import CanonicalGate
 from canopus.utils import qiskit_to_tket, tket_to_qiskit, gate_from_qiskit_to_bqskit
-from canopus.utils import infidelity, bqskit_to_qiskit
+from canopus.utils import infidelity, bqskit_to_qiskit, canonical_decompose
+from canopus.utils import check_weyl_coord, fuzzy_equal
 from canopus.decomposition.berkeley import two_qubit_unitary_to_b_circuit
 from canopus.decomposition.sqisw import two_qubit_unitary_to_sqisw_circuit
 
@@ -193,29 +192,15 @@ class CanonicalSynthesis(TransformationPass):
                 continue
             if hasattr(node.op, "to_matrix"):
                 # decompose 2Q unitary to canonical gate sandwiched by 1Q gates
-                decomp = TwoQubitWeylDecomposition(node.op.to_matrix())
-                a, b, c = decomp.a / half_pi, decomp.b / half_pi, -decomp.c / half_pi
-
-                B0 = Z @ decomp.K2l
-                B1 = decomp.K2r
-                A0 = decomp.K1l @ Z
-                A1 = decomp.K1r
-
-                if fuzzy_equal(a, 0.5) and fuzzy_less(c, 0):
-                    c = -c
-                    A0 = A0 @ X
-                    A1 = A1 @ Z
-                    B1 = Y @ B1
-
+                (a0, a1), (b0, b1), (a, b, c) = canonical_decompose(node.op.to_matrix())
                 mini_dag = DAGCircuit()
                 q = QuantumRegister(2)
                 mini_dag.add_qreg(q)
-                mini_dag.apply_operation_back(UnitaryGate(B0), [q[0]])
-                mini_dag.apply_operation_back(UnitaryGate(B1), [q[1]])
+                mini_dag.apply_operation_back(UnitaryGate(b0), [q[0]])
+                mini_dag.apply_operation_back(UnitaryGate(b1), [q[1]])
                 mini_dag.apply_operation_back(CanonicalGate(a, b, c), [q[0], q[1]])
-                mini_dag.apply_operation_back(UnitaryGate(A0), [q[0]])
-                mini_dag.apply_operation_back(UnitaryGate(A1), [q[1]])
-
+                mini_dag.apply_operation_back(UnitaryGate(a0), [q[0]])
+                mini_dag.apply_operation_back(UnitaryGate(a1), [q[1]])
                 dag.substitute_node_with_dag(node, mini_dag, [q[1], q[0]])
 
         return dag

@@ -27,11 +27,9 @@ def test_mirror_weyl_coord():
     for i in range(1000):
         u = unitary_group.rvs(4)
         _, _, coord = canonical_decompose(u)
-        a, b, c = np.array(coord) / half_pi
-        coord1 = mirror_weyl_coord(a, b, c)
+        coord1 = mirror_weyl_coord(*coord)
 
         _, _, coord2 = canonical_decompose(u @ cirq.unitary(cirq.SWAP))
-        coord2 = np.array(coord2) / half_pi
 
         assert np.allclose(coord1, coord2)
 
@@ -40,8 +38,7 @@ def test_optimal_can_gate_duration():
     durations = []
     for i in range(10000):
         u = unitary_group.rvs(4)
-        _, _, coord = canonical_decompose(u)
-        a, b, c = np.array(coord) / half_pi
+        _, _, (a, b, c) = canonical_decompose(u)
         duration = optimal_can_gate_duration(a, b, c, 1, 1, 0)
         durations.append(duration)
 

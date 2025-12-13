@@ -21,12 +21,12 @@ from canopus.decomposition.utils import (
 )
 
 
-def _in_0_region(x: float, y: float, z: float, atol: float = 1e-9) -> bool:
+def _in_0_region(x: float, y: float, z: float, atol: float = 1e-12) -> bool:
     """Check if the gate is local (no entanglement, 0 B gates needed)."""
     return abs(x) <= atol and abs(y) <= atol and abs(z) <= atol
 
 
-def _in_1_b_region(x: float, y: float, z: float, atol: float = 1e-9) -> bool:
+def _in_1_b_region(x: float, y: float, z: float, atol: float = 1e-12) -> bool:
     """Check if the gate can be implemented with exactly 1 B gate.
 
     The B gate has canonical coordinates (pi/4, pi/8, 0).
@@ -109,7 +109,7 @@ def _build_unitary_from_ops(
 
 def _single_qubit_matrices_with_b(
     kak: _QiskitKAKDecomposition,
-    atol: float = 1e-8,
+    atol: float = 1e-12,
 ) -> tuple[list[tuple[np.ndarray, np.ndarray]], list[tuple[str, float | None, int | tuple[int, int]]], complex]:
     """Compute single-qubit fixup matrices for B gate decomposition.
 
@@ -118,7 +118,6 @@ def _single_qubit_matrices_with_b(
 
     Args:
         kak: The KAK decomposition of the target unitary.
-        required_b_count: If specified, force exactly this many B gates.
         atol: Absolute tolerance for region detection.
 
     Returns:
