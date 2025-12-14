@@ -10,7 +10,7 @@
 If you make use of this code or the genAshN gate scheme in your work, please cite the following papers:
 
 
-If you make sure of Canopus in your work, please cite the following paper:
+If you make use of Canopus in your work, please cite the following paper:
 
 ```
 @article{yang2025qubit,
