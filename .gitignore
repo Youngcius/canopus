@@ -203,9 +203,5 @@ logs/
 
 rebuttal*
 
-backup.tmp/
-
-analysis.tmp/
-
-
-experiments/
+backup/
+analysis/
