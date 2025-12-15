@@ -70,8 +70,6 @@ Then use the following task commands:
 | `poe rebuild` | Clean and rebuild from scratch |
 | `poe build` | Build wheel for distribution |
 | `poe test` | Run tests |
-| `poe fmt` | Format code with ruff |
-| `poe lint` | Lint code with ruff |
 
 **Quick start for development:**
 
