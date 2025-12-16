@@ -11,14 +11,14 @@ The √iSWAP (SQiSW) gate has canonical coordinates (pi/8, pi/8, 0), which means
 
 import numpy as np
 from qiskit import QuantumCircuit
-from qiskit.circuit.library import RZGate, RXGate
+from qiskit.circuit.library import RXGate, RZGate
 
 from canopus.basics import SQiSWGate
 from canopus.decomposition.utils import (
-    _QiskitKAKDecomposition,
-    _kak_from_unitary,
-    _kak_from_coords,
     _append_single_qubit_from_matrix,
+    _kak_from_coords,
+    _kak_from_unitary,
+    _QiskitKAKDecomposition,
 )
 
 
@@ -137,8 +137,6 @@ def _decomp_3sqisw_matrices(
     Structure: [h0,h1] - √iSWAP - [e0@g0, e1@g1] - √iSWAP - [c0,c1] - √iSWAP - [d0,d1]
     """
     x, y, z = kak.interaction_coefficients
-    b0, b1 = kak.single_qubit_operations_before
-    a0, a1 = kak.single_qubit_operations_after
 
     # Choose split point based on Weyl chamber region
     ieq1 = y > np.pi / 8
@@ -158,6 +156,9 @@ def _decomp_3sqisw_matrices(
 
     ((h0, h1), (g0, g1)), phase1 = _decomp_1sqisw_matrices(kak1, atol)
     ((e0, e1), (c0, c1), (d0, d1)), phase2 = _decomp_2sqisw_matrices(kak2, atol)
+
+    b0, b1 = kak.single_qubit_operations_before
+    a0, a1 = kak.single_qubit_operations_after
 
     return [
         (h0 @ b0, h1 @ b1),

@@ -3,7 +3,8 @@ Type stubs for canopus.utils._accel Rust extension module.
 This file provides type hints for the Rust-compiled functions.
 """
 
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 import numpy as np
 

@@ -1,11 +1,17 @@
+from math import pi
+
 import numpy as np
 import pytket
 import pytket.passes
 import qiskit
-from math import pi
-
+from monodromy.coverage import (
+    CircuitPolytope,
+    convert_gate_to_monodromy_coordinate,
+    gates_to_coverage,
+)
 from pytket.circuit import OpType
 from qiskit import QuantumCircuit, QuantumRegister
+from qiskit.circuit import Gate
 from qiskit.circuit.library import (
     CXGate,
     HGate,
@@ -26,18 +32,17 @@ from qiskit.transpiler import PassManager, TransformationPass, passes
 
 from canopus.backends import ISAType
 from canopus.basics import CanonicalGate
-from canopus.utils import qiskit_to_tket, tket_to_qiskit, gate_from_qiskit_to_bqskit
-from canopus.utils import infidelity, bqskit_to_qiskit, canonical_decompose
-from canopus.utils import check_weyl_coord, fuzzy_equal
 from canopus.decomposition.berkeley import two_qubit_unitary_to_b_circuit
 from canopus.decomposition.sqisw import two_qubit_unitary_to_sqisw_circuit
-
-from qiskit.circuit import Gate
-from monodromy.coverage import (
-    CircuitPolytope,
-    coverage_lookup_cost,
-    gates_to_coverage,
-    convert_gate_to_monodromy_coordinate,
+from canopus.utils import (
+    bqskit_to_qiskit,
+    canonical_decompose,
+    check_weyl_coord,
+    fuzzy_equal,
+    gate_from_qiskit_to_bqskit,
+    infidelity,
+    qiskit_to_tket,
+    tket_to_qiskit,
 )
 
 _xx_decomposer = XXDecomposer(euler_basis="U3")
@@ -63,6 +68,8 @@ def rebase_to_custom(
 
 
 class CustomSynthesis(TransformationPass):
+    INFIDELITY_THRESHOLD = 1e-14
+
     def __init__(
         self,
         gate_set: list[Gate] = None,
@@ -109,8 +116,13 @@ class CustomSynthesis(TransformationPass):
                     circ.append_gate(U3Gate(), [0])
                 seed = self.seed
                 circ.instantiate(u, seed=seed)
-                while infidelity(u, circ.get_unitary()) > 1e-14:
+                infid_thr = self.INFIDELITY_THRESHOLD
+                trial = 0
+                while infidelity(u, circ.get_unitary()) > infid_thr:
                     seed += 1
+                    trial += 1
+                    if trial % 6 == 0:
+                        infid_thr *= 10
                     circ.instantiate(u, seed=seed)
 
                 from qiskit.converters import circuit_to_dag

@@ -8,18 +8,18 @@
 Canopus (Canonical-Optimized Placement Utility Suite) enables qubit mapping/routing tailored to advanced quantum ISAs.
 """
 
-from . import backends, basics, mapping, synthesis, utils, decomposition
-from .backends import CanopusBackend, CouplingType, ISAType, SynthCostEstimator
-from .basics import CanonicalGate, SQiSWGate, BGate
-from .mapping import CanopusMapping, SabreMapping
+from . import backends, basics, decomposition, mapping, synthesis, utils  # noqa: F401
+from .backends import CanopusBackend, CouplingType, ISAType, SynthCostEstimator  # noqa: F401
+from .basics import BGate, CanonicalGate, SQiSWGate  # noqa: F401
+from .mapping import CanopusMapping, SabreMapping  # noqa: F401
 from .synthesis import (
-    logical_optimize,
-    normalize_canonical,
-    rebase_to_canonical,
-    rebase_to_sqisw,
-    rebase_to_b,
-    rebase_to_tk2,
-    rebase_to_zzphase,
-    rebase_to_custom,
-    synthesize_clifford_circuit,
+    logical_optimize,  # noqa: F401
+    normalize_canonical,  # noqa: F401
+    rebase_to_b,  # noqa: F401
+    rebase_to_canonical,  # noqa: F401
+    rebase_to_custom,  # noqa: F401
+    rebase_to_sqisw,  # noqa: F401
+    rebase_to_tk2,  # noqa: F401
+    rebase_to_zzphase,  # noqa: F401
+    synthesize_clifford_circuit,  # noqa: F401
 )

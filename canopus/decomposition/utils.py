@@ -6,8 +6,9 @@ including KAK decomposition wrappers and single-qubit gate synthesis.
 """
 
 from dataclasses import dataclass
-import numpy as np
+
 import cirq
+import numpy as np
 from qiskit import QuantumCircuit
 from qiskit.circuit.library import UGate
 from qiskit.synthesis import OneQubitEulerDecomposer

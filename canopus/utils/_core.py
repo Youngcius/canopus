@@ -1,13 +1,14 @@
 import os
 import pickle
 from collections import Counter
+from collections.abc import Callable
 from functools import lru_cache
 from math import pi
-from collections.abc import Callable
+from typing import TYPE_CHECKING
 
-import numpy as np
-import cirq
 import bqskit
+import cirq
+import numpy as np
 import pytket
 import pytket.qasm
 import qiskit
@@ -15,26 +16,58 @@ import qiskit.qasm2
 import qiskit.quantum_info as qi
 import rustworkx as rx
 from bqskit.ir import gates as bqskit_gates
-from canopus.utils._accel import (
-    canonical_unitary,
-    check_weyl_coord,
-    optimal_can_gate_duration,
-    sort_two_ints,
-    fuzzy_less,
-)
 from monodromy.coverage import coverage_lookup_cost, gates_to_coverage
 from prettytable import PrettyTable
 from pytket import OpType
 from pytket.utils.stats import gate_counts
-from qiskit.circuit import Gate
-from qiskit.circuit import CircuitInstruction
+from qiskit.circuit import CircuitInstruction, Gate
 from qiskit.circuit.library import CXGate, RZZGate, XXPlusYYGate, iSwapGate
 from qiskit.transpiler import CouplingMap, Layout
 from rich.console import Console
 
-from canopus.basics import CanonicalGate, BGate, SQiSWGate, half_pi, X, Y, Z
+from canopus.utils._accel import (
+    canonical_unitary,
+    check_weyl_coord,
+    fuzzy_less,
+    optimal_can_gate_duration,
+    sort_two_ints,
+)
 
 console = Console()
+
+# Module-level lazy import to resolve circular dependency:
+# canopus.basics imports from canopus.utils._accel
+# canopus.utils.__init__ imports from canopus.utils._core
+# We delay importing from canopus.basics until actually needed
+if TYPE_CHECKING:
+    from canopus.basics import BGate, CanonicalGate, SQiSWGate
+
+# Cache for lazy-loaded gate classes
+_basics_cache = {}
+
+def _get_gate_class(name: str):
+    """Lazy import gate classes to avoid circular dependency.
+    
+    Args:
+        name: Gate class name ('BGate', 'CanonicalGate', or 'SQiSWGate')
+    
+    Returns:
+        The requested gate class
+    """
+    if not _basics_cache:
+        from canopus.basics import BGate, CanonicalGate, SQiSWGate
+        _basics_cache.update({
+            'BGate': BGate,
+            'CanonicalGate': CanonicalGate,
+            'SQiSWGate': SQiSWGate,
+        })
+    return _basics_cache[name]
+
+# Constants that don't create circular dependencies
+half_pi = pi / 2
+X = qi.Pauli("X").to_matrix()
+Y = qi.Pauli("Y").to_matrix()
+Z = qi.Pauli("Z").to_matrix()
 
 CX_AshN_Time_XY = optimal_can_gate_duration(0.5, 0, 0, 1, 1, 0)
 SQiSW_AshN_Time_XY = optimal_can_gate_duration(0.25, 0.25, 0, 1, 1, 0)
@@ -92,6 +125,7 @@ def get_zzphase_with_mirror_coverage():
     if os.path.exists(ZZPhase_With_Mirror_Coverage_File):
         with open(ZZPhase_With_Mirror_Coverage_File, "rb") as f:
             return pickle.load(f)
+    CanonicalGate = _get_gate_class('CanonicalGate')
     gate_set = [
         RZZGate(pi / 6),
         RZZGate(pi / 4),
@@ -130,6 +164,7 @@ def get_sqisw_with_mirror_coverage():
     if os.path.exists(SQiSW_With_Mirror_Coverage_File):
         with open(SQiSW_With_Mirror_Coverage_File, "rb") as f:
             return pickle.load(f)
+    CanonicalGate = _get_gate_class('CanonicalGate')
     gate_set = [iSwapGate().power(0.5), iSwapGate(), CanonicalGate(0.5, 0.25, 0.25), CXGate()]
     # costs = [
     #     1,
@@ -248,12 +283,14 @@ def tket_to_qiskit(circ: pytket.Circuit) -> qiskit.QuantumCircuit:
                     if np.allclose(cmd.op.params[0], 1):
                         qc.iswap(q0, q1)
                     elif np.allclose(cmd.op.params[0], 0.5):
+                        SQiSWGate = _get_gate_class('SQiSWGate')
                         qc.append(SQiSWGate(), [q0, q1])
                     else:
                         qc.append(XXPlusYYGate(-cmd.op.params[0] * pi), [q0, q1])
                 elif cmd.op.type == OpType.ZZPhase:
                     qc.rzz(cmd.op.params[0] * pi, q0, q1)
                 elif cmd.op.type == OpType.TK2:
+                    CanonicalGate = _get_gate_class('CanonicalGate')
                     qc.append(CanonicalGate(*cmd.op.params), [q0, q1])
     else:
         qc = qiskit.QuantumCircuit.from_qasm_str(pytket.qasm.circuit_to_qasm_str(circ))
@@ -337,6 +374,7 @@ def qc2mat(qc: qiskit.QuantumCircuit) -> np.ndarray:
 
 
 def is_canonical_normalized(qc: qiskit.QuantumCircuit) -> bool:
+    CanonicalGate = _get_gate_class('CanonicalGate')
     for instr in qc.data:
         if isinstance(instr.operation, CanonicalGate):
             if not check_weyl_coord(*instr.operation.params):
@@ -345,6 +383,7 @@ def is_canonical_normalized(qc: qiskit.QuantumCircuit) -> bool:
 
 
 def canonical_statistics(qc: qiskit.QuantumCircuit) -> dict[tuple[float, float, float], int]:
+    CanonicalGate = _get_gate_class('CanonicalGate')
     can_params = []
     for instr in qc.data:
         if isinstance(instr.operation, CanonicalGate):
@@ -645,6 +684,10 @@ def _pick_connected_nodes(g: rx.PyGraph, start_node: int, k: int) -> list[int]:
 def gate_from_qiskit_to_bqskit(g: Gate):
     """For simplicity, only consider common 2Q gates"""
     from qiskit.circuit.library import CXGate, iSwapGate, RXXGate, RYYGate, RZZGate, XXPlusYYGate
+    
+    CanonicalGate = _get_gate_class('CanonicalGate')
+    BGate = _get_gate_class('BGate')
+    SQiSWGate = _get_gate_class('SQiSWGate')
 
     if isinstance(g, CanonicalGate):
         return bqskit_gates.FixedCanonicalGate(*(np.array(g.params) * pi))
@@ -667,6 +710,8 @@ def gate_from_qiskit_to_bqskit(g: Gate):
 
 
 def bqskit_to_qiskit(circ: bqskit.Circuit) -> qiskit.QuantumCircuit:
+    BGate = _get_gate_class('BGate')
+    CanonicalGate = _get_gate_class('CanonicalGate')
     qc = qiskit.QuantumCircuit(2)
     for op in circ.operations():
         if isinstance(op.gate, bqskit_gates.XGate):

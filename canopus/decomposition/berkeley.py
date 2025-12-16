@@ -15,9 +15,9 @@ from qiskit.circuit.library import RYGate, RZGate
 
 from canopus.basics import BGate
 from canopus.decomposition.utils import (
-    _QiskitKAKDecomposition,
-    _kak_from_unitary,
     _append_single_qubit_from_matrix,
+    _kak_from_unitary,
+    _QiskitKAKDecomposition,
 )
 
 
@@ -50,8 +50,7 @@ def _decompose_interaction_into_two_b_gates_ignoring_single_qubit_ops(
     r = (np.sin(y) * np.cos(z)) ** 2
     r = max(0.0, r)  # Clamp out-of-range floating point error
 
-    ops = []
-    ops.append(("B", None, (0, 1)))
+    ops = [("B", None, (0, 1))]
 
     # Single qubit rotation on qubit a (qubit 0)
     s = 1 if z < 0 else -1
@@ -204,9 +203,8 @@ def two_qubit_unitary_to_b_circuit(unitary: np.ndarray, atol: float = 1e-12) -> 
     qc = QuantumCircuit(2)
     qc.global_phase += np.angle(phase_factor)
 
-    x, y, z = kak.interaction_coefficients
-
     # Case 0: Local operation (no B gates needed)
+    x, y, z = kak.interaction_coefficients
     if _in_0_region(x, y, z, atol):
         mat0, mat1 = single_ops[0]
         _append_single_qubit_from_matrix(qc, mat0, 0)
@@ -225,10 +223,8 @@ def two_qubit_unitary_to_b_circuit(unitary: np.ndarray, atol: float = 1e-12) -> 
         return qc
 
     # Case 2: Two B gates
-    before_0, before_1 = single_ops[0]
-    after_0, after_1 = single_ops[1]
-
     # Apply before single-qubit gates
+    before_0, before_1 = single_ops[0]
     _append_single_qubit_from_matrix(qc, before_0, 0)
     _append_single_qubit_from_matrix(qc, before_1, 1)
 
@@ -242,6 +238,7 @@ def two_qubit_unitary_to_b_circuit(unitary: np.ndarray, atol: float = 1e-12) -> 
             qc.append(RZGate(angle), [target])
 
     # Apply after single-qubit gates
+    after_0, after_1 = single_ops[1]
     _append_single_qubit_from_matrix(qc, after_0, 0)
     _append_single_qubit_from_matrix(qc, after_1, 1)
 

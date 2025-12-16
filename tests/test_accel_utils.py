@@ -1,9 +1,11 @@
-from scipy import linalg
-from canopus.utils import *
+from math import pi
+
 import cirq
-from canopus.basics import *
+import numpy as np
+from canopus.basics import XX, YY, ZZ
+from canopus.utils import canonical_decompose, canonical_unitary, mirror_weyl_coord, optimal_can_gate_duration
+from scipy import linalg
 from scipy.stats import unitary_group
-from canopus.utils import canonical_decompose
 
 
 def test_canonical_unitary():

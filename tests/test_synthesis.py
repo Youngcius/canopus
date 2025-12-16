@@ -1,13 +1,11 @@
 import canopus
 import numpy as np
-from qiskit import qasm2
-from qiskit import QuantumCircuit
-from canopus.utils import is_equiv_unitary, qc2mat
-from scipy.stats import unitary_group
-from qiskit.synthesis import TwoQubitWeylDecomposition
-from qiskit.circuit.random import random_circuit
-from canopus.utils import canonical_unitary
 from canopus.basics import CanonicalGate
+from canopus.utils import canonical_unitary, is_equiv_unitary, qc2mat
+from qiskit import QuantumCircuit, qasm2
+from qiskit.circuit.random import random_circuit
+from qiskit.synthesis import TwoQubitWeylDecomposition
+from scipy.stats import unitary_group
 
 Z = np.array([[1, 0], [0, -1]], dtype=np.complex128)
 

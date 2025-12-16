@@ -1,13 +1,13 @@
+from math import pi
+
 import numpy as np
 import qiskit.quantum_info as qi
-from math import pi
-from qiskit.circuit import QuantumRegister, QuantumCircuit
+from qiskit.circuit import QuantumCircuit, QuantumRegister
 from qiskit.circuit._utils import with_gate_array
 from qiskit.circuit.gate import Gate
 from qiskit.circuit.library import XXPlusYYGate
 from qiskit.circuit.parameterexpression import ParameterValueType
 from qiskit.circuit.singleton import SingletonGate, stdlib_singleton_key
-from canopus.utils._accel import canonical_unitary, only_xx_rot
 
 half_pi = pi / 2
 
@@ -38,6 +38,7 @@ class CanonicalGate(Gate):
 
     def __init__(self, a: ParameterValueType, b: ParameterValueType, c: ParameterValueType, label: str | None = None):
         super().__init__("can", 2, [a, b, c], label=label)
+        from canopus.utils._accel import only_xx_rot
         self.is_xx_rot = only_xx_rot(a, b, c)
 
     def inverse(self, annotated: bool = False):
@@ -94,6 +95,7 @@ class CanonicalGate(Gate):
         if copy is False:
             raise ValueError("unable to avoid copy while creating an array as requested")
         a, b, c = (float(param) for param in self.params)
+        from canopus.utils._accel import canonical_unitary
         mat = canonical_unitary(a, b, c)
         return qi.Operator(mat).reverse_qargs().to_matrix()
 

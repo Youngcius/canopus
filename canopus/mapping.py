@@ -3,19 +3,18 @@ import os
 from itertools import chain
 
 import numpy as np
-from canopus.utils._accel import mirror_weyl_coord, sort_two_ints, sort_two_objs
 from qiskit import QuantumCircuit
 from qiskit.circuit import Qubit
 from qiskit.circuit.library import SwapGate
+from qiskit.converters import dag_to_circuit
 from qiskit.dagcircuit import DAGCircuit, DAGNode
 from qiskit.transpiler import Layout, TransformationPass, TranspilerError
 from qiskit.transpiler.passes import VF2Layout
-from qiskit.converters import dag_to_circuit
 
 from canopus.backends import CanopusBackend
 from canopus.basics import CanonicalGate
 from canopus.utils import generate_random_layout, generate_trivial_layout
-
+from canopus.utils._accel import mirror_weyl_coord, sort_two_ints, sort_two_objs
 
 logger = logging.getLogger(__name__)
 

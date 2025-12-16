@@ -1,6 +1,6 @@
-from canopus import *
+from canopus import rebase_to_sqisw, rebase_to_tk2, rebase_to_zzphase
+from canopus.utils import is_equiv_unitary, qc2mat, qiskit_to_tket, tket_to_qiskit
 from qiskit import qasm2
-from canopus.utils import *
 
 qc_demo = qasm2.loads("""
 OPENQASM 2.0;

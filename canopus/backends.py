@@ -1,15 +1,6 @@
 from enum import Enum
 from functools import cached_property
 
-from canopus.utils._accel import (
-    mirror_weyl_coord,
-    only_xx_rot,
-    optimal_can_gate_duration,
-    sort_two_ints,
-    synth_cost_by_cx,
-    synth_cost_by_sqisw,
-    synth_cost_by_b,
-)
 from qiskit import QuantumCircuit
 from qiskit.converters import circuit_to_dag
 from qiskit.dagcircuit import DAGCircuit, DAGNode
@@ -22,6 +13,15 @@ from canopus.utils import (
     synth_cost_by_stabilizer_isa,
     synth_cost_by_zzphase,
     synth_cost_by_zzphase_with_mirror,
+)
+from canopus.utils._accel import (
+    mirror_weyl_coord,
+    only_xx_rot,
+    optimal_can_gate_duration,
+    sort_two_ints,
+    synth_cost_by_b,
+    synth_cost_by_cx,
+    synth_cost_by_sqisw,
 )
 
 CX_AshN_Time_XX = optimal_can_gate_duration(0.5, 0, 0, 1, 0, 0)
