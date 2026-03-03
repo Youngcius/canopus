@@ -1,7 +1,4 @@
 #!/usr/bin/env python
-import sys
-
-sys.path.append('../')
 
 from canopus import *
 from canopus.utils import *
@@ -9,14 +6,23 @@ from qiskit.transpiler import CouplingMap, PassManager
 from pytket.utils import compare_unitaries
 from qiskit import qasm2
 import time
-
+import argparse
 from qiskit.circuit.library import QFT
 
 from rich.console import Console
 
 console = Console()
 
-qc = QFT(int(sys.argv[1]), do_swaps=False).decompose()
+
+parser = argparse.ArgumentParser(description='Route a QFT circuit using Canopus vs. SABRE mapping.')
+parser.add_argument('num_qubits', type=int, help='Number of qubits for the QFT circuit')
+parser.add_argument('-t', '--topology', type=str, default='chain', help='Coupling map topology (default: chain)')
+parser.add_argument('-isa', '--isa', type=str, default='cx', help='ISA type (default: cx)')
+parser.add_argument('-c', '--coupling', type=str, default='xx', help='Coupling type (default: xx) (This is an optional argument)')
+args = parser.parse_args()
+
+
+qc = QFT(int(args.num_qubits), do_swaps=False).decompose()
 circ = qiskit_to_tket(qc)
 circ = rebase_to_tk2(circ)
 qc = tket_to_qiskit(circ)
@@ -29,9 +35,14 @@ if qc.num_qubits < 7:
 
 # print(qiskit_to_tket(qc).get_commands())
 
-coupling_map = gene_chain_coupling_map(qc.num_qubits)
-# coupling_map = gene_square_coupling_map(qc.num_qubits)
-backend = CanopusBackend(coupling_map, 'cx', 'xx')
+if args.topology == 'chain':
+    coupling_map = gene_chain_coupling_map(qc.num_qubits)
+elif args.topology == 'square':
+    coupling_map = gene_square_coupling_map(qc.num_qubits)
+else:
+    raise ValueError(f"Unsupported topology: {args.topology}")
+
+backend = CanopusBackend(coupling_map, args.isa, args.coupling)
 
 console.print('Pulse duration: {}'.format(backend.cost_estimator.eval_circuit_cost(qc)))
 

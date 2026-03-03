@@ -257,7 +257,7 @@ fn synth_cost_by_b(a: f64, b: f64, c: f64) -> f64 {
 }
 
 #[pyfunction]
-fn only_xx_rot(a: f64, b: f64, c: f64) -> bool {
+fn only_xx_rot(_a: f64, b: f64, c: f64) -> bool {
     return b.abs() < ATOL && c.abs() < ATOL;
 }
 

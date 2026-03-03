@@ -382,10 +382,9 @@ class CanopusMapping(BidirectionalMapping):
         wire_durations,
         layout,
         required_predecessors,
-        rng: np.random.Generator | None = None,
+        rng,
     ) -> tuple[Qubit, Qubit]:
         """Return is a tuple of two physical qubit indices"""
-        rng = np.random.default_rng() if rng is None else rng
         logger.info("Layout._v2p={}".format({"q{}".format(self._qubit_indices[v]): p for v, p in layout._v2p.items()}))
         swap_candidates = set()
         qubits = chain.from_iterable([node.qargs for node in front_layer])
@@ -393,7 +392,7 @@ class CanopusMapping(BidirectionalMapping):
             logical_neighbors = [layout._p2v[p] for p in self.coupling_map.neighbors(layout._v2p[v])]
             for n in logical_neighbors:
                 swap_candidates.add(sort_two_objs(v, n, key=self._get_qubit_index))
-        swap_candidates = list(swap_candidates)
+        swap_candidates = sorted(swap_candidates, key=lambda pair: (self._get_qubit_index(pair[0]), self._get_qubit_index(pair[1])))
 
         extended_set = []
         _front_layer = front_layer.copy()
@@ -401,16 +400,12 @@ class CanopusMapping(BidirectionalMapping):
         while len(extended_set) < EXT_SIZE and _front_layer:
             tmp_front_layer = []
             for node in _front_layer:
-                if node.num_qubits == 2:
-                    extended_set.append(node)
-                    if len(extended_set) >= EXT_SIZE:
-                        break
                 for successor in dag.op_successors(node):
                     _required_predecessors[successor] -= 1
                     if _required_predecessors[successor] == 0:
                         tmp_front_layer.append(successor)
-            if len(extended_set) >= EXT_SIZE:
-                break
+                        if node.num_qubits == 2:
+                            extended_set.append(node)
             _front_layer = tmp_front_layer
 
         duration = max(wire_durations.values())
@@ -600,16 +595,15 @@ class SabreMapping(BidirectionalMapping):
         return routed_dag, layout
 
     def _find_best_swap(
-        self, dag, front_layer, layout, required_predecessors, rng: np.random.Generator | None = None
+        self, dag, front_layer, layout, required_predecessors, rng
     ) -> tuple[Qubit, Qubit]:
-        rng = np.random.default_rng() if rng is None else rng
         swap_candidates = set()
         qubits = chain.from_iterable([node.qargs for node in front_layer])
         for v in qubits:
             logical_neighbors = [layout._p2v[p] for p in self.coupling_map.neighbors(layout._v2p[v])]
             for n in logical_neighbors:
                 swap_candidates.add(sort_two_objs(v, n, key=self._get_qubit_index))
-        swap_candidates = list(swap_candidates)
+        swap_candidates = sorted(swap_candidates, key=lambda pair: (self._get_qubit_index(pair[0]), self._get_qubit_index(pair[1])))
 
         extended_set = []
         _front_layer = front_layer.copy()
@@ -617,16 +611,12 @@ class SabreMapping(BidirectionalMapping):
         while len(extended_set) < EXT_SIZE and _front_layer:
             tmp_front_layer = []
             for node in _front_layer:
-                if node.num_qubits == 2:
-                    extended_set.append(node)
-                    if len(extended_set) >= EXT_SIZE:
-                        break
                 for successor in dag.op_successors(node):
                     _required_predecessors[successor] -= 1
                     if _required_predecessors[successor] == 0:
                         tmp_front_layer.append(successor)
-            if len(extended_set) >= EXT_SIZE:
-                break
+                        if node.num_qubits == 2:
+                            extended_set.append(node)
             _front_layer = tmp_front_layer
 
         costs = np.array([self._heuristic_cost(front_layer, extended_set, layout, swap) for swap in swap_candidates])

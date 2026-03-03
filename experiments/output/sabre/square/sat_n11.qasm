@@ -1,49 +1,48 @@
 OPENQASM 2.0;
 include "qelib1.inc";
-gate ryy(param0) q0,q1 { rx(pi/2) q0; rx(pi/2) q1; cx q0,q1; rz(0) q1; cx q0,q1; rx(-pi/2) q0; rx(-pi/2) q1; }
-gate can(param0,param1,param2) q0,q1 { rxx(pi/2) q0,q1; ryy(0) q0,q1; rzz(0) q0,q1; }
-gate can_13738637312(param0,param1,param2) q0,q1 { rxx(pi/4) q0,q1; ryy(0) q0,q1; rzz(0) q0,q1; }
-gate can_13738636352(param0,param1,param2) q0,q1 { rxx(pi/4) q0,q1; ryy(0) q0,q1; rzz(0) q0,q1; }
-gate can_13738638848(param0,param1,param2) q0,q1 { rxx(pi/4) q0,q1; ryy(0) q0,q1; rzz(0) q0,q1; }
-gate can_13738639328(param0,param1,param2) q0,q1 { rxx(pi/4) q0,q1; ryy(0) q0,q1; rzz(0) q0,q1; }
-gate can_13738633616(param0,param1,param2) q0,q1 { rxx(pi/4) q0,q1; ryy(0) q0,q1; rzz(0) q0,q1; }
-gate can_13740009776(param0,param1,param2) q0,q1 { rxx(pi/4) q0,q1; ryy(0) q0,q1; rzz(0) q0,q1; }
-gate can_13739999888(param0,param1,param2) q0,q1 { rxx(pi/4) q0,q1; ryy(0) q0,q1; rzz(0) q0,q1; }
-gate can_13740002816(param0,param1,param2) q0,q1 { rxx(pi/4) q0,q1; ryy(0) q0,q1; rzz(0) q0,q1; }
-gate can_13738638224(param0,param1,param2) q0,q1 { rxx(pi/4) q0,q1; ryy(0) q0,q1; rzz(0) q0,q1; }
-gate can_13740000992(param0,param1,param2) q0,q1 { rxx(pi/4) q0,q1; ryy(0) q0,q1; rzz(0) q0,q1; }
-gate can_13740004544(param0,param1,param2) q0,q1 { rxx(pi/4) q0,q1; ryy(0) q0,q1; rzz(0) q0,q1; }
-gate can_13740015296(param0,param1,param2) q0,q1 { rxx(pi/4) q0,q1; ryy(0) q0,q1; rzz(0) q0,q1; }
-gate can_13740014816(param0,param1,param2) q0,q1 { rxx(pi/4) q0,q1; ryy(0) q0,q1; rzz(0) q0,q1; }
-gate can_13740015104(param0,param1,param2) q0,q1 { rxx(pi/4) q0,q1; ryy(0) q0,q1; rzz(0) q0,q1; }
-gate can_13740014192(param0,param1,param2) q0,q1 { rxx(pi/4) q0,q1; ryy(0) q0,q1; rzz(0) q0,q1; }
-gate can_13740001424(param0,param1,param2) q0,q1 { rxx(pi/4) q0,q1; ryy(0) q0,q1; rzz(0) q0,q1; }
-gate can_13740004256(param0,param1,param2) q0,q1 { rxx(pi/4) q0,q1; ryy(0) q0,q1; rzz(0) q0,q1; }
-gate can_13740007232(param0,param1,param2) q0,q1 { rxx(pi/4) q0,q1; ryy(0) q0,q1; rzz(0) q0,q1; }
-gate can_13740004208(param0,param1,param2) q0,q1 { rxx(pi/4) q0,q1; ryy(0) q0,q1; rzz(0) q0,q1; }
-gate can_13740012992(param0,param1,param2) q0,q1 { rxx(pi/4) q0,q1; ryy(0) q0,q1; rzz(0) q0,q1; }
-gate can_13740003968(param0,param1,param2) q0,q1 { rxx(pi/4) q0,q1; ryy(0) q0,q1; rzz(0) q0,q1; }
-gate can_13740000272(param0,param1,param2) q0,q1 { rxx(pi/4) q0,q1; ryy(0) q0,q1; rzz(0) q0,q1; }
-gate can_13740000320(param0,param1,param2) q0,q1 { rxx(pi/4) q0,q1; ryy(0) q0,q1; rzz(0) q0,q1; }
-gate can_13740007328(param0,param1,param2) q0,q1 { rxx(pi/4) q0,q1; ryy(0) q0,q1; rzz(0) q0,q1; }
-gate can_13740014912(param0,param1,param2) q0,q1 { rxx(pi/4) q0,q1; ryy(0) q0,q1; rzz(0) q0,q1; }
-gate can_13740002240(param0,param1,param2) q0,q1 { rxx(pi/4) q0,q1; ryy(0) q0,q1; rzz(0) q0,q1; }
-gate can_13739999648(param0,param1,param2) q0,q1 { rxx(pi/4) q0,q1; ryy(0) q0,q1; rzz(0) q0,q1; }
-gate can_13740014768(param0,param1,param2) q0,q1 { rxx(pi/4) q0,q1; ryy(0) q0,q1; rzz(0) q0,q1; }
-gate can_13740003680(param0,param1,param2) q0,q1 { rxx(pi/4) q0,q1; ryy(0) q0,q1; rzz(0) q0,q1; }
-gate can_13740003632(param0,param1,param2) q0,q1 { rxx(pi/4) q0,q1; ryy(0) q0,q1; rzz(0) q0,q1; }
-gate can_13740006704(param0,param1,param2) q0,q1 { rxx(pi/4) q0,q1; ryy(0) q0,q1; rzz(0) q0,q1; }
-gate can_13740006464(param0,param1,param2) q0,q1 { rxx(pi/4) q0,q1; ryy(0) q0,q1; rzz(0) q0,q1; }
-gate can_13740001808(param0,param1,param2) q0,q1 { rxx(pi/4) q0,q1; ryy(0) q0,q1; rzz(0) q0,q1; }
-gate can_13740014576(param0,param1,param2) q0,q1 { rxx(pi/4) q0,q1; ryy(0) q0,q1; rzz(0) q0,q1; }
-gate can_13740007424(param0,param1,param2) q0,q1 { rxx(pi/4) q0,q1; ryy(0) q0,q1; rzz(0) q0,q1; }
-gate can_13740004640(param0,param1,param2) q0,q1 { rxx(pi/4) q0,q1; ryy(0) q0,q1; rzz(0) q0,q1; }
-gate can_13740004448(param0,param1,param2) q0,q1 { rxx(pi/4) q0,q1; ryy(0) q0,q1; rzz(0) q0,q1; }
-gate can_13740002864(param0,param1,param2) q0,q1 { rxx(pi/4) q0,q1; ryy(0) q0,q1; rzz(0) q0,q1; }
-gate can_13740005504(param0,param1,param2) q0,q1 { rxx(pi/4) q0,q1; ryy(0) q0,q1; rzz(0) q0,q1; }
-gate can_13740012272(param0,param1,param2) q0,q1 { rxx(pi/4) q0,q1; ryy(0) q0,q1; rzz(0) q0,q1; }
-gate can_13740003440(param0,param1,param2) q0,q1 { rxx(pi/4) q0,q1; ryy(0) q0,q1; rzz(0) q0,q1; }
-gate can_13739999840(param0,param1,param2) q0,q1 { rxx(pi/4) q0,q1; ryy(0) q0,q1; rzz(0) q0,q1; }
+gate can(param0,param1,param2) q0,q1 { u(3*pi/2,0,3*pi/2) q1; u(pi/2,3*pi/2,pi/2) q0; cx q1,q0; u(3*pi/2,3*pi/2,pi/2) q1; u(pi,0,pi) q0; cx q1,q0; u(pi/2,0,pi/2) q1; u(0,3*pi/2,pi/2) q0; cx q1,q0; }
+gate can_13719147472(param0,param1,param2) q0,q1 { u(3*pi/2,0,3*pi/2) q1; u(pi/2,3*pi/2,pi/2) q0; cx q1,q0; u(3*pi/2,5*pi/4,pi/2) q1; u(pi,0,pi) q0; cx q1,q0; u(pi/2,0,pi/2) q1; u(0,3*pi/2,pi/2) q0; cx q1,q0; }
+gate can_13719147664(param0,param1,param2) q0,q1 { u(3*pi/2,0,3*pi/2) q1; u(pi/2,3*pi/2,pi/2) q0; cx q1,q0; u(3*pi/2,5*pi/4,pi/2) q1; u(pi,0,pi) q0; cx q1,q0; u(pi/2,0,pi/2) q1; u(0,3*pi/2,pi/2) q0; cx q1,q0; }
+gate can_13719148096(param0,param1,param2) q0,q1 { u(3*pi/2,0,3*pi/2) q1; u(pi/2,3*pi/2,pi/2) q0; cx q1,q0; u(3*pi/2,5*pi/4,pi/2) q1; u(pi,0,pi) q0; cx q1,q0; u(pi/2,0,pi/2) q1; u(0,3*pi/2,pi/2) q0; cx q1,q0; }
+gate can_13719148720(param0,param1,param2) q0,q1 { u(3*pi/2,0,3*pi/2) q1; u(pi/2,3*pi/2,pi/2) q0; cx q1,q0; u(3*pi/2,5*pi/4,pi/2) q1; u(pi,0,pi) q0; cx q1,q0; u(pi/2,0,pi/2) q1; u(0,3*pi/2,pi/2) q0; cx q1,q0; }
+gate can_13719149056(param0,param1,param2) q0,q1 { u(3*pi/2,0,3*pi/2) q1; u(pi/2,3*pi/2,pi/2) q0; cx q1,q0; u(3*pi/2,5*pi/4,pi/2) q1; u(pi,0,pi) q0; cx q1,q0; u(pi/2,0,pi/2) q1; u(0,3*pi/2,pi/2) q0; cx q1,q0; }
+gate can_13719149440(param0,param1,param2) q0,q1 { u(3*pi/2,0,3*pi/2) q1; u(pi/2,3*pi/2,pi/2) q0; cx q1,q0; u(3*pi/2,5*pi/4,pi/2) q1; u(pi,0,pi) q0; cx q1,q0; u(pi/2,0,pi/2) q1; u(0,3*pi/2,pi/2) q0; cx q1,q0; }
+gate can_13719148864(param0,param1,param2) q0,q1 { u(3*pi/2,0,3*pi/2) q1; u(pi/2,3*pi/2,pi/2) q0; cx q1,q0; u(3*pi/2,5*pi/4,pi/2) q1; u(pi,0,pi) q0; cx q1,q0; u(pi/2,0,pi/2) q1; u(0,3*pi/2,pi/2) q0; cx q1,q0; }
+gate can_13719150064(param0,param1,param2) q0,q1 { u(3*pi/2,0,3*pi/2) q1; u(pi/2,3*pi/2,pi/2) q0; cx q1,q0; u(3*pi/2,5*pi/4,pi/2) q1; u(pi,0,pi) q0; cx q1,q0; u(pi/2,0,pi/2) q1; u(0,3*pi/2,pi/2) q0; cx q1,q0; }
+gate can_13719150400(param0,param1,param2) q0,q1 { u(3*pi/2,0,3*pi/2) q1; u(pi/2,3*pi/2,pi/2) q0; cx q1,q0; u(3*pi/2,5*pi/4,pi/2) q1; u(pi,0,pi) q0; cx q1,q0; u(pi/2,0,pi/2) q1; u(0,3*pi/2,pi/2) q0; cx q1,q0; }
+gate can_13719150208(param0,param1,param2) q0,q1 { u(3*pi/2,0,3*pi/2) q1; u(pi/2,3*pi/2,pi/2) q0; cx q1,q0; u(3*pi/2,5*pi/4,pi/2) q1; u(pi,0,pi) q0; cx q1,q0; u(pi/2,0,pi/2) q1; u(0,3*pi/2,pi/2) q0; cx q1,q0; }
+gate can_13719151072(param0,param1,param2) q0,q1 { u(3*pi/2,0,3*pi/2) q1; u(pi/2,3*pi/2,pi/2) q0; cx q1,q0; u(3*pi/2,5*pi/4,pi/2) q1; u(pi,0,pi) q0; cx q1,q0; u(pi/2,0,pi/2) q1; u(0,3*pi/2,pi/2) q0; cx q1,q0; }
+gate can_13719150448(param0,param1,param2) q0,q1 { u(3*pi/2,0,3*pi/2) q1; u(pi/2,3*pi/2,pi/2) q0; cx q1,q0; u(3*pi/2,5*pi/4,pi/2) q1; u(pi,0,pi) q0; cx q1,q0; u(pi/2,0,pi/2) q1; u(0,3*pi/2,pi/2) q0; cx q1,q0; }
+gate can_13719151504(param0,param1,param2) q0,q1 { u(3*pi/2,0,3*pi/2) q1; u(pi/2,3*pi/2,pi/2) q0; cx q1,q0; u(3*pi/2,5*pi/4,pi/2) q1; u(pi,0,pi) q0; cx q1,q0; u(pi/2,0,pi/2) q1; u(0,3*pi/2,pi/2) q0; cx q1,q0; }
+gate can_13719151216(param0,param1,param2) q0,q1 { u(3*pi/2,0,3*pi/2) q1; u(pi/2,3*pi/2,pi/2) q0; cx q1,q0; u(3*pi/2,5*pi/4,pi/2) q1; u(pi,0,pi) q0; cx q1,q0; u(pi/2,0,pi/2) q1; u(0,3*pi/2,pi/2) q0; cx q1,q0; }
+gate can_13719151648(param0,param1,param2) q0,q1 { u(3*pi/2,0,3*pi/2) q1; u(pi/2,3*pi/2,pi/2) q0; cx q1,q0; u(3*pi/2,5*pi/4,pi/2) q1; u(pi,0,pi) q0; cx q1,q0; u(pi/2,0,pi/2) q1; u(0,3*pi/2,pi/2) q0; cx q1,q0; }
+gate can_13719152464(param0,param1,param2) q0,q1 { u(3*pi/2,0,3*pi/2) q1; u(pi/2,3*pi/2,pi/2) q0; cx q1,q0; u(3*pi/2,5*pi/4,pi/2) q1; u(pi,0,pi) q0; cx q1,q0; u(pi/2,0,pi/2) q1; u(0,3*pi/2,pi/2) q0; cx q1,q0; }
+gate can_13719152992(param0,param1,param2) q0,q1 { u(3*pi/2,0,3*pi/2) q1; u(pi/2,3*pi/2,pi/2) q0; cx q1,q0; u(3*pi/2,5*pi/4,pi/2) q1; u(pi,0,pi) q0; cx q1,q0; u(pi/2,0,pi/2) q1; u(0,3*pi/2,pi/2) q0; cx q1,q0; }
+gate can_13719152896(param0,param1,param2) q0,q1 { u(3*pi/2,0,3*pi/2) q1; u(pi/2,3*pi/2,pi/2) q0; cx q1,q0; u(3*pi/2,5*pi/4,pi/2) q1; u(pi,0,pi) q0; cx q1,q0; u(pi/2,0,pi/2) q1; u(0,3*pi/2,pi/2) q0; cx q1,q0; }
+gate can_13719154192(param0,param1,param2) q0,q1 { u(3*pi/2,0,3*pi/2) q1; u(pi/2,3*pi/2,pi/2) q0; cx q1,q0; u(3*pi/2,5*pi/4,pi/2) q1; u(pi,0,pi) q0; cx q1,q0; u(pi/2,0,pi/2) q1; u(0,3*pi/2,pi/2) q0; cx q1,q0; }
+gate can_13719154144(param0,param1,param2) q0,q1 { u(3*pi/2,0,3*pi/2) q1; u(pi/2,3*pi/2,pi/2) q0; cx q1,q0; u(3*pi/2,5*pi/4,pi/2) q1; u(pi,0,pi) q0; cx q1,q0; u(pi/2,0,pi/2) q1; u(0,3*pi/2,pi/2) q0; cx q1,q0; }
+gate can_13719152848(param0,param1,param2) q0,q1 { u(3*pi/2,0,3*pi/2) q1; u(pi/2,3*pi/2,pi/2) q0; cx q1,q0; u(3*pi/2,5*pi/4,pi/2) q1; u(pi,0,pi) q0; cx q1,q0; u(pi/2,0,pi/2) q1; u(0,3*pi/2,pi/2) q0; cx q1,q0; }
+gate can_13719155488(param0,param1,param2) q0,q1 { u(3*pi/2,0,3*pi/2) q1; u(pi/2,3*pi/2,pi/2) q0; cx q1,q0; u(3*pi/2,5*pi/4,pi/2) q1; u(pi,0,pi) q0; cx q1,q0; u(pi/2,0,pi/2) q1; u(0,3*pi/2,pi/2) q0; cx q1,q0; }
+gate can_13719154864(param0,param1,param2) q0,q1 { u(3*pi/2,0,3*pi/2) q1; u(pi/2,3*pi/2,pi/2) q0; cx q1,q0; u(3*pi/2,5*pi/4,pi/2) q1; u(pi,0,pi) q0; cx q1,q0; u(pi/2,0,pi/2) q1; u(0,3*pi/2,pi/2) q0; cx q1,q0; }
+gate can_13719154240(param0,param1,param2) q0,q1 { u(3*pi/2,0,3*pi/2) q1; u(pi/2,3*pi/2,pi/2) q0; cx q1,q0; u(3*pi/2,5*pi/4,pi/2) q1; u(pi,0,pi) q0; cx q1,q0; u(pi/2,0,pi/2) q1; u(0,3*pi/2,pi/2) q0; cx q1,q0; }
+gate can_13719155824(param0,param1,param2) q0,q1 { u(3*pi/2,0,3*pi/2) q1; u(pi/2,3*pi/2,pi/2) q0; cx q1,q0; u(3*pi/2,5*pi/4,pi/2) q1; u(pi,0,pi) q0; cx q1,q0; u(pi/2,0,pi/2) q1; u(0,3*pi/2,pi/2) q0; cx q1,q0; }
+gate can_13719155632(param0,param1,param2) q0,q1 { u(3*pi/2,0,3*pi/2) q1; u(pi/2,3*pi/2,pi/2) q0; cx q1,q0; u(3*pi/2,5*pi/4,pi/2) q1; u(pi,0,pi) q0; cx q1,q0; u(pi/2,0,pi/2) q1; u(0,3*pi/2,pi/2) q0; cx q1,q0; }
+gate can_13719155872(param0,param1,param2) q0,q1 { u(3*pi/2,0,3*pi/2) q1; u(pi/2,3*pi/2,pi/2) q0; cx q1,q0; u(3*pi/2,5*pi/4,pi/2) q1; u(pi,0,pi) q0; cx q1,q0; u(pi/2,0,pi/2) q1; u(0,3*pi/2,pi/2) q0; cx q1,q0; }
+gate can_13719156928(param0,param1,param2) q0,q1 { u(3*pi/2,0,3*pi/2) q1; u(pi/2,3*pi/2,pi/2) q0; cx q1,q0; u(3*pi/2,5*pi/4,pi/2) q1; u(pi,0,pi) q0; cx q1,q0; u(pi/2,0,pi/2) q1; u(0,3*pi/2,pi/2) q0; cx q1,q0; }
+gate can_13719156496(param0,param1,param2) q0,q1 { u(3*pi/2,0,3*pi/2) q1; u(pi/2,3*pi/2,pi/2) q0; cx q1,q0; u(3*pi/2,5*pi/4,pi/2) q1; u(pi,0,pi) q0; cx q1,q0; u(pi/2,0,pi/2) q1; u(0,3*pi/2,pi/2) q0; cx q1,q0; }
+gate can_13719156640(param0,param1,param2) q0,q1 { u(3*pi/2,0,3*pi/2) q1; u(pi/2,3*pi/2,pi/2) q0; cx q1,q0; u(3*pi/2,5*pi/4,pi/2) q1; u(pi,0,pi) q0; cx q1,q0; u(pi/2,0,pi/2) q1; u(0,3*pi/2,pi/2) q0; cx q1,q0; }
+gate can_13719157216(param0,param1,param2) q0,q1 { u(3*pi/2,0,3*pi/2) q1; u(pi/2,3*pi/2,pi/2) q0; cx q1,q0; u(3*pi/2,5*pi/4,pi/2) q1; u(pi,0,pi) q0; cx q1,q0; u(pi/2,0,pi/2) q1; u(0,3*pi/2,pi/2) q0; cx q1,q0; }
+gate can_13719157840(param0,param1,param2) q0,q1 { u(3*pi/2,0,3*pi/2) q1; u(pi/2,3*pi/2,pi/2) q0; cx q1,q0; u(3*pi/2,5*pi/4,pi/2) q1; u(pi,0,pi) q0; cx q1,q0; u(pi/2,0,pi/2) q1; u(0,3*pi/2,pi/2) q0; cx q1,q0; }
+gate can_13719157984(param0,param1,param2) q0,q1 { u(3*pi/2,0,3*pi/2) q1; u(pi/2,3*pi/2,pi/2) q0; cx q1,q0; u(3*pi/2,5*pi/4,pi/2) q1; u(pi,0,pi) q0; cx q1,q0; u(pi/2,0,pi/2) q1; u(0,3*pi/2,pi/2) q0; cx q1,q0; }
+gate can_13719158272(param0,param1,param2) q0,q1 { u(3*pi/2,0,3*pi/2) q1; u(pi/2,3*pi/2,pi/2) q0; cx q1,q0; u(3*pi/2,5*pi/4,pi/2) q1; u(pi,0,pi) q0; cx q1,q0; u(pi/2,0,pi/2) q1; u(0,3*pi/2,pi/2) q0; cx q1,q0; }
+gate can_13719158704(param0,param1,param2) q0,q1 { u(3*pi/2,0,3*pi/2) q1; u(pi/2,3*pi/2,pi/2) q0; cx q1,q0; u(3*pi/2,5*pi/4,pi/2) q1; u(pi,0,pi) q0; cx q1,q0; u(pi/2,0,pi/2) q1; u(0,3*pi/2,pi/2) q0; cx q1,q0; }
+gate can_13719146944(param0,param1,param2) q0,q1 { u(3*pi/2,0,3*pi/2) q1; u(pi/2,3*pi/2,pi/2) q0; cx q1,q0; u(3*pi/2,5*pi/4,pi/2) q1; u(pi,0,pi) q0; cx q1,q0; u(pi/2,0,pi/2) q1; u(0,3*pi/2,pi/2) q0; cx q1,q0; }
+gate can_13719146512(param0,param1,param2) q0,q1 { u(3*pi/2,0,3*pi/2) q1; u(pi/2,3*pi/2,pi/2) q0; cx q1,q0; u(3*pi/2,5*pi/4,pi/2) q1; u(pi,0,pi) q0; cx q1,q0; u(pi/2,0,pi/2) q1; u(0,3*pi/2,pi/2) q0; cx q1,q0; }
+gate can_13719145456(param0,param1,param2) q0,q1 { u(3*pi/2,0,3*pi/2) q1; u(pi/2,3*pi/2,pi/2) q0; cx q1,q0; u(3*pi/2,5*pi/4,pi/2) q1; u(pi,0,pi) q0; cx q1,q0; u(pi/2,0,pi/2) q1; u(0,3*pi/2,pi/2) q0; cx q1,q0; }
+gate can_13719145600(param0,param1,param2) q0,q1 { u(3*pi/2,0,3*pi/2) q1; u(pi/2,3*pi/2,pi/2) q0; cx q1,q0; u(3*pi/2,5*pi/4,pi/2) q1; u(pi,0,pi) q0; cx q1,q0; u(pi/2,0,pi/2) q1; u(0,3*pi/2,pi/2) q0; cx q1,q0; }
+gate can_13719145168(param0,param1,param2) q0,q1 { u(3*pi/2,0,3*pi/2) q1; u(pi/2,3*pi/2,pi/2) q0; cx q1,q0; u(3*pi/2,5*pi/4,pi/2) q1; u(pi,0,pi) q0; cx q1,q0; u(pi/2,0,pi/2) q1; u(0,3*pi/2,pi/2) q0; cx q1,q0; }
+gate can_13719145888(param0,param1,param2) q0,q1 { u(3*pi/2,0,3*pi/2) q1; u(pi/2,3*pi/2,pi/2) q0; cx q1,q0; u(3*pi/2,5*pi/4,pi/2) q1; u(pi,0,pi) q0; cx q1,q0; u(pi/2,0,pi/2) q1; u(0,3*pi/2,pi/2) q0; cx q1,q0; }
+gate can_13719144544(param0,param1,param2) q0,q1 { u(3*pi/2,0,3*pi/2) q1; u(pi/2,3*pi/2,pi/2) q0; cx q1,q0; u(3*pi/2,5*pi/4,pi/2) q1; u(pi,0,pi) q0; cx q1,q0; u(pi/2,0,pi/2) q1; u(0,3*pi/2,pi/2) q0; cx q1,q0; }
 qreg q[11];
 u(3*pi/2,0,pi/2) q[0];
 u(pi/2,3*pi/2,pi/2) q[1];
@@ -71,10 +70,10 @@ swap q[2],q[6];
 u(7*pi/2,3*pi/2,pi/4) q[5];
 can(0.5,0,0) q[1],q[5];
 u(0,3*pi/2,3*pi/2) q[1];
-can_13738637312(0.25,0,0) q[1],q[2];
+can_13719147472(0.25,0,0) q[1],q[2];
 u(pi,3*pi/2,3*pi/2) q[1];
 u(pi,3*pi/2,7*pi/4) q[5];
-can_13738636352(0.25,0,0) q[6],q[7];
+can_13719147664(0.25,0,0) q[6],q[7];
 u(pi,3*pi/2,3*pi/2) q[6];
 swap q[6],q[2];
 u(pi/4,3*pi/2,3*pi/2) q[8];
@@ -89,20 +88,19 @@ u(7*pi/2,3*pi/2,pi/4) q[9];
 can(0.5,0,0) q[8],q[9];
 u(pi/2,3*pi/2,7*pi/4) q[9];
 swap q[8],q[9];
-can_13738638848(0.25,0,0) q[9],q[5];
+can_13719148096(0.25,0,0) q[9],q[5];
 can(0.5,0,0) q[6],q[5];
 u(7*pi/2,3*pi/2,pi/4) q[5];
 can(0.5,0,0) q[1],q[5];
 u(7*pi/2,3*pi/2,3*pi/4) q[5];
 can(0.5,0,0) q[6],q[5];
-swap q[2],q[6];
 u(7*pi/2,3*pi/2,pi/4) q[5];
 can(0.5,0,0) q[1],q[5];
 u(pi,3*pi/2,3*pi/2) q[1];
-can_13738639328(0.25,0,0) q[1],q[2];
-u(0,3*pi/2,3*pi/2) q[2];
 u(7*pi/2,3*pi/2,3*pi/4) q[5];
-swap q[6],q[2];
+swap q[1],q[5];
+can_13719148720(0.25,0,0) q[5],q[6];
+u(0,3*pi/2,3*pi/2) q[6];
 can(0.5,0,0) q[7],q[6];
 u(7*pi/2,3*pi/2,pi/4) q[6];
 can(0.5,0,0) q[2],q[6];
@@ -112,69 +110,71 @@ u(7*pi/2,3*pi/2,pi/4) q[6];
 can(0.5,0,0) q[2],q[6];
 u(0,3*pi/2,3*pi/2) q[2];
 u(7*pi/2,3*pi/2,3*pi/4) q[6];
-swap q[7],q[3];
-can_13738633616(0.25,0,0) q[2],q[3];
-u(pi,3*pi/2,3*pi/2) q[2];
-u(3*pi/4,3*pi/2,3*pi/2) q[3];
-swap q[3],q[7];
-can(0.5,0,0) q[7],q[6];
-u(7*pi/2,3*pi/2,pi/4) q[6];
-can(0.5,0,0) q[2],q[6];
-u(7*pi/2,3*pi/2,3*pi/4) q[6];
-can(0.5,0,0) q[7],q[6];
-u(7*pi/2,3*pi/2,pi/4) q[6];
-can(0.5,0,0) q[2],q[6];
-u(0,3*pi/2,3*pi/2) q[2];
-u(pi/4,3*pi/2,7*pi/4) q[6];
-can(0.5,0,0) q[6],q[5];
-u(7*pi/2,3*pi/2,pi/4) q[5];
-can(0.5,0,0) q[1],q[5];
-u(7*pi/2,3*pi/2,3*pi/4) q[5];
-can(0.5,0,0) q[6],q[5];
-u(7*pi/2,3*pi/2,pi/4) q[5];
-can(0.5,0,0) q[1],q[5];
-u(0,3*pi/2,3*pi/2) q[1];
-u(pi,3*pi/2,7*pi/4) q[5];
-swap q[6],q[5];
-can_13740009776(0.25,0,0) q[1],q[5];
-u(0,3*pi/2,3*pi/2) q[1];
-u(pi,3*pi/2,3*pi/2) q[9];
-u(pi/2,0,pi/2) q[10];
-can(0.5,0,0) q[10],q[6];
-u(7*pi/2,3*pi/2,pi/4) q[10];
-can(0.5,0,0) q[9],q[10];
-u(7*pi/2,3*pi/2,3*pi/4) q[10];
-can(0.5,0,0) q[10],q[6];
-u(5*pi/4,3*pi/2,3*pi/2) q[6];
-swap q[5],q[6];
-u(7*pi/2,3*pi/2,pi/4) q[10];
-can(0.5,0,0) q[9],q[10];
-can_13739999888(0.25,0,0) q[9],q[5];
-can(0.5,0,0) q[6],q[5];
-u(7*pi/2,3*pi/2,pi/4) q[5];
-can(0.5,0,0) q[1],q[5];
-u(7*pi/2,3*pi/2,3*pi/4) q[5];
-can(0.5,0,0) q[6],q[5];
-u(7*pi/2,3*pi/2,pi/4) q[5];
-can(0.5,0,0) q[1],q[5];
-u(7*pi/2,3*pi/2,3*pi/4) q[5];
-u(5*pi/4,3*pi/2,3*pi/2) q[6];
 swap q[2],q[6];
-can_13740002816(0.25,0,0) q[1],q[2];
-can_13738638224(0.25,0,0) q[6],q[7];
+can_13719149056(0.25,0,0) q[6],q[7];
 u(pi,3*pi/2,3*pi/2) q[6];
-swap q[6],q[2];
-can(0.5,0,0) q[7],q[6];
-u(7*pi/2,3*pi/2,pi/4) q[6];
-can(0.5,0,0) q[2],q[6];
-u(7*pi/2,3*pi/2,3*pi/4) q[6];
-can(0.5,0,0) q[7],q[6];
-u(7*pi/2,3*pi/2,pi/4) q[6];
-can(0.5,0,0) q[2],q[6];
-u(7*pi/2,3*pi/2,3*pi/4) q[6];
 u(3*pi/4,3*pi/2,3*pi/2) q[7];
 swap q[7],q[3];
-can_13740000992(0.25,0,0) q[2],q[3];
+can(0.5,0,0) q[3],q[2];
+u(7*pi/2,3*pi/2,pi/4) q[2];
+can(0.5,0,0) q[6],q[2];
+u(7*pi/2,3*pi/2,3*pi/4) q[2];
+can(0.5,0,0) q[3],q[2];
+u(7*pi/2,3*pi/2,pi/4) q[2];
+can(0.5,0,0) q[6],q[2];
+u(pi/4,3*pi/2,7*pi/4) q[2];
+can(0.5,0,0) q[2],q[1];
+u(7*pi/2,3*pi/2,pi/4) q[1];
+can(0.5,0,0) q[5],q[1];
+u(7*pi/2,3*pi/2,3*pi/4) q[1];
+can(0.5,0,0) q[2],q[1];
+u(7*pi/2,3*pi/2,pi/4) q[1];
+can(0.5,0,0) q[5],q[1];
+u(pi,3*pi/2,7*pi/4) q[1];
+u(0,3*pi/2,3*pi/2) q[5];
+swap q[5],q[1];
+can_13719149440(0.25,0,0) q[1],q[2];
+u(0,3*pi/2,3*pi/2) q[1];
+u(0,3*pi/2,3*pi/2) q[6];
+swap q[6],q[2];
+can_13719148864(0.25,0,0) q[2],q[3];
+u(pi,3*pi/2,3*pi/2) q[2];
+u(pi,3*pi/2,3*pi/2) q[9];
+u(pi/2,0,pi/2) q[10];
+swap q[9],q[10];
+can(0.5,0,0) q[9],q[5];
+u(7*pi/2,3*pi/2,pi/4) q[9];
+can(0.5,0,0) q[10],q[9];
+u(7*pi/2,3*pi/2,3*pi/4) q[9];
+can(0.5,0,0) q[9],q[5];
+u(5*pi/4,3*pi/2,3*pi/2) q[5];
+u(7*pi/2,3*pi/2,pi/4) q[9];
+can(0.5,0,0) q[10],q[9];
+u(pi/4,3*pi/2,7*pi/4) q[9];
+swap q[10],q[9];
+can_13719150064(0.25,0,0) q[9],q[5];
+can(0.5,0,0) q[6],q[5];
+u(7*pi/2,3*pi/2,pi/4) q[5];
+can(0.5,0,0) q[1],q[5];
+u(7*pi/2,3*pi/2,3*pi/4) q[5];
+can(0.5,0,0) q[6],q[5];
+u(7*pi/2,3*pi/2,pi/4) q[5];
+can(0.5,0,0) q[1],q[5];
+u(7*pi/2,3*pi/2,3*pi/4) q[5];
+u(5*pi/4,3*pi/2,3*pi/2) q[6];
+swap q[2],q[6];
+can_13719150400(0.25,0,0) q[1],q[2];
+can(0.5,0,0) q[3],q[2];
+u(7*pi/2,3*pi/2,pi/4) q[2];
+can(0.5,0,0) q[6],q[2];
+u(7*pi/2,3*pi/2,3*pi/4) q[2];
+can(0.5,0,0) q[3],q[2];
+u(7*pi/2,3*pi/2,pi/4) q[2];
+u(3*pi/4,3*pi/2,3*pi/2) q[3];
+can(0.5,0,0) q[6],q[2];
+u(7*pi/2,3*pi/2,3*pi/4) q[2];
+swap q[6],q[2];
+can_13719150208(0.25,0,0) q[2],q[3];
 u(0,3*pi/2,3*pi/2) q[2];
 swap q[3],q[7];
 can(0.5,0,0) q[7],q[6];
@@ -195,12 +195,12 @@ swap q[2],q[6];
 u(7*pi/2,3*pi/2,pi/4) q[5];
 can(0.5,0,0) q[1],q[5];
 u(0,3*pi/2,3*pi/2) q[1];
-can_13740004544(0.25,0,0) q[1],q[2];
+can_13719151072(0.25,0,0) q[1],q[2];
 u(5*pi/4,3*pi/2,3*pi/2) q[1];
 u(pi,3*pi/2,7*pi/4) q[5];
 can(0.5,0,0) q[4],q[5];
 u(7*pi/2,3*pi/2,pi/4) q[4];
-can_13740015296(0.25,0,0) q[6],q[7];
+can_13719150448(0.25,0,0) q[6],q[7];
 u(pi,3*pi/2,3*pi/2) q[6];
 swap q[6],q[2];
 swap q[9],q[8];
@@ -212,7 +212,7 @@ u(5*pi/4,3*pi/2,3*pi/2) q[5];
 can(0.5,0,0) q[8],q[4];
 u(pi/2,3*pi/2,7*pi/4) q[4];
 swap q[8],q[4];
-can_13740014816(0.25,0,0) q[4],q[5];
+can_13719151504(0.25,0,0) q[4],q[5];
 swap q[4],q[8];
 can(0.5,0,0) q[6],q[5];
 u(7*pi/2,3*pi/2,pi/4) q[5];
@@ -224,7 +224,7 @@ can(0.5,0,0) q[1],q[5];
 u(7*pi/2,3*pi/2,3*pi/4) q[5];
 swap q[1],q[5];
 u(5*pi/4,3*pi/2,3*pi/2) q[6];
-can_13740015104(0.25,0,0) q[5],q[6];
+can_13719151216(0.25,0,0) q[5],q[6];
 can(0.5,0,0) q[7],q[6];
 u(7*pi/2,3*pi/2,pi/4) q[6];
 can(0.5,0,0) q[2],q[6];
@@ -234,14 +234,13 @@ u(7*pi/2,3*pi/2,pi/4) q[6];
 can(0.5,0,0) q[2],q[6];
 u(0,3*pi/2,3*pi/2) q[2];
 u(7*pi/2,3*pi/2,3*pi/4) q[6];
-u(pi/4,3*pi/2,7*pi/4) q[10];
 can(0.5,0,0) q[10],q[6];
 u(7*pi/2,3*pi/2,pi/4) q[6];
 swap q[5],q[6];
 swap q[2],q[6];
 can(0.5,0,0) q[2],q[3];
 u(7*pi/2,3*pi/2,pi/4) q[3];
-can_13740014192(0.25,0,0) q[6],q[7];
+can_13719151648(0.25,0,0) q[6],q[7];
 u(pi,3*pi/2,3*pi/2) q[6];
 swap q[6],q[10];
 u(pi,3*pi/2,3*pi/2) q[7];
@@ -253,7 +252,7 @@ can(0.5,0,0) q[7],q[3];
 u(pi/4,3*pi/2,7*pi/4) q[3];
 swap q[2],q[3];
 u(0,3*pi/2,3*pi/2) q[7];
-can_13740001424(0.25,0,0) q[7],q[3];
+can_13719152464(0.25,0,0) q[7],q[3];
 u(pi,3*pi/2,3*pi/2) q[7];
 can(0.5,0,0) q[9],q[5];
 u(7*pi/2,3*pi/2,3*pi/4) q[5];
@@ -282,12 +281,13 @@ u(7*pi/2,3*pi/2,pi/4) q[1];
 can(0.5,0,0) q[1],q[2];
 u(3*pi/2,0,3*pi/4) q[1];
 swap q[1],q[0];
-can_13740004256(0.25,0,0) q[2],q[1];
+can_13719152992(0.25,0,0) q[2],q[1];
 u(pi/2,3*pi/2,3*pi/2) q[2];
 can(0.5,0,0) q[3],q[2];
 u(7*pi/2,3*pi/2,pi/4) q[2];
+swap q[3],q[2];
 u(0,3*pi/2,3*pi/2) q[4];
-can_13740007232(0.25,0,0) q[4],q[5];
+can_13719152896(0.25,0,0) q[4],q[5];
 u(pi,3*pi/2,3*pi/2) q[4];
 swap q[0],q[4];
 can(0.5,0,0) q[5],q[1];
@@ -300,24 +300,23 @@ can(0.5,0,0) q[0],q[1];
 u(7*pi/2,3*pi/2,3*pi/4) q[1];
 swap q[4],q[0];
 u(5*pi/4,3*pi/2,3*pi/2) q[5];
-can_13740004208(0.25,0,0) q[4],q[5];
+can_13719154192(0.25,0,0) q[4],q[5];
 u(pi/2,3*pi/2,3*pi/2) q[4];
-u(0,3*pi/2,3*pi/2) q[9];
-swap q[10],q[6];
-swap q[6],q[7];
-can(0.5,0,0) q[6],q[2];
-u(7*pi/2,3*pi/2,3*pi/4) q[2];
-can(0.5,0,0) q[3],q[2];
-u(7*pi/2,3*pi/2,pi/4) q[2];
-u(5*pi/4,3*pi/2,3*pi/2) q[3];
-can(0.5,0,0) q[6],q[2];
-u(pi/2,0,pi/4) q[2];
-swap q[7],q[6];
-can_13740012992(0.25,0,0) q[7],q[3];
+can(0.5,0,0) q[7],q[3];
+u(7*pi/2,3*pi/2,3*pi/4) q[3];
+can(0.5,0,0) q[2],q[3];
+u(5*pi/4,3*pi/2,3*pi/2) q[2];
+u(7*pi/2,3*pi/2,pi/4) q[3];
+can(0.5,0,0) q[7],q[3];
+u(pi/2,0,pi/4) q[3];
+swap q[2],q[3];
+can_13719154144(0.25,0,0) q[7],q[3];
 u(pi/2,3*pi/2,3*pi/2) q[3];
 swap q[3],q[2];
 u(13*pi/4,3*pi/2,3*pi/2) q[7];
-can_13740003968(0.25,0,0) q[9],q[10];
+u(0,3*pi/2,3*pi/2) q[9];
+swap q[10],q[6];
+can_13719152848(0.25,0,0) q[9],q[10];
 u(pi,3*pi/2,3*pi/2) q[9];
 swap q[9],q[10];
 can(0.5,0,0) q[9],q[5];
@@ -325,76 +324,13 @@ u(7*pi/2,3*pi/2,pi/4) q[5];
 swap q[6],q[5];
 can(0.5,0,0) q[10],q[6];
 u(7*pi/2,3*pi/2,3*pi/4) q[6];
-swap q[5],q[6];
-can(0.5,0,0) q[9],q[5];
-u(7*pi/2,3*pi/2,pi/4) q[5];
-u(5*pi/4,3*pi/2,3*pi/2) q[9];
 swap q[10],q[9];
+can(0.5,0,0) q[10],q[6];
+u(7*pi/2,3*pi/2,pi/4) q[6];
+swap q[5],q[6];
+swap q[6],q[7];
 can(0.5,0,0) q[9],q[5];
 u(7*pi/2,3*pi/2,3*pi/4) q[5];
-swap q[6],q[5];
-can(0.5,0,0) q[7],q[6];
-u(7*pi/2,3*pi/2,pi/4) q[6];
-can(0.5,0,0) q[5],q[6];
-u(7*pi/2,3*pi/2,3*pi/4) q[6];
-can(0.5,0,0) q[7],q[6];
-u(7*pi/2,3*pi/2,pi/4) q[6];
-can(0.5,0,0) q[5],q[6];
-u(0,3*pi/2,3*pi/2) q[5];
-u(pi/4,3*pi/2,7*pi/4) q[6];
-swap q[5],q[6];
-can(0.5,0,0) q[5],q[1];
-u(7*pi/2,3*pi/2,pi/4) q[1];
-can(0.5,0,0) q[2],q[1];
-u(7*pi/2,3*pi/2,3*pi/4) q[1];
-can(0.5,0,0) q[5],q[1];
-u(7*pi/2,3*pi/2,pi/4) q[1];
-can(0.5,0,0) q[2],q[1];
-u(pi,3*pi/2,7*pi/4) q[1];
-u(0,3*pi/2,3*pi/2) q[2];
-swap q[5],q[1];
-can_13740000272(0.25,0,0) q[2],q[1];
-u(0,3*pi/2,3*pi/2) q[2];
-can(0.5,0,0) q[4],q[5];
-u(7*pi/2,3*pi/2,pi/4) q[4];
-can_13740000320(0.25,0,0) q[6],q[7];
-u(pi,3*pi/2,3*pi/2) q[6];
-can(0.5,0,0) q[8],q[4];
-u(7*pi/2,3*pi/2,3*pi/4) q[4];
-can(0.5,0,0) q[4],q[5];
-u(7*pi/2,3*pi/2,pi/4) q[4];
-u(5*pi/4,3*pi/2,3*pi/2) q[5];
-can(0.5,0,0) q[8],q[4];
-u(pi/2,0,pi/4) q[4];
-can_13740007328(0.25,0,0) q[9],q[10];
-u(pi/2,3*pi/2,3*pi/2) q[9];
-swap q[8],q[9];
-can_13740014912(0.25,0,0) q[9],q[5];
-can(0.5,0,0) q[1],q[5];
-u(7*pi/2,3*pi/2,pi/4) q[5];
-swap q[1],q[5];
-can(0.5,0,0) q[2],q[1];
-u(7*pi/2,3*pi/2,3*pi/4) q[1];
-can(0.5,0,0) q[5],q[1];
-u(7*pi/2,3*pi/2,pi/4) q[1];
-can(0.5,0,0) q[2],q[1];
-u(7*pi/2,3*pi/2,3*pi/4) q[1];
-u(5*pi/4,3*pi/2,3*pi/2) q[5];
-swap q[6],q[5];
-can_13740002240(0.25,0,0) q[2],q[6];
-can(0.5,0,0) q[7],q[6];
-u(7*pi/2,3*pi/2,pi/4) q[6];
-can(0.5,0,0) q[5],q[6];
-u(7*pi/2,3*pi/2,3*pi/4) q[6];
-can(0.5,0,0) q[7],q[6];
-u(7*pi/2,3*pi/2,pi/4) q[6];
-can(0.5,0,0) q[5],q[6];
-u(7*pi/2,3*pi/2,3*pi/4) q[6];
-swap q[5],q[6];
-u(3*pi/4,3*pi/2,3*pi/2) q[7];
-can_13739999648(0.25,0,0) q[6],q[7];
-u(0,3*pi/2,3*pi/2) q[6];
-swap q[6],q[7];
 can(0.5,0,0) q[6],q[5];
 u(7*pi/2,3*pi/2,pi/4) q[5];
 swap q[7],q[6];
@@ -413,13 +349,76 @@ u(7*pi/2,3*pi/2,3*pi/4) q[1];
 can(0.5,0,0) q[5],q[1];
 u(7*pi/2,3*pi/2,pi/4) q[1];
 can(0.5,0,0) q[2],q[1];
+u(pi,3*pi/2,7*pi/4) q[1];
+u(0,3*pi/2,3*pi/2) q[2];
+swap q[5],q[1];
+can_13719155488(0.25,0,0) q[2],q[1];
+u(0,3*pi/2,3*pi/2) q[2];
+can(0.5,0,0) q[4],q[5];
+u(7*pi/2,3*pi/2,pi/4) q[4];
+u(0,3*pi/2,3*pi/2) q[6];
+can_13719154864(0.25,0,0) q[6],q[7];
+u(pi,3*pi/2,3*pi/2) q[6];
+can(0.5,0,0) q[8],q[4];
+u(7*pi/2,3*pi/2,3*pi/4) q[4];
+can(0.5,0,0) q[4],q[5];
+u(7*pi/2,3*pi/2,pi/4) q[4];
+u(5*pi/4,3*pi/2,3*pi/2) q[5];
+can(0.5,0,0) q[8],q[4];
+u(pi/2,0,pi/4) q[4];
+u(5*pi/4,3*pi/2,3*pi/2) q[10];
+can_13719154240(0.25,0,0) q[9],q[10];
+u(pi/2,3*pi/2,3*pi/2) q[9];
+swap q[8],q[9];
+can_13719155824(0.25,0,0) q[9],q[5];
+can(0.5,0,0) q[1],q[5];
+u(7*pi/2,3*pi/2,pi/4) q[5];
+swap q[1],q[5];
+can(0.5,0,0) q[2],q[1];
+u(7*pi/2,3*pi/2,3*pi/4) q[1];
+can(0.5,0,0) q[5],q[1];
+u(7*pi/2,3*pi/2,pi/4) q[1];
+can(0.5,0,0) q[2],q[1];
+u(7*pi/2,3*pi/2,3*pi/4) q[1];
+u(5*pi/4,3*pi/2,3*pi/2) q[5];
+swap q[6],q[5];
+can_13719155632(0.25,0,0) q[2],q[6];
+can(0.5,0,0) q[7],q[6];
+u(7*pi/2,3*pi/2,pi/4) q[6];
+can(0.5,0,0) q[5],q[6];
+u(7*pi/2,3*pi/2,3*pi/4) q[6];
+can(0.5,0,0) q[7],q[6];
+u(7*pi/2,3*pi/2,pi/4) q[6];
+can(0.5,0,0) q[5],q[6];
+u(7*pi/2,3*pi/2,3*pi/4) q[6];
+swap q[5],q[6];
+u(3*pi/4,3*pi/2,3*pi/2) q[7];
+can_13719155872(0.25,0,0) q[6],q[7];
+u(0,3*pi/2,3*pi/2) q[6];
+swap q[6],q[5];
+can(0.5,0,0) q[7],q[6];
+u(7*pi/2,3*pi/2,pi/4) q[6];
+can(0.5,0,0) q[5],q[6];
+u(7*pi/2,3*pi/2,3*pi/4) q[6];
+can(0.5,0,0) q[7],q[6];
+u(7*pi/2,3*pi/2,pi/4) q[6];
+can(0.5,0,0) q[5],q[6];
+u(0,3*pi/2,3*pi/2) q[5];
+u(pi/4,3*pi/2,7*pi/4) q[6];
+swap q[5],q[6];
+can(0.5,0,0) q[5],q[1];
+u(7*pi/2,3*pi/2,pi/4) q[1];
+can(0.5,0,0) q[2],q[1];
+u(7*pi/2,3*pi/2,3*pi/4) q[1];
+can(0.5,0,0) q[5],q[1];
+u(7*pi/2,3*pi/2,pi/4) q[1];
+can(0.5,0,0) q[2],q[1];
 u(15*pi/4,3*pi/2,7*pi/4) q[1];
 u(0,3*pi/2,3*pi/2) q[2];
 swap q[2],q[1];
-can_13740014768(0.25,0,0) q[1],q[5];
+can_13719156928(0.25,0,0) q[1],q[5];
 u(pi,3*pi/2,3*pi/2) q[1];
-u(0,3*pi/2,3*pi/2) q[6];
-can_13740003680(0.25,0,0) q[6],q[7];
+can_13719156496(0.25,0,0) q[6],q[7];
 u(pi,3*pi/2,3*pi/2) q[6];
 swap q[6],q[2];
 can(0.5,0,0) q[10],q[6];
@@ -431,7 +430,7 @@ swap q[5],q[6];
 u(7*pi/2,3*pi/2,pi/4) q[10];
 can(0.5,0,0) q[9],q[10];
 u(13*pi/4,3*pi/2,3*pi/2) q[9];
-can_13740003632(0.25,0,0) q[9],q[5];
+can_13719156640(0.25,0,0) q[9],q[5];
 u(0,3*pi/2,3*pi/2) q[5];
 can(0.5,0,0) q[6],q[5];
 u(7*pi/2,3*pi/2,pi/4) q[5];
@@ -443,7 +442,7 @@ can(0.5,0,0) q[1],q[5];
 u(7*pi/2,3*pi/2,3*pi/4) q[5];
 swap q[1],q[5];
 u(5*pi/4,3*pi/2,3*pi/2) q[6];
-can_13740006704(0.25,0,0) q[5],q[6];
+can_13719157216(0.25,0,0) q[5],q[6];
 u(3*pi/2,3*pi/2,3*pi/2) q[5];
 can(0.5,0,0) q[7],q[6];
 u(7*pi/2,3*pi/2,pi/4) q[6];
@@ -455,7 +454,7 @@ can(0.5,0,0) q[2],q[6];
 u(0,3*pi/2,3*pi/2) q[2];
 u(7*pi/2,3*pi/2,3*pi/4) q[6];
 swap q[2],q[6];
-can_13740006464(0.25,0,0) q[6],q[7];
+can_13719157840(0.25,0,0) q[6],q[7];
 u(pi,3*pi/2,3*pi/2) q[6];
 u(3*pi/2,3*pi/2,3*pi/2) q[7];
 swap q[7],q[3];
@@ -477,11 +476,11 @@ can(0.5,0,0) q[5],q[1];
 u(3*pi/4,3*pi/2,7*pi/4) q[1];
 u(0,3*pi/2,3*pi/2) q[5];
 swap q[5],q[1];
-can_13740001808(0.25,0,0) q[1],q[2];
+can_13719157984(0.25,0,0) q[1],q[2];
 u(pi,3*pi/2,3*pi/2) q[1];
 u(0,3*pi/2,3*pi/2) q[6];
 swap q[6],q[2];
-can_13740014576(0.25,0,0) q[2],q[3];
+can_13719158272(0.25,0,0) q[2],q[3];
 u(pi,3*pi/2,3*pi/2) q[2];
 swap q[9],q[8];
 can(0.5,0,0) q[9],q[5];
@@ -493,7 +492,7 @@ u(7*pi/2,3*pi/2,pi/4) q[9];
 can(0.5,0,0) q[8],q[9];
 u(pi,3*pi/2,3*pi/2) q[8];
 swap q[8],q[4];
-can_13740007424(0.25,0,0) q[4],q[5];
+can_13719158704(0.25,0,0) q[4],q[5];
 u(7*pi/2,0,7*pi/4) q[4];
 u(pi,3*pi/2,3*pi/2) q[5];
 can(0.5,0,0) q[6],q[5];
@@ -506,7 +505,7 @@ can(0.5,0,0) q[1],q[5];
 u(7*pi/2,3*pi/2,3*pi/4) q[5];
 u(5*pi/4,3*pi/2,3*pi/2) q[6];
 swap q[2],q[6];
-can_13740004640(0.25,0,0) q[1],q[2];
+can_13719146944(0.25,0,0) q[1],q[2];
 u(7*pi/2,pi,pi/2) q[1];
 can(0.5,0,0) q[3],q[2];
 u(7*pi/2,3*pi/2,pi/4) q[2];
@@ -518,7 +517,7 @@ can(0.5,0,0) q[6],q[2];
 u(7*pi/2,3*pi/2,3*pi/4) q[2];
 u(0,3*pi/2,3*pi/2) q[6];
 swap q[6],q[2];
-can_13740004448(0.25,0,0) q[2],q[3];
+can_13719146512(0.25,0,0) q[2],q[3];
 u(pi/2,0,pi/2) q[2];
 u(15*pi/4,3*pi/2,0) q[3];
 swap q[3],q[7];
@@ -550,10 +549,10 @@ u(7*pi/2,3*pi/2,pi/4) q[0];
 can(0.5,0,0) q[0],q[4];
 u(3*pi/2,0,5*pi/4) q[0];
 u(pi,3*pi/2,3*pi/2) q[4];
-can_13740002864(0.25,0,0) q[5],q[6];
+can_13719145456(0.25,0,0) q[5],q[6];
 u(pi,3*pi/2,3*pi/2) q[5];
 swap q[5],q[1];
-can_13740005504(0.25,0,0) q[4],q[5];
+can_13719145600(0.25,0,0) q[4],q[5];
 u(0,3*pi/2,3*pi/2) q[5];
 can(0.5,0,0) q[6],q[5];
 u(7*pi/2,3*pi/2,pi/4) q[5];
@@ -564,23 +563,23 @@ swap q[2],q[6];
 u(7*pi/2,3*pi/2,pi/4) q[5];
 can(0.5,0,0) q[1],q[5];
 u(pi,3*pi/2,3*pi/2) q[1];
-can_13740012272(0.25,0,0) q[1],q[2];
+can_13719145168(0.25,0,0) q[1],q[2];
 u(0,3*pi/2,3*pi/2) q[2];
 u(pi/2,0,pi/4) q[5];
-can_13740003440(0.25,0,0) q[6],q[7];
+can_13719145888(0.25,0,0) q[6],q[7];
 u(pi,3*pi/2,3*pi/2) q[6];
-swap q[7],q[3];
-can(0.5,0,0) q[3],q[2];
-u(7*pi/2,3*pi/2,pi/4) q[2];
-can(0.5,0,0) q[6],q[2];
-u(7*pi/2,3*pi/2,3*pi/4) q[2];
-can(0.5,0,0) q[3],q[2];
-u(7*pi/2,3*pi/2,pi/4) q[2];
-u(7*pi/4,3*pi/2,3*pi/2) q[3];
-can(0.5,0,0) q[6],q[2];
-u(pi/2,0,pi/4) q[2];
 swap q[6],q[2];
-can_13739999840(0.25,0,0) q[2],q[3];
-u(pi,3*pi/2,3*pi/2) q[2];
+can(0.5,0,0) q[7],q[6];
+u(7*pi/2,3*pi/2,pi/4) q[6];
+can(0.5,0,0) q[2],q[6];
+u(7*pi/2,3*pi/2,3*pi/4) q[6];
+can(0.5,0,0) q[7],q[6];
+u(7*pi/2,3*pi/2,pi/4) q[6];
+can(0.5,0,0) q[2],q[6];
+swap q[2],q[3];
+u(pi/2,0,pi/4) q[6];
+u(7*pi/4,3*pi/2,3*pi/2) q[7];
+can_13719144544(0.25,0,0) q[3],q[7];
+u(pi,3*pi/2,3*pi/2) q[3];
 u(pi/2,0,pi/4) q[9];
 u(pi/2,0,pi/4) q[10];

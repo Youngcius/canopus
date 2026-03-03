@@ -1,11 +1,9 @@
-import sys
-sys.path.append("../..")  # Adjust the path to import canopus
-
 from qiskit import QuantumCircuit, qasm2
 from qiskit.circuit.library import QFT
 from qiskit.transpiler import PassManager
 import uuid
 import os
+import sys
 
 import canopus
 
@@ -21,7 +19,7 @@ def canopus_pass(qc, topology, isa='cx'):
         raise ValueError(f"Unsupported topology: {topology}")
     
     backend = canopus.CanopusBackend(coupling_map, isa)
-    qc_mapped = PassManager(canopus.CanopusMapping(backend, max_iterations=8)).run(qc)
+    qc_mapped = PassManager(canopus.CanopusMapping(backend)).run(qc)
     return canopus.rebase_to_canonical(qc_mapped)
 
 
@@ -33,13 +31,10 @@ def toqm_pass(qc, topology):
     qasm2.dump(qc, input_fname)
 
     if topology == "chain":
-        coupling_file = '../../configs/chain.txt'
         coupling_map = canopus.utils.gene_chain_coupling_map(qc.num_qubits)
     elif topology == "hhex":
-        coupling_file = '../../configs/hhex.txt'
         coupling_map = canopus.utils.gene_hhex_coupling_map(qc.num_qubits)
     elif topology == "square":
-        coupling_file = '../../configs/square.txt'
         coupling_map = canopus.utils.gene_square_coupling_map(qc.num_qubits)
     else:
         raise ValueError(f"Unsupported topology: {topology}")
@@ -54,7 +49,7 @@ def toqm_pass(qc, topology):
         for src, dst in graph.edge_list():
             f.write('{} {}\n'.format(src, dst))
 
-    os.system(f'../mapper {input_fname} {coupling_fname} {TOQM_FLAGS} > {output_fname}')
+    os.system(f'../toqm_mapper {input_fname} {coupling_fname} {TOQM_FLAGS} > {output_fname}')
     os.remove(coupling_fname)  # Clean up temporary coupling file
 
     # Replace 'swp ' with 'swap ' in the output file
@@ -87,22 +82,21 @@ qft18_can = canopus.rebase_to_tk2(qft18)
 topology = sys.argv[1] if len(sys.argv) > 1 else 'chain'
 if __name__ == "__main__":
     # TOQM routing
-    # qft6_toqm = toqm_pass(qft6_cx, topology)
-    # qft12_toqm = toqm_pass(qft12_cx, topology)
-    # # qft16_toqm = toqm_pass(qft16_cx, topology)
+    qft6_toqm = toqm_pass(qft6_cx, topology)
+    qft12_toqm = toqm_pass(qft12_cx, topology)
+    qft18_toqm = toqm_pass(qft18_cx, topology)
 
-    # print('\nTOQM routing results:')
-    # canopus.utils.print_circ_info(qft6_toqm, title='QFT-6 TOQM')
-    # canopus.utils.print_circ_info(qft12_toqm, title='QFT-12 TOQM')
-    # # canopus.utils.print_circ_info(qft16_toqm, title='QFT-16 TOQM')
+    print('\nTOQM routing results:')
+    canopus.utils.print_circ_info(qft6_toqm, title='QFT-6 TOQM')
+    canopus.utils.print_circ_info(qft12_toqm, title='QFT-12 TOQM')
+    canopus.utils.print_circ_info(qft18_toqm, title='QFT-18 TOQM')
 
+    # Canopus routing
+    qft6_canopus = canopus_pass(qft6_can, topology)
+    qft12_canopus = canopus_pass(qft12_can, topology)
+    qft18_canopus = canopus_pass(qft18_can, topology)
 
     print('\nCanopus routing results:')
-    qft6_canopus = canopus_pass(qft6_can, topology)
     canopus.utils.print_circ_info(qft6_canopus, title='QFT-6 Canopus')
-
-    qft12_canopus = canopus_pass(qft12_can, topology)
     canopus.utils.print_circ_info(qft12_canopus, title='QFT-12 Canopus')
-
-    qft18_canopus = canopus_pass(qft18_can, topology)
     canopus.utils.print_circ_info(qft18_canopus, title='QFT-18 Canopus')

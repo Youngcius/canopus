@@ -5,10 +5,7 @@ OUTPUT_QASM_PATH = 'output'
 all: init
 
 init:
-	@echo "Preparing logical-level optimized circuits ...\n"
-	@echo "Install accel_utils ..."
-	@cd ../accel && make install
-	@echo "Generate logical-level optimized circuits ..."
+	@echo "Preparing logical-level optimized circuits ..."
 	@python gene_logic_opt_circuits.py
 	@echo "Generate coverage set for different ISAs in advance ..."
 	@python gene_coverage_pkl.py

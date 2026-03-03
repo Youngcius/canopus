@@ -3,6 +3,7 @@ import pickle
 from collections import Counter
 from collections.abc import Callable
 from functools import lru_cache
+from pathlib import Path
 from math import pi
 from typing import TYPE_CHECKING
 
@@ -72,7 +73,7 @@ Z = qi.Pauli("Z").to_matrix()
 CX_AshN_Time_XY = optimal_can_gate_duration(0.5, 0, 0, 1, 1, 0)
 SQiSW_AshN_Time_XY = optimal_can_gate_duration(0.25, 0.25, 0, 1, 1, 0)
 
-Coverage_Dumped_Dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "configs")
+Coverage_Dumped_Dir = str(Path(__file__).resolve().parents[2] / "configs")
 ZZPhase_Coverage_File = os.path.join(Coverage_Dumped_Dir, "zzphase_coverage.pkl")
 ZZPhase_With_Mirror_Coverage_File = os.path.join(Coverage_Dumped_Dir, "zzphase_with_mirror_coverage.pkl")
 SQiSW_Coverage_File = os.path.join(Coverage_Dumped_Dir, "sqisw_coverage.pkl")
@@ -640,10 +641,9 @@ def crop_coupling_map(coupling_map, crop_size, seed=None):
 
 
 def generate_random_layout(qreg, coupling_map, seed=None) -> Layout:
-    rng = np.random.default_rng(seed)
-    start_node = rng.integers(0, coupling_map.size())
-    physical_qubits = _pick_connected_nodes(coupling_map.graph.to_undirected(), start_node, qreg.size)
-    rng.shuffle(physical_qubits)
+    np.random.seed(seed)
+    physical_qubits = list(coupling_map.physical_qubits)
+    np.random.shuffle(physical_qubits)
     return Layout.from_intlist(physical_qubits, qreg)
 
 

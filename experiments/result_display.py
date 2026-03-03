@@ -1,10 +1,19 @@
 import pandas as pd
 from scipy.stats import gmean
 from prettytable import PrettyTable
+import sys
 
 
 ISA_TYPES = ['cx', 'zzphase', 'sqisw', 'zzphase_', 'sqisw_', 'het']
 COMPILERS = ['sabre', 'toqm', 'bqskit', 'canopus']
+
+designated_compiler = sys.argv[1] if len(sys.argv) > 1 else None
+if designated_compiler is not None:
+    if designated_compiler not in COMPILERS:
+        raise ValueError(f"Invalid compiler specified: {designated_compiler}. Valid options are: {COMPILERS}")
+    else:
+        print('Displaying results for compiler: {}'.format(designated_compiler))
+        COMPILERS = [designated_compiler]
 
 
 def display_result_count(compiler: str):

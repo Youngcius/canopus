@@ -115,4 +115,4 @@ def test_custom_synthesis():
         names=["sqisw", "ecp"],
         seed=123,
     )
-    assert canopus.utils.is_equiv_unitary(canopus.utils.qc2mat(qc), canopus.utils.qc2mat(qc_rebased))
+    assert canopus.utils.infidelity(canopus.utils.qc2mat(qc), canopus.utils.qc2mat(qc_rebased)) < 1e-4

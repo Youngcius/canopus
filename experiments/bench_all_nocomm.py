@@ -14,6 +14,8 @@ from qiskit.transpiler import PassManager
 from rich.console import Console
 import logging
 
+SEED = 123
+
 console = Console()
 
 # configure logging
@@ -70,16 +72,16 @@ for fname in fnames:
     console.print(f"Circuit cost: {logic_circ_cost}")
 
     backend = canopus.CanopusBackend(coupling_map, args.isa, args.coupling)
-    qc_canopus = PassManager(canopus.CanopusMapping(backend, max_iterations=7, comm_opt=False)).run(qc)  # max_iterations=8
+    qc_canopus = PassManager(canopus.CanopusMapping(backend, max_iterations=7, comm_opt=False, seed=SEED)).run(qc)  # max_iterations=8
     canopus_circ_cost = backend.cost_estimator.eval_circuit_cost(qc_canopus)
     print_circ_info(qc_canopus, title='Mapped circuit')
     console.print(f"Gate counts: {qc_canopus.count_ops()}")
     console.print(f"Circuit cost: {canopus_circ_cost}")
     console.print(f"Routing overhead (Count): {canopus_circ_cost[0] / logic_circ_cost[0]:.2f}; Routing Overhead (Depth): {canopus_circ_cost[1] / logic_circ_cost[1]:.2f}")
 
-    if not os.path.exists(os.path.join(output_dpath, os.path.basename(fname))) or canopus_circ_cost < backend.cost_estimator.eval_circuit_cost(QuantumCircuit.from_qasm_file(os.path.join(output_dpath, os.path.basename(fname)))):
-        qasm2.dump(qc_canopus, os.path.join(output_dpath, os.path.basename(fname)))
-        console.print(f"Saved to {os.path.join(output_dpath, os.path.basename(fname))}", style="bold red")
+    # if not os.path.exists(os.path.join(output_dpath, os.path.basename(fname))) or canopus_circ_cost < backend.cost_estimator.eval_circuit_cost(QuantumCircuit.from_qasm_file(os.path.join(output_dpath, os.path.basename(fname)))):
+    qasm2.dump(qc_canopus, os.path.join(output_dpath, os.path.basename(fname)))
+    console.print(f"Saved to {os.path.join(output_dpath, os.path.basename(fname))}", style="bold red")
         # console.print(f"Current cost {canopus_circ_cost:.2f} is better than previous cost {backend.cost_estimator.eval_circuit_duration(QuantumCircuit.from_qasm_file(os.path.join(output_dpath, os.path.basename(fname)))):.2f}, saved.", style="bold red")
     # else:
     #     console.print(f"current cost {canopus_circ_cost:.2f} is not better than previous cost {backend.cost_estimator.eval_circuit_duration(QuantumCircuit.from_qasm_file(os.path.join(output_dpath, os.path.basename(fname)))):.2f}, skipping saving.", style="bold yellow")

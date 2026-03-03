@@ -13,6 +13,8 @@ from canopus.utils import print_circ_info
 from qiskit.transpiler import PassManager
 from rich.console import Console
 
+SEED = 123
+
 console = Console()
 
 parser = argparse.ArgumentParser(description="Sabre executable.")
@@ -32,9 +34,9 @@ fnames = [os.path.join(benchmark_dpath, fname) for fname in natsorted(os.listdir
 cx_synth_cost_estimator = canopus.SynthCostEstimator('cx')
 for fname in fnames:
     output_fname = os.path.join(output_dpath, os.path.basename(fname))
-    if os.path.exists(output_fname):
-        console.print(f"Skipping {output_fname}, already processed.")
-        continue
+    # if os.path.exists(output_fname):
+    #     console.print(f"Skipping {output_fname}, already processed.")
+    #     continue
 
     console.rule(f"Processing {fname}")
 
@@ -56,7 +58,7 @@ for fname in fnames:
     console.print(f"Circuit cost: {logic_circ_cost}")
 
     backend = canopus.CanopusBackend(coupling_map)
-    qc_sabre = PassManager(canopus.SabreMapping(backend)).run(qc)
+    qc_sabre = PassManager(canopus.SabreMapping(backend, seed=SEED)).run(qc)
     sabre_circ_cost = cx_synth_cost_estimator.eval_circuit_cost(qc_sabre)
     print_circ_info(qc_sabre, title='Mapped circuit')
     console.print(f"Gate counts: {qc_sabre.count_ops()}")

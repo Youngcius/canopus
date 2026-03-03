@@ -1,0 +1,22 @@
+{
+  "6": {
+    "qiskit_cx": "d4c3094i51bc738jjt50",
+    "canopus_cx": "d4c309fnmdfs73aee1gg",
+    "canopus_zzphase": "d4c309ki51bc738jjt60"
+  },
+  "8": {
+    "qiskit_cx": "d4c30ci489vs73a404hg",
+    "canopus_cx": "d4c30cplag1s73blota0",
+    "canopus_zzphase": "d4c30d2489vs73a404ig"
+  },
+  "10": {
+    "qiskit_cx": "d4c30hq489vs73a404o0",
+    "canopus_cx": "d4c30ia489vs73a404og",
+    "canopus_zzphase": "d4c30innmdfs73aee1og"
+  },
+  "12": {
+    "qiskit_cx": "d4c30qki51bc738jjtmg",
+    "canopus_cx": "d4c30r4i51bc738jjtng",
+    "canopus_zzphase": "d4c30rnnmdfs73aee210"
+  }
+}

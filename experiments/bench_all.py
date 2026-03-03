@@ -13,6 +13,8 @@ from canopus.utils import print_circ_info
 from qiskit.transpiler import PassManager
 from rich.console import Console
 
+SEED = 123
+
 console = Console()
 
 
@@ -63,7 +65,7 @@ for fname in fnames:
     console.print(f"Circuit cost: {logic_circ_cost}")
 
     backend = canopus.CanopusBackend(coupling_map, args.isa, args.coupling)
-    qc_canopus = PassManager(canopus.CanopusMapping(backend, max_iterations=7)).run(qc)  # max_iterations=8
+    qc_canopus = PassManager(canopus.CanopusMapping(backend, max_iterations=7, seed=SEED)).run(qc)  # max_iterations=7
     canopus_circ_cost = backend.cost_estimator.eval_circuit_cost(qc_canopus)
     print_circ_info(qc_canopus, title='Mapped circuit')
     console.print(f"Gate counts: {qc_canopus.count_ops()}")

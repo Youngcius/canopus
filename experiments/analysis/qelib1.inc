@@ -4,6 +4,8 @@
 // --- QE Hardware primitives ---
 
 // 3-parameter 2-pulse single qubit gate
+gate u(theta,phi,lambda) q { U(theta,phi,lambda) q; }
+// 3-parameter 2-pulse single qubit gate
 gate u3(theta,phi,lambda) q { U(theta,phi,lambda) q; }
 // 2-parameter 1-pulse single qubit gate
 gate u2(phi,lambda) q { U(pi/2,phi,lambda) q; }
