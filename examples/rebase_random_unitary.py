@@ -10,7 +10,7 @@ from pytket.utils import compare_unitaries
 from qiskit.circuit.library import UnitaryGate
 from rich.console import Console
 from canopus.backends import SynthCostEstimator
-from regulus.utils.functions import infidelity
+from canopus.utils import infidelity
 
 console = Console()
 

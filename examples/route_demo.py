@@ -66,7 +66,7 @@ qc_sabre = pm.run(qc)
 end = time.perf_counter()
 print(qc_sabre)
 console.print('Pulse duration: {}'.format(backend.cost_estimator.eval_circuit_cost(qc_sabre)))
-console.print('Time taken for Canopus mapping: {:.4f} seconds'.format(end - start))
+console.print('Time taken for Sabre mapping: {:.4f} seconds'.format(end - start))
 
 # qasm2.dump(qc_sabre, 'demo_can_sabre.qasm')
 

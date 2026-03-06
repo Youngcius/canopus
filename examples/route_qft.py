@@ -7,7 +7,7 @@ from pytket.utils import compare_unitaries
 from qiskit import qasm2
 import time
 import argparse
-from qiskit.circuit.library import QFT
+from qiskit.synthesis import synth_qft_full
 
 from rich.console import Console
 
@@ -22,7 +22,7 @@ parser.add_argument('-c', '--coupling', type=str, default='xx', help='Coupling t
 args = parser.parse_args()
 
 
-qc = QFT(int(args.num_qubits), do_swaps=False).decompose()
+qc = synth_qft_full(int(args.num_qubits), do_swaps=False)
 circ = qiskit_to_tket(qc)
 circ = rebase_to_tk2(circ)
 qc = tket_to_qiskit(circ)
@@ -53,7 +53,7 @@ qc_sabre = pm.run(qc)
 end = time.perf_counter()
 print(qc_sabre)
 console.print('Pulse duration: {}'.format(backend.cost_estimator.eval_circuit_cost(qc_sabre)))
-console.print('Time taken for Canopus mapping: {:.4f} seconds'.format(end - start))
+console.print('Time taken for Sabre mapping: {:.4f} seconds'.format(end - start))
 print_circ_info(rebase_to_canonical(qc_sabre))
 
 console.rule('Canopus mapping')

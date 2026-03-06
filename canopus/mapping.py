@@ -2,7 +2,7 @@ import os
 from itertools import chain
 
 import numpy as np
-from qiskit import QuantumCircuit
+from operator import length_hint
 from qiskit.circuit import Qubit
 from qiskit.circuit.library import SwapGate
 from qiskit.dagcircuit import DAGCircuit, DAGNode
@@ -10,7 +10,6 @@ from qiskit.transpiler import Layout, TransformationPass, TranspilerError
 from qiskit.transpiler.passes import VF2Layout
 
 from canopus.backends import CanopusBackend
-from canopus.basics import CanonicalGate
 from canopus.utils import generate_random_layout, generate_trivial_layout
 from canopus.utils._accel import mirror_weyl_coord, sort_two_ints, sort_two_objs
 
@@ -19,25 +18,6 @@ DECAY_STEP = 0.001
 NUM_SEARCHES_TO_RESET = 5
 EXT_WEIGHT = 0.5
 EXT_SIZE = 20
-
-
-def disp_last_mapped_layer(last_mapped_layer):
-    from itertools import chain
-
-    if not last_mapped_layer:
-        return None
-
-    num_qubits = max(chain.from_iterable(pair for pair in last_mapped_layer.keys())) + 1
-    qc = QuantumCircuit(num_qubits)
-    for pair, node in last_mapped_layer.items():
-        gname, params = node.op.name, node.op.params
-        if gname.startswith("can"):
-            qc.append(CanonicalGate(*params), pair)
-        elif gname == "swap":
-            qc.swap(*pair)
-        else:
-            raise ValueError(f"Unknown gate name: {gname}")
-    print(qc)
 
 
 def average_degree(g):
@@ -182,11 +162,13 @@ class BidirectionalMapping(TransformationPass):
         else:
             raise ValueError(f"Unsupported number of qubits for executable check: {len(qargs)}")
 
-    def _repr_dag_node(self, node):
-        return "{}({})@{}".format(
-            node.op.name, np.round(node.op.params, 4).tolist(), [self._get_qubit_index(q) for q in node.qargs]
-        )
-
+    def _avg_dist(self, nodes, layout: Layout):
+        if nodes:
+            return np.mean(
+                [self.distance_matrix[layout._v2p[node.qargs[0]], layout._v2p[node.qargs[1]]] for node in nodes]
+            )
+        return 0
+    
 
 class CanopusMapping(BidirectionalMapping):
     def __init__(
@@ -225,7 +207,7 @@ class CanopusMapping(BidirectionalMapping):
         last_mapped_layer: dict[tuple[int, int], DAGNode] = {}
         commutative_pairs: dict[tuple[int, int], tuple[int, int]] = {}
 
-        layouts = [layout.copy()]
+        # layouts = [layout.copy()] # dump intermediate layouts for debugging
         front_layer = dag.front_layer()
         routed_dag = dag.copy_empty_like()
         while front_layer:
@@ -284,7 +266,6 @@ class CanopusMapping(BidirectionalMapping):
                                     commutative_pairs.pop((pred_pred_p0, pred_pred_p1), None)
                         # only add 2Q gates to last_mapped_layer
                         last_mapped_layer[p0, p1] = routed_node
-                        # disp_last_mapped_layer(last_mapped_layer)
                     else:
                         p0 = layout._v2p[node.qargs[0]]
                         routed_dag.apply_operation_back(node.op, [self.canonical_qreg[p0]], node.cargs)
@@ -311,7 +292,7 @@ class CanopusMapping(BidirectionalMapping):
                 )
 
                 layout.swap(*swap)
-                layouts.append(layout.copy())
+                # layouts.append(layout.copy())
 
                 # update wire_durations
                 if (p0, p1) in last_mapped_layer:
@@ -370,18 +351,21 @@ class CanopusMapping(BidirectionalMapping):
         swap_candidates = sorted(swap_candidates, key=lambda pair: (self._get_qubit_index(pair[0]), self._get_qubit_index(pair[1])))
 
         extended_set = []
-        _front_layer = front_layer.copy()
-        _required_predecessors = required_predecessors.copy()
+        _front_layer = front_layer
+        decremented = []
         while len(extended_set) < EXT_SIZE and _front_layer:
-            tmp_front_layer = []
+            new_front_layer = []
             for node in _front_layer:
                 for successor in dag.op_successors(node):
-                    _required_predecessors[successor] -= 1
-                    if _required_predecessors[successor] == 0:
-                        tmp_front_layer.append(successor)
-                        if node.num_qubits == 2:
-                            extended_set.append(node)
-            _front_layer = tmp_front_layer
+                    required_predecessors[successor] -= 1
+                    decremented.append(successor)
+                    if required_predecessors[successor] == 0:
+                        new_front_layer.append(successor)
+                        if successor.num_qubits == 2:
+                            extended_set.append(successor)
+            _front_layer = new_front_layer
+        for node in decremented:
+            required_predecessors[node] += 1
 
         duration = max(wire_durations.values())
         avg_dist_front = self._avg_dist(front_layer, layout)
@@ -485,12 +469,8 @@ class CanopusMapping(BidirectionalMapping):
         c_depth = (max(wire_durations.values()) - duration) * self.w_degree  # currently, this setting works well
         c_gate = gate_duration
 
+        # return c1 + EXT_WEIGHT * c2 + (c_gate + c_depth) * 0.5  # this setting works better in general
         return c1 + EXT_WEIGHT * c2 + self.w_gate * c_gate + self.w_depth * c_depth
-
-    def _avg_dist(self, nodes, layout):
-        if not nodes:
-            return 0
-        return sum(self.distance_matrix[layout._v2p[n.qargs[0]], layout._v2p[n.qargs[1]]] for n in nodes) / len(nodes)
 
 
 class SabreMapping(BidirectionalMapping):
@@ -515,7 +495,7 @@ class SabreMapping(BidirectionalMapping):
         required_predecessors = build_required_predecessors(dag)
 
         num_searches = 0
-        layouts = [layout.copy()]
+        # layouts = [layout.copy()] # dump intermediate layouts for debugging
         front_layer = dag.front_layer()
         routed_dag = dag.copy_empty_like()
         while front_layer:
@@ -543,7 +523,7 @@ class SabreMapping(BidirectionalMapping):
                 routed_dag.apply_operation_back(SwapGate(), [self.canonical_qreg[layout._v2p[v]] for v in swap])
 
                 layout.swap(*swap)
-                layouts.append(layout.copy())
+                # layouts.append(layout.copy())
 
                 num_searches += 1
                 if num_searches % NUM_SEARCHES_TO_RESET == 0:
@@ -566,18 +546,21 @@ class SabreMapping(BidirectionalMapping):
         swap_candidates = sorted(swap_candidates, key=lambda pair: (self._get_qubit_index(pair[0]), self._get_qubit_index(pair[1])))
 
         extended_set = []
-        _front_layer = front_layer.copy()
-        _required_predecessors = required_predecessors.copy()
+        _front_layer = front_layer
+        decremented = []
         while len(extended_set) < EXT_SIZE and _front_layer:
-            tmp_front_layer = []
+            new_front_layer = []
             for node in _front_layer:
                 for successor in dag.op_successors(node):
-                    _required_predecessors[successor] -= 1
-                    if _required_predecessors[successor] == 0:
-                        tmp_front_layer.append(successor)
-                        if node.num_qubits == 2:
-                            extended_set.append(node)
-            _front_layer = tmp_front_layer
+                    required_predecessors[successor] -= 1
+                    decremented.append(successor)
+                    if required_predecessors[successor] == 0:
+                        new_front_layer.append(successor)
+                        if successor.num_qubits == 2:
+                            extended_set.append(successor)
+            _front_layer = new_front_layer
+        for node in decremented:
+            required_predecessors[node] += 1
 
         costs = np.array([self._heuristic_cost(front_layer, extended_set, layout, swap) for swap in swap_candidates])
         min_cost = np.min(costs)
@@ -588,15 +571,8 @@ class SabreMapping(BidirectionalMapping):
     def _heuristic_cost(self, front_layer, extended_set, layout: Layout, swap: tuple[Qubit, Qubit]):
         layout = layout.copy()
         layout.swap(*swap)
-        c1 = np.mean(
-            [self.distance_matrix[layout._v2p[node.qargs[0]], layout._v2p[node.qargs[1]]] for node in front_layer]
-        )
-        if extended_set:
-            c2 = np.mean(
-                [self.distance_matrix[layout._v2p[node.qargs[0]], layout._v2p[node.qargs[1]]] for node in extended_set]
-            )
-        else:
-            c2 = 0
+        c1 = self._avg_dist(front_layer, layout)
+        c2 = self._avg_dist(extended_set, layout)
         w = max(self.qubit_decays[swap[0]], self.qubit_decays[swap[1]])
         return w * (c1 + EXT_WEIGHT * c2)
 
@@ -605,7 +581,7 @@ def build_required_predecessors(dag):
     """Build a dictionary that maps each node in the DAG to the number of its predecessors"""
     required_predecessors = {}
     for node in dag.topological_op_nodes():
-        required_predecessors[node] = sum(1 for _ in dag.op_predecessors(node))
+        required_predecessors[node] = length_hint(dag.op_predecessors(node))
     return required_predecessors
 
 
@@ -613,5 +589,5 @@ def build_required_successors(dag):
     """Build a dictionary that maps each node in the DAG to the number of its successors"""
     required_successors = {}
     for node in dag.topological_op_nodes():
-        required_successors[node] = sum(1 for _ in dag.op_successors(node))
+        required_successors[node] = length_hint(dag.op_successors(node))
     return required_successors
