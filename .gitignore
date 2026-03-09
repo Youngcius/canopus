@@ -194,6 +194,7 @@ cython_debug/
 *.fdb_latexmk
 *.fls
 
+Cargo.lock
 
 mirror-gates/
 toqm/
