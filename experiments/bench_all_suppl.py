@@ -80,9 +80,10 @@ for fname in fnames:
     console.print(f"Gate counts: {qc_canopus.count_ops()}")
     console.print(f"Circuit cost: {canopus_circ_cost:.2f}; Routing overhead: {canopus_circ_cost / logic_circ_cost:.2f}")
 
-    if canopus_circ_cost < backend.cost_estimator.eval_circuit_cost(QuantumCircuit.from_qasm_file(os.path.join(output_dpath, os.path.basename(fname)))):
-        qasm2.dump(qc_canopus, os.path.join(output_dpath, os.path.basename(fname)))
-        console.print(f"Saved to {os.path.join(output_dpath, os.path.basename(fname))}", style="bold red")
-        console.print(f"Current cost {canopus_circ_cost:.2f} is better than previous cost {backend.cost_estimator.eval_circuit_cost(QuantumCircuit.from_qasm_file(os.path.join(output_dpath, os.path.basename(fname)))):.2f}, saved.", style="bold red")
+    output_fname = os.path.join(output_dpath, os.path.basename(fname))
+    if not os.path.exists(output_fname) or canopus_circ_cost < backend.cost_estimator.eval_circuit_cost(QuantumCircuit.from_qasm_file(output_fname)):
+        qasm2.dump(qc_canopus, output_fname)
+        console.print(f"Saved to {output_fname}", style="bold red")
+        console.print(f"Current cost {canopus_circ_cost:.2f} is better than previous cost {backend.cost_estimator.eval_circuit_cost(QuantumCircuit.from_qasm_file(output_fname)):.2f}, saved.", style="bold red")
     # else:
     #     console.print(f"current cost {canopus_circ_cost:.2f} is not better than previous cost {backend.cost_estimator.eval_circuit_duration(QuantumCircuit.from_qasm_file(os.path.join(output_dpath, os.path.basename(fname)))):.2f}, skipping saving.", style="bold yellow")

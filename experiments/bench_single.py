@@ -53,6 +53,7 @@ console.print(f"Circuit cost: {logic_circ_cost}")
 # Sabre mapping
 start = time.perf_counter()
 qc_sabre = PassManager(canopus.SabreMapping(backend)).run(qc)
+qc_sabre = canopus.rebase_to_canonical(qc_sabre)
 sabre_circ_cost = backend.cost_estimator.eval_circuit_cost(qc_sabre)
 print_circ_info(qc_sabre, title='Sabre mapping')
 console.print(f"Gate counts: {qc_sabre.count_ops()}")
@@ -62,7 +63,8 @@ console.print(f"Sabre mapping time: {time.perf_counter() - start:.2f} seconds")
 
 # Canopus mapping
 start = time.perf_counter()
-qc_canopus = PassManager(canopus.CanopusMapping(backend)).run(qc)
+qc_canopus = PassManager(canopus.CanopusMapping(backend, seed=123, max_iterations=7)).run(qc)
+qc_canopus = canopus.rebase_to_canonical(qc_canopus)
 canopus_circ_cost = backend.cost_estimator.eval_circuit_cost(qc_canopus)
 print_circ_info(qc_canopus, title='Canopus mapping')
 console.print(f"Gate counts: {qc_canopus.count_ops()}")
@@ -71,4 +73,4 @@ console.print(f"Routing overhead (Count): {canopus_circ_cost[0] / logic_circ_cos
 console.print(f"Canopus mapping time: {time.perf_counter() - start:.2f} seconds")
 
 if args.output is not None:
-    qasm2.dump(qc, args.output)
+    qasm2.dump(qc_canopus, args.output)

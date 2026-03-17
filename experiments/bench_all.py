@@ -65,12 +65,25 @@ for fname in fnames:
     console.print(f"Circuit cost: {logic_circ_cost}")
 
     backend = canopus.CanopusBackend(coupling_map, args.isa, args.coupling)
-    qc_canopus = PassManager(canopus.CanopusMapping(backend, max_iterations=7, seed=SEED)).run(qc)  # max_iterations=7
+    qc_canopus = PassManager(canopus.CanopusMapping(backend, max_iterations=7+1, seed=None)).run(qc)  # max_iterations=7
     canopus_circ_cost = backend.cost_estimator.eval_circuit_cost(qc_canopus)
     print_circ_info(qc_canopus, title='Mapped circuit')
     console.print(f"Gate counts: {qc_canopus.count_ops()}")
     console.print(f"Circuit cost: {canopus_circ_cost}")
     console.print(f"Routing overhead (Count): {canopus_circ_cost[0] / logic_circ_cost[0]:.2f}; Routing Overhead (Depth): {canopus_circ_cost[1] / logic_circ_cost[1]:.2f}")
 
-    qasm2.dump(qc_canopus, output_fname)
-    console.print(f"Saved to {output_fname}", style="bold red")
+    if not os.path.exists(output_fname):    
+        qasm2.dump(qc_canopus, output_fname)
+        console.print(f"Saved to {output_fname}", style="bold red")
+    else:
+        canopus_circ_cost_old = backend.cost_estimator.eval_circuit_cost(QuantumCircuit.from_qasm_file(output_fname))
+        if canopus_circ_cost[0] < canopus_circ_cost_old[0] and canopus_circ_cost[1] < canopus_circ_cost_old[1]:
+            qasm2.dump(qc_canopus, output_fname)
+            console.print(f"Saved to {output_fname}", style="bold red")
+            console.print(f"Current cost {canopus_circ_cost} is better than previous cost {canopus_circ_cost_old}, saved.", style="bold red")
+        else:
+            console.print(f"Current cost {canopus_circ_cost} is not better than previous cost {canopus_circ_cost_old}, skipping saving.", style="bold yellow")
+
+
+    # qasm2.dump(qc_canopus, output_fname)
+    # console.print(f"Saved to {output_fname}", style="bold red")

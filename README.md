@@ -1,6 +1,6 @@
 # 🧭 Canopus: Canonical-Optimized Placement Utility Suite
 
-[![](https://img.shields.io/badge/license-Apache%202.0-green)](./LICENSE) ![](https://img.shields.io/badge/Python-3.8--3.12-blue)  [![a](https://img.shields.io/static/v1?label=arXiv&message=2511.04608&color=red)](https://arxiv.org/abs/2511.04608)
+[![](https://img.shields.io/badge/license-Apache%202.0-green)](./LICENSE) ![](https://img.shields.io/badge/Python-3.10--3.12-blue)  [![a](https://img.shields.io/static/v1?label=arXiv&message=2511.04608&color=red)](https://arxiv.org/abs/2511.04608)
 
 
 **Canopus** (**Can**onical-**O**ptimized **P**lacement **U**tility **S**uite) is a qubit mapping/routing framework tailored to advanced quantum ISAs. Its main function is to optimize the layout and routing of qubits on quantum hardware, handling optimal synthesis with diverse ISAs in a unified approach through two-qubit canonical gate representation, providing guidance for hardware-software co-design.
@@ -110,8 +110,4 @@ to prepare prerequisite files for evaluation (e.g., coupling files, coverage set
 - Run `make disp_result` to show the summarized routing overheads across different compilers, topologies, and ISAs
 
 You can also run `bench_all.py`, `bench_all_toqm.py` and so on to perform fine-grain evaluation.
-
-
-
-
 

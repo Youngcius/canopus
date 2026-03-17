@@ -96,8 +96,7 @@ class CanonicalGate(Gate):
             raise ValueError("unable to avoid copy while creating an array as requested")
         a, b, c = (float(param) for param in self.params)
         from canopus.utils._accel import canonical_unitary
-        mat = canonical_unitary(a, b, c)
-        return qi.Operator(mat).reverse_qargs().to_matrix()
+        return canonical_unitary(a, b, c)
 
     def __eq__(self, other):
         if isinstance(other, CanonicalGate):

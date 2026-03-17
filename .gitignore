@@ -202,8 +202,6 @@ toqm/
 docs/
 logs/
 
-rebuttal*
-
 backup/
 analysis/
 *.lock

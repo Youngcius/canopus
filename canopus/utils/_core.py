@@ -15,8 +15,9 @@ import pytket.qasm
 import qiskit
 import qiskit.qasm2
 import qiskit.quantum_info as qi
+from canopus.extensions.bqskit import FixedCanonicalGate as BQSKitFixedCanonicalGate
+import bqskit.ir.gates
 import rustworkx as rx
-from bqskit.ir import gates as bqskit_gates
 from monodromy.coverage import coverage_lookup_cost, gates_to_coverage
 from prettytable import PrettyTable
 from pytket import OpType
@@ -690,21 +691,21 @@ def gate_from_qiskit_to_bqskit(g: Gate):
     SQiSWGate = _get_gate_class('SQiSWGate')
 
     if isinstance(g, CanonicalGate):
-        return bqskit_gates.FixedCanonicalGate(*(np.array(g.params) * pi))
+        return BQSKitFixedCanonicalGate(*(np.array(g.params) * pi))
     elif isinstance(g, CXGate):
-        return bqskit_gates.CNOTGate()
+        return bqskit.ir.gates.CNOTGate()
     elif isinstance(g, RXXGate):
-        return bqskit_gates.RXXGate(g.params[0] * pi)
+        return bqskit.ir.gates.RXXGate(g.params[0] * pi)
     elif isinstance(g, RYYGate):
-        return bqskit_gates.RYYGate(g.params[0] * pi)
+        return bqskit.ir.gates.RYYGate(g.params[0] * pi)
     elif isinstance(g, RZZGate):
-        return bqskit_gates.RZZGate(g.params[0] * pi)
+        return bqskit.ir.gates.RZZGate(g.params[0] * pi)
     elif isinstance(g, iSwapGate) or (isinstance(g, XXPlusYYGate) and g.params[0] == -pi):
-        return bqskit_gates.ISwapGate()
+        return bqskit.ir.gates.ISwapGate()
     elif isinstance(g, BGate):
-        return bqskit_gates.BGate()
+        return bqskit.ir.gates.BGate()
     elif isinstance(g, SQiSWGate) or (isinstance(g, XXPlusYYGate) and g.params[0] == -half_pi):
-        return bqskit_gates.SqrtISwapGate()
+        return bqskit.ir.gates.SqrtISwapGate()
     else:
         raise ValueError(f"Unsupported gate type: {type(g)}")
 
@@ -714,47 +715,47 @@ def bqskit_to_qiskit(circ: bqskit.Circuit) -> qiskit.QuantumCircuit:
     CanonicalGate = _get_gate_class('CanonicalGate')
     qc = qiskit.QuantumCircuit(2)
     for op in circ.operations():
-        if isinstance(op.gate, bqskit_gates.XGate):
+        if isinstance(op.gate, bqskit.ir.gates.XGate):
             qc.x(op.location[0])
-        elif isinstance(op.gate, bqskit_gates.YGate):
+        elif isinstance(op.gate, bqskit.ir.gates.YGate):
             qc.y(op.location[0])
-        elif isinstance(op.gate, bqskit_gates.ZGate):
+        elif isinstance(op.gate, bqskit.ir.gates.ZGate):
             qc.z(op.location[0])
-        elif isinstance(op.gate, bqskit_gates.HGate):
+        elif isinstance(op.gate, bqskit.ir.gates.HGate):
             qc.h(op.location[0])
-        elif isinstance(op.gate, bqskit_gates.SGate):
+        elif isinstance(op.gate, bqskit.ir.gates.SGate):
             qc.s(op.location[0])
-        elif isinstance(op.gate, bqskit_gates.SdgGate):
+        elif isinstance(op.gate, bqskit.ir.gates.SdgGate):
             qc.sdg(op.location[0])
-        elif isinstance(op.gate, bqskit_gates.TGate):
+        elif isinstance(op.gate, bqskit.ir.gates.TGate):
             qc.t(op.location[0])
-        elif isinstance(op.gate, bqskit_gates.TdgGate):
+        elif isinstance(op.gate, bqskit.ir.gates.TdgGate):
             qc.tdg(op.location[0])
-        elif isinstance(op.gate, bqskit_gates.U3Gate):
+        elif isinstance(op.gate, bqskit.ir.gates.U3Gate):
             qc.u(*op.params, op.location[0])
-        elif isinstance(op.gate, bqskit_gates.CXGate):
+        elif isinstance(op.gate, bqskit.ir.gates.CXGate):
             qc.cx(op.location[0], op.location[1])
-        elif isinstance(op.gate, bqskit_gates.CZGate):
+        elif isinstance(op.gate, bqskit.ir.gates.CZGate):
             qc.cz(op.location[0], op.location[1])
-        elif isinstance(op.gate, bqskit_gates.RXGate):
+        elif isinstance(op.gate, bqskit.ir.gates.RXGate):
             qc.rx(op.params[0], op.location[0])
-        elif isinstance(op.gate, bqskit_gates.RYGate):
+        elif isinstance(op.gate, bqskit.ir.gates.RYGate):
             qc.ry(op.params[0], op.location[0])
-        elif isinstance(op.gate, bqskit_gates.RZGate):
+        elif isinstance(op.gate, bqskit.ir.gates.RZGate):
             qc.rz(op.params[0], op.location[0])
-        elif isinstance(op.gate, bqskit_gates.RXXGate):
+        elif isinstance(op.gate, bqskit.ir.gates.RXXGate):
             qc.rxx(op.params[0], op.location[0], op.location[1])
-        elif isinstance(op.gate, bqskit_gates.RYYGate):
+        elif isinstance(op.gate, bqskit.ir.gates.RYYGate):
             qc.ryy(op.params[0], op.location[0], op.location[1])
-        elif isinstance(op.gate, bqskit_gates.RZZGate):
+        elif isinstance(op.gate, bqskit.ir.gates.RZZGate):
             qc.rzz(op.params[0], op.location[0], op.location[1])
-        elif isinstance(op.gate, bqskit_gates.ISwapGate):
+        elif isinstance(op.gate, bqskit.ir.gates.ISwapGate):
             qc.iswap(op.location[0], op.location[1])
-        elif isinstance(op.gate, bqskit_gates.BGate):
+        elif isinstance(op.gate, bqskit.ir.gates.BGate):
             qc.append(BGate(), [op.location[0], op.location[1]])
-        elif isinstance(op.gate, bqskit_gates.SqrtISwapGate):
+        elif isinstance(op.gate, bqskit.ir.gates.SqrtISwapGate):
             qc.append(iSwapGate().power(0.5), [op.location[0], op.location[1]])
-        elif isinstance(op.gate, bqskit_gates.FixedCanonicalGate):
+        elif isinstance(op.gate, BQSKitFixedCanonicalGate):
             a, b, c = np.array(op.gate.angles) / pi
             qc.append(CanonicalGate(a, b, c), [op.location[0], op.location[1]])
         else:
