@@ -23,17 +23,11 @@ args = parser.parse_args()
 
 
 qc = synth_qft_full(int(args.num_qubits), do_swaps=False)
-circ = qiskit_to_tket(qc)
-circ = rebase_to_tk2(circ)
-qc = tket_to_qiskit(circ)
+qc = rebase_to_canonical(qc)
 
 console.rule('Original circuit')
 
 print(qc)
-if qc.num_qubits < 7:
-    assert compare_unitaries(circ.get_unitary(), qc2mat(qc))
-
-# print(qiskit_to_tket(qc).get_commands())
 
 if args.topology == 'chain':
     coupling_map = gene_chain_coupling_map(qc.num_qubits)
