@@ -5,6 +5,9 @@
 
 **Canopus** (**Can**onical-**O**ptimized **P**lacement **U**tility **S**uite) is a qubit mapping/routing framework tailored to advanced quantum ISAs. Its main function is to optimize the layout and routing of qubits on quantum hardware, handling optimal synthesis with diverse ISAs in a unified approach through two-qubit canonical gate representation, providing guidance for hardware-software co-design.
 
+
+> ***Canopus** evokes the name of the second-brightest star in the sky, symbolizing its role as a "navigational" guide for routing qubits through the complex constraints of quantum hardware.*
+
 ![](./assets/motivation.svg)
 
 If you make use of Canopus in your work, please cite the following paper:
