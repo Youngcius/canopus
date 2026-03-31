@@ -234,3 +234,15 @@ test     = { shell = "pytest" }
 test-cov = { shell = "pytest --cov=canopus --cov-report=term-missing" }
 # Aggregate gate — what CI runs before merge
 check    = { shell = "poe lint && poe fmt-check && poe test" }
+
+[tool.uv.sources]
+monodromy = { url = "https://github.com/gjz010-Forks/monodromy/releases/download/0.0.2/monodromy-0.0.2-py3-none-any.whl" }
+
+[tool.uv]
+# 核心设置：让 uv 监听 Rust 代码变化，一旦改变，下次 uv sync / uv run 时自动重新编译
+cache-keys = [
+    { file = "pyproject.toml" },
+    { file = "Cargo.toml" },
+    { file = "Cargo.lock" },
+    { file = "src/**/*.rs" },    # ⚠️ 请确认你的 Rust 代码目录，如果是 src 就写 src/**/*.rs
+]

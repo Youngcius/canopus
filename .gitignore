@@ -212,3 +212,10 @@ output/
 results/
 
 .claude
+.devenv
+.devenv.flake.nix
+
+
+# Added by cargo
+
+/target
