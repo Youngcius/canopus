@@ -205,3 +205,9 @@ logs/
 backup/
 analysis/
 *.lock
+
+# Experiment artifacts (untracked but kept locally)
+output/
+results/
+
+.claude
