@@ -201,6 +201,7 @@ toqm/
 *.tmp*
 docs/
 logs/
+ablation/
 
 backup/
 analysis/

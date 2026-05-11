@@ -2,8 +2,7 @@
 
 from canopus import *
 from canopus.utils import *
-from qiskit.transpiler import CouplingMap, PassManager
-from pytket.utils import compare_unitaries
+from qiskit.transpiler import PassManager
 from qiskit import qasm2
 import time
 import argparse

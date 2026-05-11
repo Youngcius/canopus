@@ -210,7 +210,8 @@ class CanonicalSynthesis(TransformationPass):
                 mini_dag.add_qreg(q)
                 mini_dag.apply_operation_back(UnitaryGate(b0), [q[0]])
                 mini_dag.apply_operation_back(UnitaryGate(b1), [q[1]])
-                mini_dag.apply_operation_back(CanonicalGate(a, b, c), [q[0], q[1]])
+                if not np.allclose(a, 0):
+                    mini_dag.apply_operation_back(CanonicalGate(a, b, c), [q[0], q[1]])
                 mini_dag.apply_operation_back(UnitaryGate(a0), [q[0]])
                 mini_dag.apply_operation_back(UnitaryGate(a1), [q[1]])
                 dag.substitute_node_with_dag(node, mini_dag, [q[1], q[0]])

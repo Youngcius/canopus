@@ -9,11 +9,9 @@ COMPILERS = ['sabre', 'toqm', 'bqskit', 'canopus']
 
 designated_compiler = sys.argv[1] if len(sys.argv) > 1 else None
 if designated_compiler is not None:
-    if designated_compiler not in COMPILERS:
-        raise ValueError(f"Invalid compiler specified: {designated_compiler}. Valid options are: {COMPILERS}")
-    else:
-        print('Displaying results for compiler: {}'.format(designated_compiler))
-        COMPILERS = [designated_compiler]
+    COMPILERS = [designated_compiler]
+else:
+    COMPILERS = ['sabre', 'toqm', 'bqskit', 'canopus']
 
 
 def display_result_count(compiler: str):
@@ -45,11 +43,11 @@ def display_result_depth(compiler: str):
     print(table)
 
 
-print('=='*50)
+print('=='*40)
 for compiler in COMPILERS:
     display_result_count(compiler)
 
-print('=='*50)
+print('=='*40)
 for compiler in COMPILERS:
     display_result_depth(compiler)
 

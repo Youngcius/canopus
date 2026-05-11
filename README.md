@@ -13,8 +13,8 @@
 If you make use of Canopus in your work, please cite the following paper:
 
 ```
-@article{yang2025qubit,
-  title={Qubit Mapping and Routing tailored to Advanced Quantum ISAs: Not as Costly as You Think},
+@article{yang2025unifying,
+  title={Unifying Qubit Routing Across Diverse Quantum ISAs via Canonical Representation},
   author={Yang, Zhaohui and Zhang, Kai and Tian, Xinyang and Ren, Xiangyu and Liu, Yingjian and Li, Yunfeng and Ding, Dawei and Chen, Jianxin and Xie, Yuan},
   journal={arXiv preprint arXiv:2511.04608},
   year={2025}

@@ -1,3 +1,4 @@
 *.qasm linguist-detectable=false
 *.ipynb linguist-detectable=false
 *.tex linguist-detectable=false
+qelib1.inc linguist-vendored=true
