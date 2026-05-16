@@ -1,0 +1,30 @@
+#!/bin/bash
+
+if [ ! -n "$1" ]; then
+  echo "usage:    % mminrep infile [ outfile [procs] ] " 
+  exit 1
+fi
+
+rm -f $1tmp
+echo "\n\ntestlin" > $1tmp
+cat $1 >> $1tmp
+
+# output goes to outfile, outfile1....       
+
+#if [ -n "$2" ]; then
+#   out=$2
+#fi
+
+if [ -n "$3" ]; then
+   procs=$3
+else
+   procs=$(nproc)
+fi
+
+if [ -n "$2" ]; then
+mpirun -np $procs --oversubscribe mplrs -minrep $1tmp $2   
+else
+mpirun -np $procs --oversubscribe mplrs -minrep $1tmp   
+fi
+
+rm -f $1tmp

@@ -1,0 +1,98 @@
+#!/bin/bash
+
+if [ ! -n "$1" ]; then
+  echo "usage:    % mlrs infile [ outfile [procs [cptime [cpindex] ] ] " 
+  exit 1
+fi
+
+# cptime is checkpoint time in seconds
+# output goes to outfile, outfile1....       
+# checkpoint file to infile.cp0, infile.cp1, ... 
+# if restart specified restart from infile.cp{cpindex} output to outfile{cpindex+1}
+
+# infile.conf   line 1: before mpirun options   last line: after mpirun options 
+#               overides command line procs
+# default will be generated if no infile.conf exists:
+# nice -n 0
+# -np procs
+
+###options
+
+inp=$1       
+time=86400           # 1 day
+echo  $(hostname)
+
+if [ -n "$2" ]; then
+   out=$2
+fi
+
+if [ -n "$3" ]; then
+   procs=$3 
+else
+   procs=$(nproc)
+fi
+
+if [ -n "$4" ]; then
+   time=$4
+fi
+
+cpindex=-1    
+if [ -n "$5" ]; then
+   cpindex=$5
+fi
+let "round=cpindex+1"
+
+config=1
+if [[ ! -f "$1.conf" ]]; then
+  if [[ $procs -lt 3 ]]; then
+    echo "specify at least 3 procs"
+    exit 1
+  fi
+  echo "time " > $1.conf
+  if [ $procs -le $(nproc) ] ; then
+     echo "-np $procs --oversubscribe -H $(hostname) nice -n 5" >> $1.conf
+  else
+     echo "-np $procs --oversubscribe nice -n 5" >> $1.conf
+  fi
+  config=0
+fi
+
+###end options
+
+echo "cptime=$time secs"
+
+
+done=0
+
+while [ $done -ne 1 ] ; do
+ pre=`head -n 1 $1.conf`
+ mpiargs=`tail -n 1 $1.conf`
+ if [ $round -gt 0 ]; then
+  restart="-restart ${inp}.cp${cpindex}"
+  echo " "; echo "*Restarting from ${inp}.cp${cpindex}"
+ fi
+
+if [ ! -n "$2" ]; then          # stdout
+ ${pre} mpirun ${mpiargs} mplrs ${inp} ${restart} -checkp ${inp}.cp${round} -time ${time}  
+elif [ ${round} -gt 0 ] ; then  # restart outfile{round}
+ ${pre} mpirun ${mpiargs} mplrs ${inp} ${out}${round} ${restart} -checkp ${inp}.cp${round} -time ${time}
+ sed -i "3s/^/\*Restarted from ${inp}.cp${cpindex}\n/" ${out}${round}
+else                            # outfile
+ ${pre} mpirun ${mpiargs} mplrs ${inp} ${out} ${restart} -checkp ${inp}.cp${round} -time ${time}
+fi
+
+ done=1
+ if [ `cat ${inp}.cp${round} | wc -l` -gt 0 ]; then
+   done=0
+   let "round=round+1"
+   let "cpindex=cpindex+1"
+ fi
+done
+
+if [ ${config} -eq 0 ] ; then  # we made conf file
+   rm -f $1.conf
+fi
+
+if [ `cat ${inp}.cp${round} | wc -l` -eq 0 ]; then
+   rm -f ${inp}.cp${round}   # it is empty
+fi

@@ -1,0 +1,114 @@
+#!/bin/bash
+#
+# projred: test inequalities for redundancy after projection
+# usage: projred [-solver SMT SOLVER] <ine file> [output file]
+# projection should be given in the ine file. Tests each of the
+# inequalities specified by a redund or redund_list option
+#
+# requires: polyv, inedel, z3 or cvc4 in path
+# uses temporary files in current directory - be careful with multiple
+# runs
+#
+
+CHECKPRED=polyv
+INEDEL=inedel
+
+if [ $# -lt 1 ] || [ $# -gt 4 ]; then
+	echo Usage: projred [-solver SMT-solver] \<ine file\> [output file]
+        exit 1
+fi
+
+if [ "$1" = "-solver" ]; then
+	if [ $# -lt 3 ]; then
+		echo Usage: projred [-solver SMT-solver] \<ine file\> [output file]
+		exit 1
+	fi
+	SOLVER=$2
+	INPUT=$3
+	if [ $# -eq 4 ]; then
+		OUTPUT=$4
+	fi
+else
+	INPUT=$1
+	if [ $# -ge 2 ]; then
+		OUTPUT=$2
+	fi
+fi
+
+if [ -z ${SOLVER} ]; then
+ SOLVER=z3
+fi
+echo "*SMT-solver=$SOLVER, input from $INPUT"
+
+c=0
+m=0
+
+TMPSMT=$INPUT-$SOLVER-tmp.smt2
+TMPINE=$INPUT-$SOLVER-tmp.ine
+TMPINE2=$INPUT-$SOLVER-tmp2.ine
+TMPOUT=$INPUT-$SOLVER-tmp.out
+
+if [ `cat $INPUT | grep rational | wc -l` -eq 1 ]; then
+	m=`cat $INPUT |grep rational | tr -s ' ' | cut -d ' ' -f 1`
+elif [ `cat $INPUT | grep integer | wc -l` -eq 1 ]; then
+	m=`cat $INPUT | grep integer | tr -s ' ' | cut -d ' ' -f 1`
+fi
+
+sed -i s/redund/Redund/ $INPUT
+sed -i s/^Redund/redund/ $INPUT
+
+if [ `cat $INPUT | grep redund | wc -l` -ne 1 ]; then
+	echo Must use one redund or redund_list line
+	exit 1
+fi
+
+if [ `cat $INPUT | grep redund_list | wc -l` -eq 1 ]; then
+	RANGE=`cat $INPUT | grep redund_list | tr -s ' ' | cut -d ' ' -f 3-`
+else
+	RANGE1=`cat $INPUT | grep redund | tr -s ' ' | cut -d ' ' -f 2`
+	RANGE2=`cat $INPUT | grep redund | tr -s ' ' | cut -d ' ' -f 3`
+	if [ $RANGE1 -eq 0 ] && [ $RANGE2 -eq 0 ]; then
+		RANGE1=1
+		RANGE2=$m
+	fi
+	RANGE=`seq $RANGE1 $RANGE2`
+fi
+
+sed -i s/Redund/redund/ $INPUT
+
+cp $INPUT $TMPINE2
+
+for i in $RANGE ; do
+	cat $TMPINE2 | grep -v redund > $TMPINE
+	i=$(($i + 0))
+	row=$((i - c))
+	echo redund_list 1 $row >> $TMPINE
+	$CHECKPRED $TMPINE > $TMPSMT 2>/dev/null
+	$SOLVER $TMPSMT > $TMPOUT
+
+	if [ `cat $TMPOUT | grep unsat | wc -l` -ge 1 ]; then
+		((c++))
+		echo *Row $i is $c-th redundant, removing
+                $INEDEL $row <$TMPINE2 > $TMPINE
+                mv $TMPINE $TMPINE2
+	elif [ `cat $TMPOUT | grep sat | wc -l` -ge 1 ]; then
+		RES=1
+	else
+		echo Broken run, no guarantees
+	fi
+done
+
+#sed -i s/^redund/\*redund/ $TMPINE2
+cat $TMPINE2 | sed 's/^redund/\*redund/' > $TMPINE
+mv $TMPINE $TMPINE2
+
+if [ -z ${OUTPUT} ]; then
+	cat $TMPINE2 
+        echo "*SMT-solver=$SOLVER, input from $INPUT" 
+	rm $TMPINE2
+else
+	mv $TMPINE2  $OUTPUT 
+        echo "*SMT-solver=$SOLVER, input from $INPUT" >> $OUTPUT
+fi
+
+rm -f $TMPOUT $TMPSMT $TMPINE

@@ -1,0 +1,42 @@
+#!/bin/csh
+date
+if ($#argv == 0 ) then
+  echo "usage:    % mfel infile [procs] ] " 
+  exit 1
+endif
+
+set j = 0
+
+echo `hostname`
+
+if ($#argv == 2) then
+  set procs = $2
+else
+  set procs = `nproc`
+endif
+
+#cleanup input removing hidden linearities and duplicates now done in mplrs
+
+#mpirun -np $procs --oversubscribe -H `hostname` mplrs -j 1 $1 $1.tmpin
+#minrep $1 $1.tmpin
+
+cp $1 $1.tmpin
+
+while ( $j >= 0  )
+   set test1=`grep "^ *eliminate" $1.tmpin`
+   set test2=`grep "^ *project" $1.tmpin`
+
+   if($procs <= `nproc`) then
+      mpirun -np $procs --oversubscribe -H `hostname` mplrs -fel -j 1 $1.tmpin $1.tmpout
+   else
+      mpirun -np $procs --oversubscribe mplrs -fel -j 1 $1.tmpin $1.tmpout
+   endif 
+
+   @ j++
+   cat $1.tmpout
+   if("$test1" == "" && "$test2" == "") break
+   mv -f $1.tmpout $1.tmpin
+end
+   rm -f $1.tmpin $1.tmpout
+date
+

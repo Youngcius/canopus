@@ -1,0 +1,14 @@
+#!/bin/csh
+
+set n=3
+set arr = ( 1 2 3 )
+echo $arr
+set j = $n
+cp $1 $1.tmp 
+while ( $j > 0 )
+   echo $arr[$j]
+   cat $1.tmp | inedel  $arr[$j] >! $1.tmp.out
+   mv -f $1.tmp.out $1.tmp
+   cat $1.tmp
+   @ j-- 
+end

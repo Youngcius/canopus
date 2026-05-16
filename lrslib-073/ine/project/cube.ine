@@ -1,0 +1,15 @@
+cube
+H-representation
+begin
+7 4 rational
+ 1  1  0  0 
+ 1  0  1  0 
+ 1  0  0  1 
+ 1 -1  0  0 
+ 1  0  0 -1 
+ 1  0 -1  0 
+-1 -1  0  0
+end
+project  1 2
+verbose
+*debug

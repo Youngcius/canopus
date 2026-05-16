@@ -1,0 +1,10 @@
+ 2503 -23 -62  252  645 -606  207 -121 -153  8  152 
+ 3071  144 -545  576  814 -601  631 -231 -325  136  340 
+end
+*Totals: facets=26321306 bases=181991726
+*Dictionary Cache: dict_limit=400 dict_count=400 misses= 55363989/181989949   Tree Depth= 74
+*threads=8  counts: 55996917 6357006 4089515 56092334 1634081 51333508 4997739 1490625
+*children=11 counts: 51333508 1634081 55996917 6357006 4089515 4997739 928410 5 1291632 55163924 198988
+*lrs:lrslib_v.7.3_2024.4.17(64bit,lrslong.h,hybrid_arithmetic)
+*overflow checking on lrslong arithmetic
+*14862.078u 107.671s 5916Kb 23548 flts 0 swaps 0 blks-in 0 blks-out 

@@ -1,0 +1,12 @@
+square
+H-representation
+begin
+6 3 rational
+ 0  1  0 
+ 0  0  1 
+ 1 -1  0 
+ 1  0 -1 
+ 0  -1  0 
+ 0  3  1 
+end
+verbose

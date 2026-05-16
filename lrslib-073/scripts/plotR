@@ -1,0 +1,46 @@
+#!/bin/bash
+# plot #R rays against depth and B#  (useful for cones, otherwise use plotB
+if [ ! -n "$1" ]; then
+  echo "usage: % plotR  lrs_output_file [ maxdepth [ maxcobases ] ]"
+  exit 1
+fi
+
+#strip out first four fields from cobasis lines
+grep "V#" $1 | sed -n '/V#/s/V#//;s/R#//;s/B#//;s/h=//;s/f.*//p' > $1Bhist
+
+#get maxdepth from file if not supplied
+if [ ! -n "$2" ]; then
+  maxd=$(grep -i "tree depth" $1 | awk '{print $NF}')
+else
+  maxd=$2
+fi
+
+#get maxcobases from file if not supplied
+if [ ! -n "$3" ]; then
+  maxB=$(tail -n 1 $1Bhist | awk '{print $3}')
+else
+  maxB=$3
+fi
+
+echo "$maxd $maxB"
+
+gnuplot -persist <<EOF
+set terminal postscript enhanced color
+set output 'plotR.ps'
+set autoscale
+set xlabel "R#"
+set title "R# vs height"
+set ylabel "height"
+set yrange [0:$maxd]
+plot '$1Bhist' using 2:4
+
+set title "R# vs B#"
+set ylabel "B#"
+set yrange [0:$maxB]
+plot '$1Bhist' using 2:3
+EOF
+
+rm -f $1Bhist 
+
+ps2pdf plotR.ps $1R.pdf
+rm plotR.ps

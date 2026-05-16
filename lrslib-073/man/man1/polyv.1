@@ -1,0 +1,200 @@
+.TH "polyv" "1" "2023.10.21" "October 2023" "polyv 7.3"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SS "Name"
+polyv - utility to create and verify logical formulas checking properties
+of given H/V representations using logic solvers.
+.SS "Synopsis"
+.HP \w'\fBpolyv\fR\ [input-files]\ 'u
+\fBpolyv\fR\ \fI[input-files]\fR
+.SS "Description"
+.PP
+
+The input file or files are H- or V-representations of polyhedra in \fIlrs\fR
+format, and the output is a logical formula in \fISMT\-LIB\fR 2.6 format.
+Behavior depends on the options and number of input files provided.
+In many cases, it is easier and faster to use \fIlrs\fR, \fImplrs\fR or
+other tools to check the following questions directly.  \fIpolyv\fR is
+an alternative approach intended for some examples where the direct approach
+is difficult.
+
+First, \fIpolyv\fR can be given a single H-representation defining a 
+polyhedron P, along with a list of variables for a projection of P and an
+inequality I to test. The question is whether we have the same projection
+when I is deleted from P.  If so we say I is redundant for the projection,
+otherwise it is non-redundant.  \fIpolyv\fR allows the use of SMT solvers to
+decide this question  without performing the projection explicitly,
+producing a formula that is satisfiable iff the I is non-redundant for the
+projection.  In addition, \fIpolyv\fR it produce \fIlrs\fR inputs that
+verify witnesses of non-redundancy produced by an SMT solver.
+
+Next, \fIpolyv\fR can be given two representations defining polyhedra
+P and Q, where H-representations may contain projections.  The question
+is whether P and Q are different polyhedra: \fIpolyv\fR produces a formula
+that is satisfiable iff there is a point contained in exactly one of P and Q.
+
+Finally, \fIpolyv\fR can be given three representations defining polyhedra
+P, Q and R.  The question is whether the intersection of P and Q is different
+from R: \fIpolyv\fR produces a formula that is satisfiable iff there is a
+point contained in exactly one of R and the intersection.
+
+.SS "File formats"
+.PP
+The input file is in \fIlrs\fR format (see 
+.BR lrs (1) )
+consisting of
+(a) an H-representation of
+a polyhedron, (b) a projection to a subset of variables given by the \fIproject\fR or \fIeliminate\fR
+options, and (c) an inequality to test given by the \fIredund\fR or \fIredund_list\fR options.
+Note that only "linearity", "redund", "redund_list", "project"
+and "eliminate" options are supported, and the combination of
+redund/redund_list and project/eliminate options is both unique to
+polyv and required.
+
+.PP
+The output
+is in \fISMT\-LIB\fR 2.6 format using logic \fILRA\fR.  Solvers such as
+\fIz3\fR or \fIcvc5\fR support this logic.  See The SMT-LIB Standard: Version 2.6
+for details.
+
+.SS "Usage"
+.PP
+
+\fBpolyv\fR\ [input-file]
+produces a logical formula satisfiable iff the first inequality
+given in a redund/redund_list option is redundant after projection according to
+a project/eliminate option.
+The solver can produce witnesses for non-redundant inequalities, i.e.
+an assignment to the variables whose image is in the projection only if
+the inequality is removed.  No witness is produced if the inequality
+is redundant.
+.PP
+A witness of non-redundancy can be verified using two
+certificates.  The first certificate specifies that the assignment to
+the variables is feasible when the inequality in question is removed.
+The second certificate asserts that when this inequality is added,
+no feasible assignment has the same projection.  Certificates are produced
+using the following options.
+.PP
+\fBpolyv\fR\ -c 1 [input-file]
+reads a witness of non-redundancy on standard input and produces an lrs input
+file that should be feasible.  The options in the input file should be the
+same as when the formula was produced.
+.PP
+\fBpolyv\fR\ -c 2 [input-file]
+reads a witness of non-redundancy on standard input and produces an lrs input
+file that should be infeasible.  The options in the input file should be
+the same as when the formula was produced.
+.PP
+\fBpolyv\fR\ [input-file-1] [input-file-2]
+given two H/V representations, produces a logical formula satisfiable
+iff they define different polyhedra.  Projections are supported in
+H-representations using the project or eliminate option.  This can be
+used to e.g. verify H/V equivalency or fel projections.
+.PP
+\fBpolyv\fR\ [input-file-1] [input-file-2] [input-file-3]
+given three H/V representations, produces a logical formula satisfiable
+iff the intersection of polyhedra defined by input-file-1 and input-file-2 is
+not defined by input-file-3.  Projections are supported in H-representations
+using the project or eliminate option.
+
+.SS "Examples"
+.PP
+(1) Check if the first inequality in cp4.ine is redundant for projections.
+.br
+(a) To check for redundancy after the first variable is eliminated,
+add options "redund_list 1 1" and "eliminate 1 1" to cp4.ine. Then:
+
+ % polyv cp4.ine > cp4\-11.smt
+ % z3 cp4\-11.smt > cp4\-11.out    
+.br
+or
+.br
+ % cvc5 -L smt --produce-models cp4\-11.smt > cp4\-11.out 
+
+The first line of cp4\-11.out reads "sat" indicating that
+inequality 1 is non-redundant for eliminating variable 1. We
+can check the witness:
+
+ % polyv -c 1 cp4.ine < cp4\-11.out | lrs
+ % polyv -c 2 cp4.ine < cp4\-11.out | lrs
+
+The first certificate is feasible and second infeasible, so
+the witness proves non-redundancy for the projection.
+.br
+(b) To check for redunancy after variables 1 and 2 are eliminated,
+add options "redund_list 1 1" and "eliminate 2 1 2" to cp4.ine. Then
+
+ % polyv cp4.ine > cp4\-112.smt
+ % z3 cp4\-112.smt > cp4\-112.out
+.br
+or
+.br
+ % cvc5 -L smt --produce-models cp4\-112.smt > cp4\-112.out
+
+The first line of cp4\-112.out reads "unsat" indicating that
+inequality 1 is redundant for eliminating variables 1 and 2.
+In this case there is no witness.
+
+.PP
+(2) Check if given H- and V- representations define different polyhedra.
+.br
+(a) To check whether mp5.ine and mp5.ext (produced using lrs) define
+different polyhedra:
+
+ % polyv mp5.ine mp5.ext > mp5hv.smt
+ % z3 mp5hv.smt > mp5hv.out
+
+The first line of mp5hv.out reads "unsat" indicating that these two
+representations do not define different polyhedra (i.e. they are
+equivalent).
+.br
+(b) After removing the last vertex (the origin) from mp5.ext to create
+    mp5missing.ext:
+
+ % polyv mp5.ine mp5missing.ext > mp5hvm.smt
+ % z3 mp5hvm.smt > mp5hvm.out
+
+The first line of mp5hvm.out reads "sat" indicating that these
+two representations define different polyhedra.  
+.br
+Note that the H-representations are allowed to include projections.
+
+.SS "Notes"
+.IP " 1." 4
+SMT-Lib Standards
+.RS 4
+\%http://smtlib.cs.uiowa.edu/language.shtml
+.RE
+.IP " 2." 4
+z3
+.RS 4
+\%https://github.com/Z3Prover/z3/wiki
+.RE
+.IP " 3." 4
+cvc5
+.RS 4
+\%https://cvc5.github.io/
+.RE
+.SS Author
+Charles Jordan <skip at res dot otaru-uc dot ac dot jp >
+.SS "See also"
+.BR lrslib (5),
+.BR lrs (1)

@@ -1,0 +1,225 @@
+.TH "redund|minrep" "1" "2024.1.10 " "January 2024" "lrslib 7.3"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SS "Name"
+redund|minrep  -   Remove redundant inequalities from an H-representation or redundant
+vertices (non-extreme points) from a V-representation. \fBminrep\fR also identifies hidden
+linearities.
+.SS "Synopsis"
+.HP \w'\fBredund\fR\ [input-file] [output-file]\ 'u
+\fBredund\fR\ \fI[input-file] [output-file]\fR      
+.HP \w'\fBminrep\fR\ [input-file] [output-file]\ 'u
+\fBminrep\fR\ \fI[input-file] [output-file]\fR     
+.HP \w'\fBmpirun\fR\ \fR\fBmplrs\fR\ [input-file] [output-file]\ 'u
+\fBmpirun\fR\ -np [procs] \fBmplrs -minrep\fR\ \fI[input-file] [output-file] [option...]\fR
+.SS "Description"
+.PP
+\fBredund\fR and \fBminrep\fR are aliases to \fBlrs\fR which is part of 
+the C library \fBlrslib(5)\fR. 
+This functionality can also be performed by
+\fBlrs\fR directly by using the options described below.
+All computations are done in exact arithmetic. For input file descriptions
+see \fBlrs(1)\fR.
+A parallel version of \fBminrep\fR
+is given by \fBmplrs -minrep\fR. 
+The \fB-redund\fR option performs the same function and is retained for legacy.
+(see \fBmplrs(1)\fR)
+.PP
+\fIredund\fR
+.br
+\fIH-representation:\fR
+redundant inequalities in an input H-representation are removed and
+the remaining inequalities output\&. 
+Hidden linearities
+are not detected unless the \fBtestlin\fR option is included,
+in which case the output is a minimum representation
+and the dimension is reported.
+.br
+\fIV-representation:\fR
+outputs all extreme points and extreme rays, often called the
+\fIconvex hull\fR problem. 
+The \fBtestlin\fR option cause linearities to be detected and explicitly
+output.
+.br
+Outputs can be piped directly into \fIlrs\fR.
+\fIredund\fR is a link to \fIlrs\fR which can also perform these functions via 
+the \fBtestlin\fR, \fBredund\fR and \fBredund_list\fR options. 
+\fBmplrs -redund\fR always sets the \fBtestlin\fR option, so always produces
+minimum representations. 
+.PP
+\fIminrep\fR
+.br
+Equivalent to \fBredund\fR with the \fBtestlin\fR option. 
+
+.PP
+With no options minrep|redund will process the entire input file.
+.PP
+\fBredund start end \fR       
+.br
+Check input lines with line numbers from start to end and remove any redundant lines.
+.br
+\fBredund 0 0\fR  will check all input lines. 
+.PP
+\fBredund_list k   i_1 i_2 ... i_k\fR   
+.br
+Check the k input line numbers with indices i_1 i_2 ... i_k  
+and remove any redundant lines.
+.PP
+\fBtestlin\fR      \fB(before the begin line only)\fR   (new 7.3)
+.br 
+\fIredund\fR
+An LP test will be made for hidden linearities at the beginning of the run and is reported.
+If there are no hidden linearities
+one LP per constraint tests for redundancy.
+If hidden linearities exist two LPs per constraint search for hidden linearities and remove redundancies.
+In both cases
+the run ends with a minimum set of linearities and inequalities (ie. no hidden inequalities or duplicates)
+and the dimension is reported.
+.br
+\fIlrs\fR
+If neither \fBredund\fR or \fBredund_list\fR options are present the initial
+LP test is made, reported and the run halted.
+Otherwise as above for \fIredund\fR.
+.br
+\fImplrs\fR
+This option is ignored. In redund/minrep mode a minimum representation is always found.
+.PP
+\fBverbose\fR
+.br
+As each input line is checked a message is printed telling its status
+.br
+ *nr :non-redundant 
+ *re :redundant 
+ *sr :strongly redundant
+.br
+For an H-representation strongly redundant means the feasible
+region lies in its open half-space. For a V-representation it means that the point
+lies in the (relative) interior of the convex hull.
+.br
+In addition \fIminrep\fR may report
+ *li :linearity
+.SS "Examples"
+.PP
+(1) Remove hidden linearities and minimum representation of an H-representation.
+ % cat cube.ine
+ H-representation
+ begin
+ 7 4 rational
+  0  1  0  0 
+  0  0  1  0 
+  0  0  0  1 
+  1 -1  0  0 
+  1  0 -1  0 
+  1  0  0 -1 
+ -1  0  0  1
+ end
+ verbose
+ 
+ % minrep cube.ine
+ minrep:lrslib_v.7.3_2024.1.10(64bit,lrslong.h,hybrid_arithmetic)
+ *Input taken from  cube.ine
+ *hidden linearities exist
+ *finding minimum representation
+ *nr 0  1  0  0 
+ *nr 0  0  1  0 
+ *sr 0  0  0  1 
+ *nr 1 -1  0  0 
+ *nr 1  0 -1  0 
+ *li 1  0  0 -1 
+ *li-1  0  0  1 
+ *linearity in row=6 removed or in cobasis, independent
+ *linearity in row=7 dependent, made redundant
+ H-representation
+ linearity 1 1
+ begin
+ 5 4 rational
+  1  0  0 -1 
+  0  1  0  0 
+  0  0  1  0 
+  1 -1  0  0 
+  1  0 -1  0 
+ end
+ 
+ *input had 7 rows and 4 columns
+ * 2 redundant row(s) found
+  3 7
+ * 1 hidden linearity found
+ 
+.PP
+(2) Compute the extreme points of a set of 10 points in R^3
+.PP
+ % cat c.ext
+ V-representation
+ begin
+ 10 4 rational
+ 1  1  1  1 
+ 1  0  1  1 
+ 1 1/2 0 1/3
+ 1  1  1  0 
+ 1  0  1  0 
+ 1  1  0  0 
+ 1  0  0  0 
+ 1  0 1/3 1/4
+ 1  1  0  1 
+ 1  0  0  1 
+ end
+
+ % redund c.ext
+
+ *redund:lrslib v.7.2 2020.6.8(64bit,lrslong.h,hybrid arithmetic)
+ *Input taken from  c.ext
+ V-representation
+ begin
+ 8 4 rational
+ 1  1  1  1 
+ 1  0  1  1 
+ 1  1  1  0 
+ 1  0  1  0 
+ 1  1  0  0 
+ 1  0  0  0 
+ 1  1  0  1 
+ 1  0  0  1 
+ end
+ *Input had 10 rows and 4 columns
+ * 2 redundant row(s) found:
+ 3 8
+
+.SS "Notes"
+.IP " 1." 4
+FAQ page
+.RS 4
+\%https://inf.ethz.ch/personal/fukudak/polyfaq/polyfaq.html
+.RE
+.IP "2." 4
+redund: extreme point enumeration and eliminating redundant inequalities
+.RS 4
+\%http://cgm.cs.mcgill.ca/%7Eavis/C/lrslib/USERGUIDE.html#redund
+.RE
+.IP "3." 4
+User's guide for lrslib
+.RS 4
+\%http://cgm.cs.mcgill.ca/%7Eavis/C/lrslib/USERGUIDE.html
+.RE
+.SS Author
+David Avis <avis at cs dot mcgill dot ca >
+.SS "See also"
+.BR lrs (1),
+.BR mplrs (1),
+.BR lrslib (5),

@@ -1,0 +1,13 @@
+cube-1 
+* 1  1  1  1 
+V-representation
+begin
+7 4 rational
+ 1  0  1  1 
+ 1  1  0  1 
+ 1  0  0  1 
+ 1  1  1  0 
+ 1  0  1  0 
+ 1  1  0  0 
+ 1  0  0  0 
+end

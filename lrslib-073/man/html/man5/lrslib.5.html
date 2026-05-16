@@ -1,0 +1,172 @@
+Content-type: text/html; charset=UTF-8
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML><HEAD><TITLE>Man page of lrslib</TITLE>
+</HEAD><BODY>
+<H1>lrslib</H1>
+Section: lrslib 7.3 (5)<BR>Updated: 2024.01.31<BR><A HREF="#index">Index</A>
+<A HREF="../index.html">Return to Main Contents</A><HR>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<A NAME="lbAB">&nbsp;</A>
+<H3>Name</H3>
+
+lrslib: Convert between representations of convex polyhedra, remove redundant inequalities, find minimum representations,
+convex hull computation, solve linear programs in exact precision, 
+compute Nash-equibria in 2-person games.
+<A NAME="lbAC">&nbsp;</A>
+<H3>Synopsis</H3>
+
+<DL COMPACT>
+<DT>
+<B>lrs</B>&nbsp;<I>[input-file] [output-file]</I>
+<DT>
+<B>redund</B>&nbsp;<I>[input-file] [output-file]</I>
+<DT>
+<B>minrep</B>&nbsp;<I>[input-file] [output-file]</I>
+<DT>
+<B>fel</B>&nbsp;<I>[input-file] [output-file]</I>
+<DT>
+<B>mpirun</B> -np <I>num-proc</I> <B>mplrs</B>&nbsp;<I>input-file [output-file] [options]</I>
+<DT>
+<B>lrsnash</B>&nbsp;<I>[options] [input-file] </I> 
+<DT>
+<B>hvref/xvref</B>&nbsp;<I>[input-file]</I> 
+<DT>
+<B>polyv</B>&nbsp;<I>[input-file]</I> 
+</DL>
+<A NAME="lbAD">&nbsp;</A>
+<H3>Description</H3>
+
+<P>
+<P>
+
+<DD>A polyhedron can be described by a list of inequalities (<I>H-representation)</I>
+or as by a list of its vertices and extreme rays (<I>V-representation)</I>.
+<I>lrslib</I> is a C library containing programs to manipulate these representations.
+All computations are done in exact arithmetic.
+<P>
+
+<A HREF="../man1/lrs.1.html">lrs</A>(1)
+converts an H-representation of a polyhedron to its V-representation and vice versa,
+known respectively as the
+<I>vertex enumeration</I>
+and
+<I>facet enumeration</I> problems (see Example (1) below).
+lrs can also be used to solve a linear program, remove linearities from a system,
+and extract a subset of columns.
+<P>
+
+<A HREF="../man1/redund.1.html">redund</A>(1)
+removes redundant inequalities in an input H-representation and outputs the remaining inequalities.
+For a V-representation input it
+outputs all extreme points and extreme rays. Both outputs can be piped directly into <I>lrs</I>.
+<I>redund</I> is a link to <I>lrs</I> which performs these functions via
+the <B>redund</B> and <B>redund_list</B> options.
+<P>
+
+<A HREF="../man1/minrep.1.html">minrep</A>(1)
+performs the same functions as <A HREF="../man1/redund.1.html">redund</A>(1) but in addition searches for
+hidden linearities in the input. These are made explicit in the output
+which is a minimum representation of the polyhedron.
+<P>
+
+<A HREF="../man1/fel.1.html">fel</A>(1)
+projects an input H-representation onto a given set of variables using Fourier-Motzkin elimination.
+For a V-representation it extracts the specified columns.
+The output is non-redundant and can be 
+can be piped directly into <I>lrs</I>.
+<I>fel</I> is a link to <I>lrs</I> which performs these functions via 
+the <B>eliminate</B> and <B>project</B> options.
+<P>
+
+<A HREF="../man1/mplrs.1.html">mplrs</A>(1)
+is Skip Jordan's parallel wrapper for <I>lrs/redund/minrep/fel</I>. 
+<P>
+
+<A HREF="../man1/lrsnash.1.html">lrsnash</A>(1)
+is Terje Lensberg's application of <I>lrs</I> for finding Nash-equilibria
+in 2-person games. 
+<P>
+
+<A HREF="../man1/hvref.1.html">hvref</A>(1) <A HREF="../man1/xvref.1.html">xvref</A>(1) produce a cross reference list between H- and V-representations.
+<P>
+
+<A HREF="../man1/polyv.1.html">polyv</A>(1) is Skip Jordan's utility to create logical formulas for checking equivalence between H- and V- representations or determining whether a given inequality is redundant after eliminating variables, without eliminating the variables.  
+
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H3>Arithmetic </H3>
+
+<A HREF="../man5/lrsarith.5.html">lrsarith</A>(5) From version 7.1 <I>lrs/redund/mplrs</I> use hybrid arithmetic with overflow checking, 
+starting in 64bit integers, moving to 128bit (if available) and then GMP.
+Overflow checking is conservative to improve performance:
+eg. with 64 bit arithmetic, a*b triggers overflow if either a or b is at least 2^31, 
+and a+b triggers an overflow if either a or b is at least 2^62.
+Typically problems that can be solved in 64bits run 3-4 times faster than with GMP 
+and inputs solvable in 128bits run twice as fast as GMP.
+<P>
+
+Various arithmetic versions are available 
+and can be built from the makefile.
+<P>
+<A NAME="lbAF">&nbsp;</A>
+<H3>Notes</H3>
+
+<P>
+
+User's guide for lrslib
+<DL COMPACT><DT><DD>
+<A HREF="http://cgm.cs.mcgill.ca/~avis/C/lrslib/USERGUIDE.html">http://cgm.cs.mcgill.ca/~avis/C/lrslib/USERGUIDE.html</A>
+</DL>
+
+<A NAME="lbAG">&nbsp;</A>
+<H3>Author</H3>
+
+David Avis &lt;avis at cs dot mcgill dot ca &gt;
+<A NAME="lbAH">&nbsp;</A>
+<H3>See Also</H3>
+
+lrs (1), <A HREF="../man1/redund.1.html">redund</A>(1), <A HREF="../man1/minrep.1.html">minrep</A>(1), <A HREF="../man1/mplrs.1.html">mplrs</A>(1), <A HREF="../man1/fel.1.html">fel</A>(1), <A HREF="../man1/lrsnash.1.html">lrsnash</A>(1), <A HREF="../man1/hvref.1.html">hvref</A>(1), <A HREF="../man1/xvref.1.html">xvref</A>(1), <A HREF="../man1/polyv.1.html">polyv</A>(1), <A HREF="../man5/lrsarith.5.html">lrsarith</A>(5)
+<P>
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DL>
+<DT><A HREF="#lbAB">Name</A><DD>
+<DT><A HREF="#lbAC">Synopsis</A><DD>
+<DT><A HREF="#lbAD">Description</A><DD>
+<DT><A HREF="#lbAE">Arithmetic </A><DD>
+<DT><A HREF="#lbAF">Notes</A><DD>
+<DT><A HREF="#lbAG">Author</A><DD>
+<DT><A HREF="#lbAH">See Also</A><DD>
+</DL>
+</DL>
+<HR>
+This document was created by
+<A HREF="/cgi-bin/man/man2html">man2html</A>,
+using the manual pages.<BR>
+Time: 07:33:14 GMT, January 31, 2024
+</BODY>
+</HTML>

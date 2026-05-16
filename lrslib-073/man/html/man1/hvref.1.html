@@ -1,0 +1,181 @@
+Content-type: text/html; charset=UTF-8
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML><HEAD><TITLE>Man page of xref|hvref</TITLE>
+</HEAD><BODY>
+<H1>xref|hvref</H1>
+Section: lrslib 7.3 (1)<BR>Updated: 2023.1.4 <BR><A HREF="#index">Index</A>
+<A HREF="../index.html">Return to Main Contents</A><HR>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<A NAME="lbAB">&nbsp;</A>
+<H3>Name</H3>
+
+xref|hvref  - produce a cross reference list between H- and V-representations.
+<BR>&nbsp;
+<A NAME="lbAC">&nbsp;</A>
+<H3>Synopsis</H3>
+
+<DL COMPACT>
+<DT>
+<B>xref</B>&nbsp;<I>[input-file]</I> 
+<DT>
+<B>hvref</B>&nbsp;<I>[input-file]</I> 
+</DL>
+<A NAME="lbAD">&nbsp;</A>
+<H3>Description</H3>
+
+<P>
+
+<DD>These programs are part of and must be compiled with
+<I>lrslib</I> which is a C library.
+All computations are done in exact arithmetic.
+<P>
+
+<I>xref</I> and <I>hvref</I>&nbsp;produce a cross reference list between H- and V-representations.
+<P>
+
+<B>xref/hvref</B>   Cross reference listing between V- and H-representations  
+<P>
+In the example below we start from an H-representation of cube.ine but the same
+steps apply to the V-representation cube.ext.
+It is recommended to first remove any redundancies from the input file using redund.
+<P>
+1. Add  <B>printcobasis</B> and <B>incidence</B> options to cube.ine and run lrs.
+<BR>&nbsp;%&nbsp;cat&nbsp;cube.ine
+<BR>&nbsp;cube
+<BR>&nbsp;H-representation
+<BR>&nbsp;begin
+<BR>&nbsp;6&nbsp;4&nbsp;rational
+<BR>&nbsp;&nbsp;0&nbsp;&nbsp;1&nbsp;&nbsp;0&nbsp;&nbsp;0
+<BR>&nbsp;&nbsp;0&nbsp;&nbsp;0&nbsp;&nbsp;1&nbsp;&nbsp;0
+<BR>&nbsp;&nbsp;0&nbsp;&nbsp;0&nbsp;&nbsp;0&nbsp;&nbsp;1
+<BR>&nbsp;&nbsp;1&nbsp;-1&nbsp;&nbsp;0&nbsp;&nbsp;0
+<BR>&nbsp;&nbsp;1&nbsp;&nbsp;0&nbsp;-1&nbsp;&nbsp;0
+<BR>&nbsp;&nbsp;1&nbsp;&nbsp;0&nbsp;&nbsp;0&nbsp;-1
+<BR>&nbsp;end
+<BR>&nbsp;printcobasis
+<BR>&nbsp;incidence
+<BR>&nbsp;
+% lrs cube.ine cube.ext   
+<P>
+2. Run xref on the output file cube.ext getting cube.ext.ex
+<P>
+<BR>&nbsp;%&nbsp;xref&nbsp;cube.ext
+<BR>&nbsp;%&nbsp;cat&nbsp;cube.ext.ex
+lg% cat cube.ext.x
+<BR>&nbsp;V-representation
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;4&nbsp;5&nbsp;6&nbsp;&nbsp;&nbsp;&nbsp;#
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;1&nbsp;5&nbsp;6&nbsp;&nbsp;&nbsp;&nbsp;#
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3&nbsp;&nbsp;&nbsp;2&nbsp;4&nbsp;6&nbsp;&nbsp;&nbsp;&nbsp;#
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4&nbsp;&nbsp;&nbsp;1&nbsp;2&nbsp;6&nbsp;&nbsp;&nbsp;&nbsp;#
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5&nbsp;&nbsp;&nbsp;3&nbsp;4&nbsp;5&nbsp;&nbsp;&nbsp;&nbsp;#
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;6&nbsp;&nbsp;&nbsp;1&nbsp;3&nbsp;5&nbsp;&nbsp;&nbsp;&nbsp;#
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;7&nbsp;&nbsp;&nbsp;2&nbsp;3&nbsp;4&nbsp;&nbsp;&nbsp;&nbsp;#
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;8&nbsp;&nbsp;&nbsp;1&nbsp;2&nbsp;3&nbsp;&nbsp;&nbsp;&nbsp;#
+<P>
+<P>
+3. Edit the file  cube.ext.x to insert a second line that contains two integers
+<P>
+rows maxindex
+<P>
+where rows &gt;= # output lines in cube.ext.x
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;maxindex&nbsp;&gt;=&nbsp;#&nbsp;input&nbsp;lines&nbsp;in&nbsp;cube.ine
+<P>
+or just use 0 0 and run hvref, the output will tell you which values to use.
+<P>
+% hvref cube.ext.x
+% hvref cube.ext.x
+<P>
+<BR>&nbsp;V-representation
+<BR>&nbsp;8&nbsp;8
+<BR>&nbsp;1:&nbsp;4&nbsp;5&nbsp;6
+<BR>&nbsp;2:&nbsp;1&nbsp;5&nbsp;6
+<BR>&nbsp;3:&nbsp;2&nbsp;4&nbsp;6
+<BR>&nbsp;4:&nbsp;1&nbsp;2&nbsp;6
+<BR>&nbsp;5:&nbsp;3&nbsp;4&nbsp;5
+<BR>&nbsp;6:&nbsp;1&nbsp;3&nbsp;5
+<BR>&nbsp;7:&nbsp;2&nbsp;3&nbsp;4
+<BR>&nbsp;8:&nbsp;1&nbsp;2&nbsp;3
+<BR>&nbsp;
+<BR>&nbsp;H-representation
+<BR>&nbsp;6&nbsp;8
+<BR>&nbsp;1:&nbsp;2&nbsp;4&nbsp;6&nbsp;8
+<BR>&nbsp;2:&nbsp;3&nbsp;4&nbsp;7&nbsp;8
+<BR>&nbsp;3:&nbsp;5&nbsp;6&nbsp;7&nbsp;8
+<BR>&nbsp;4:&nbsp;1&nbsp;3&nbsp;5&nbsp;7
+<BR>&nbsp;5:&nbsp;1&nbsp;2&nbsp;5&nbsp;6
+<BR>&nbsp;6:&nbsp;1&nbsp;2&nbsp;3&nbsp;4
+<BR>&nbsp;input&nbsp;rows=8&nbsp;maxindex=6
+<BR>&nbsp;
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H3>Notes</H3>
+
+<DL COMPACT>
+<DT> 1.<DD>
+FAQ page
+<DL COMPACT><DT><DD>
+<A HREF="https://inf.ethz.ch/personal/fukudak/polyfaq/polyfaq.html">https://inf.ethz.ch/personal/fukudak/polyfaq/polyfaq.html</A>
+</DL>
+
+<DT> 2.<DD>
+User's guide for lrslib
+<DL COMPACT><DT><DD>
+<A HREF="http://cgm.cs.mcgill.ca/~avis/C/lrslib/USERGUIDE.html">http://cgm.cs.mcgill.ca/~avis/C/lrslib/USERGUIDE.html</A>
+</DL>
+
+</DL>
+<A NAME="lbAF">&nbsp;</A>
+<H3>Author</H3>
+
+David Avis &lt;avis at cs dot mcgill dot ca &gt;
+<A NAME="lbAG">&nbsp;</A>
+<H3>See also</H3>
+
+<B><A HREF="../man1/mplrs.1.html">mplrs</A></B>(1),
+
+<B><A HREF="../man5/lrslib.5.html">lrslib</A></B>(5),
+
+<B><A HREF="../man1/lrsnash.1.html">lrsnash</A></B>(1)
+
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DL>
+<DT><A HREF="#lbAB">Name</A><DD>
+<DT><A HREF="#lbAC">Synopsis</A><DD>
+<DT><A HREF="#lbAD">Description</A><DD>
+<DT><A HREF="#lbAE">Notes</A><DD>
+<DT><A HREF="#lbAF">Author</A><DD>
+<DT><A HREF="#lbAG">See also</A><DD>
+</DL>
+</DL>
+<HR>
+This document was created by
+<A HREF="/cgi-bin/man/man2html">man2html</A>,
+using the manual pages.<BR>
+Time: 07:33:14 GMT, January 31, 2024
+</BODY>
+</HTML>

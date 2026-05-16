@@ -1,18 +1,16 @@
 from __future__ import annotations
 
-from bqskit.ir.circuit import Circuit
-from bqskit.ir.lang import get_language
-
 import numpy as np
-from numpy import pi
 import numpy.typing as npt
-
-from bqskit.ir.gates.qubitgate import QubitGate
+from bqskit.ir.circuit import Circuit
 from bqskit.ir.gates.constantgate import ConstantGate
+from bqskit.ir.gates.qubitgate import QubitGate
+from bqskit.ir.lang import get_language
 from bqskit.qis.unitary.differentiable import DifferentiableUnitary
 from bqskit.qis.unitary.unitary import RealVector
 from bqskit.qis.unitary.unitarymatrix import UnitaryMatrix
 from bqskit.utils.cachedclass import CachedClass
+from numpy import pi
 
 
 def qasm_to_bqskit(qasm_str: str) -> Circuit:
@@ -38,11 +36,11 @@ class FixedCanonicalGate(QubitGate, ConstantGate):
 
     def __init__(self, *angles):
         self.angles = tuple(angles)
-        self._qasm_name = "can({})".format(", ".join(["{}".format(a) for a in self.angles]))
+        self._qasm_name = "can({})".format(", ".join([f"{a}" for a in self.angles]))
         self._utry = CanonicalGate().get_unitary(self.angles)
 
     def __repr__(self):
-        return "Can({})".format(",".join(["{:.2f}π".format(a / pi) for a in self.angles]))
+        return "Can({})".format(",".join([f"{a / pi:.2f}π" for a in self.angles]))
 
     def get_qasm_gate_def(self) -> str:
         """Returns a qasm gate definition block for this gate."""

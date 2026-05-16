@@ -1,0 +1,157 @@
+Content-type: text/html; charset=UTF-8
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML><HEAD><TITLE>Man page of lrsscripts</TITLE>
+</HEAD><BODY>
+<H1>lrsscripts</H1>
+Section: lrslib 7.2 (5)<BR>Updated: 2022.02.15<BR><A HREF="#index">Index</A>
+<A HREF="../index.html">Return to Main Contents</A><HR>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<A NAME="lbAB">&nbsp;</A>
+<H3>Name</H3>
+
+lrsscripts: some (fragile) shell functions to perform common 
+lrslib operations. <I>caveat emptor</I> !
+<A NAME="lbAC">&nbsp;</A>
+<H3>Synopsis</H3>
+
+<DL COMPACT>
+<DT>
+<B>mfel</B> <I>input-file [output-file [procs ] ]</I>
+<DT>
+<B>mlrs</B>&nbsp;<I>input-file [output-file [procs [cptime [cpindex] ] ]</I>
+<DT>
+<B>tlrs</B>&nbsp;<I>input-file [output-file [procs ]</I>
+<DT>
+<B>plotV|plotR</B>
+<I>lrs-output-file [maxdepth [maxcobases] ]</I>
+<DT>
+<B>plotL</B> [<I>histogram-file</I>] 
+<DT>
+<B>projred</B> <I>[-solver SMT-solver] ine-file [output file]</I>
+<P>
+</DL>
+<A NAME="lbAD">&nbsp;</A>
+<H3>Description</H3>
+
+<P>
+<B>mfel</B>:
+<DD>multiprocessor version of <B><A HREF="../man1/fel.1.html">fel</A>(1)</B> which performs multiple rounds of Fourier-Motzkin elimination
+as specified in either a project or eliminate option in the input file. <B>mplrs</B>
+performs only one iteration and terminates. <I>procs</I> (if specified) is the number of processors to use (assigned according to the default-hostfile),
+otherwise all available processors on the current machine are used.
+<P>
+<B>mlrs</B>:
+simple interface to <B><A HREF="../man1/mplrs.1.html">mplrs</A>(1)</B> that is similar to <B><A HREF="../man1/lrs.1.html">lrs</A>(1)</B> and 
+in addition does automatic checkpoint/restart
+for long runs.
+<I>procs</I> (if specified) is the number of processors to use
+(assigned according to the default-hostfile),
+otherwise all available processors on the current machine are used.
+<I>cptime</I> (if specified) is the time in seconds until a checkpoint/restart is made, default 86400 secs (1 day). 
+Checkpoint data is written into a file named input-file.cpN, where N=0,1,2,... is assigned
+consecutively. <B>cpindex</B> (if specified) is a valid value of N and causes a restart from
+checkpoint file input-file.cpN.
+Other <B><A HREF="../man1/mplrs.1.html">mplrs</A>(1)</B> command line parameters are default values.
+<P>
+<B>tlrs</B>:
+Runs naive hybrid arithmetic for multithreaded lrs using the binaries tlrs1, tlrs2, tlrsgmp.
+<I>procs</I> (if specified) is the number of threads to use. If omitted or zero the default openMP maximum
+thread count is used.
+<P>
+<P>
+<B>plotV</B>(requires <B>gnuplot</B> be installed): 
+produces a PDF file named &lt;lrs-output-file&gt;V.pdf that gives a plot of each vertex or facet
+along with its height in the reverse search tree. 
+<I>lrs-output-file</I> should be an <B>lrs/mplrs</B> output file produced when the <I>printcobasis</I>
+is included in the input file for the run.
+<P>
+<B>plotR</B>(requires <B>gnuplot</B> be installed): performs a similar task 
+to <B>plotV</B> for cones producing the file
+&lt;lrs-output-file&gt;H.pdf where the height of each ray is plotted.
+<P>
+<B>plotL</B>(requires <B>gnuplot</B> be installed): <B>plotL</B> produces 
+a realtime view of an <B>mplrs</B> run that uses the command line option &quot;-hist &lt;histogram-file&gt;&quot;.
+If <I>histogram-file</I> is not specified <I>hist</I> is the assumed file name.
+A PDF file named 
+<I>&lt;histogram-file&gt;.pdf</I> is produced. 
+The first plot has 3 graphs showing the number of processors working, the size of the job queue L, 
+and message requests pending, all versus elapsed time on the x-axis.
+The second histogram shows the size of the subtrees explored by producers. 
+The root of the subtree is not counted in this size. 
+Note that a producer stops after (possibly scaled) maxc nodes are explored, 
+but in backtracking some additional leaves may be discovered. 
+So the size of the largest subtree may be slightly larger than maxc. 
+<P>
+<B>projred</B>(requires <B>inedel</B>, <B><A HREF="../man1/polyv.1.html">polyv</A>(1)</B> and
+external SMT solver be installed):
+simple wrapper for <B><A HREF="../man1/polyv.1.html">polyv</A>(1)</B> that tests and greedily
+removes inequalities that are redundant after a projection, without
+doing the projection.  Repeatedly calls <B><A HREF="../man1/polyv.1.html">polyv</A>(1)</B> and the
+specified SMT solver (<B>z3</B> by default), removing inequalities
+determined to be redundant for the given projection.  The output is
+produced in <I>[output file]</I> or on standard output if no output file is
+specified.  The output file will produce the same projection as the
+original input.  Inequalities and projection to test are given as 
+options in the input file, see <B><A HREF="../man1/polyv.1.html">polyv</A>(1)</B> for details.
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H3>Notes</H3>
+
+<P>
+
+User's guide for lrslib
+<DL COMPACT><DT><DD>
+<A HREF="http://cgm.cs.mcgill.ca/~avis/C/lrslib/USERGUIDE.html">http://cgm.cs.mcgill.ca/~avis/C/lrslib/USERGUIDE.html</A>
+</DL>
+
+<A NAME="lbAF">&nbsp;</A>
+<H3>Author</H3>
+
+David Avis &lt;avis at cs dot mcgill dot ca &gt;
+<A NAME="lbAG">&nbsp;</A>
+<H3>See Also</H3>
+
+<A HREF="../man1/lrs.1.html">lrs</A>(1), <A HREF="../man1/mplrs.1.html">mplrs</A>(1), <A HREF="../man1/fel.1.html">fel</A>(1), <A HREF="../man1/polyv.1.html">polyv</A>(1), <A HREF="../man5/lrslib.5.html">lrslib</A>(5)
+<P>
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DL>
+<DT><A HREF="#lbAB">Name</A><DD>
+<DT><A HREF="#lbAC">Synopsis</A><DD>
+<DT><A HREF="#lbAD">Description</A><DD>
+<DT><A HREF="#lbAE">Notes</A><DD>
+<DT><A HREF="#lbAF">Author</A><DD>
+<DT><A HREF="#lbAG">See Also</A><DD>
+</DL>
+</DL>
+<HR>
+This document was created by
+<A HREF="/cgi-bin/man/man2html">man2html</A>,
+using the manual pages.<BR>
+Time: 07:33:14 GMT, January 31, 2024
+</BODY>
+</HTML>

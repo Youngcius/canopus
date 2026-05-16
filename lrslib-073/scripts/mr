@@ -1,0 +1,14 @@
+if [ -n "$2" ]; then
+  procs=$2
+else
+  procs=8
+fi
+
+rm -f $1tmp
+echo "\n\ntestlin" > $1tmp
+cat $1 >> $1tmp
+
+mpirun -np $procs --oversubscribe mplrs -redund $1tmp
+
+rm -f $1tmp
+

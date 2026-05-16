@@ -1,0 +1,49 @@
+#!/usr/local/bin/perl
+
+#$Id: ine2ieq.pl,v 1.2 1996/05/02 16:15:43 bremner Exp $
+
+$docstring='
+$Id: ine2ieq.doc,v 1.1 1996/05/02 16:14:20 bremner Exp $ 
+
+Transforms a fukuda/avis .ine file  into a .ieq file suitable for porta
+
+';
+sub usage {     print($docstring);  exit(1); } 
+&usage if ($ARGV[0] eq "-h");
+    
+open(IN,"-");
+
+$_=<IN>;
+
+while (!/^begin/){
+    $_=<IN>;
+}
+
+$_=<IN>;
+
+($m,$n,$type) = m/(\d+)\s+(\d+)\s+(\w+)/;
+
+printf "DIM = %d \n",$n-1;
+#print $m,"\n";
+
+print "INEQUALITIES_SECTION\n";
+
+while (<IN>){
+    last  if (m/^end/);
+    ($b,@a)=split(' ');
+				
+	for ($i=0; $i<=$#a; $i++){
+	    if ($a[$i] ne "0"){
+		$a[$i]= "-".$a[$i] unless ($a[$i] =~ s/^-/\+/);
+		printf "%sx%d",$a[$i],$i+1;
+		}
+	}	
+	print "<=$b\n";
+				
+    }
+
+
+print "END\n"
+	
+
+

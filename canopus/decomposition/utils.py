@@ -231,3 +231,32 @@ def _append_single_qubit_from_matrix(qc: QuantumCircuit, matrix: np.ndarray, qub
     theta, phi, lam, phase = _one_qubit_decomposer.angles_and_phase(matrix)
     qc.global_phase += phase
     qc.append(UGate(theta, phi, lam), [qubit])
+
+
+def two_qubit_unitary_to_can_circuit(unitary: np.ndarray) -> QuantumCircuit:
+    """Synthesize a 2-qubit unitary into {can, u} gates."""
+    from canopus.basics import CanonicalGate
+    from canopus.utils import canonical_decompose
+
+    (a0, a1), (b0, b1), (a, b, c) = canonical_decompose(unitary)
+    qc = QuantumCircuit(2)
+    _append_single_qubit_from_matrix(qc, b0, 0)
+    _append_single_qubit_from_matrix(qc, b1, 1)
+    qc.append(CanonicalGate(a, b, c), [0, 1])
+    _append_single_qubit_from_matrix(qc, a0, 0)
+    _append_single_qubit_from_matrix(qc, a1, 1)
+
+    return qc
+
+
+def two_qubit_unitary_to_custom_circuit(
+    unitary: np.ndarray, gate_set: list, costs: list, names: list = None
+) -> QuantumCircuit:
+    """Synthesize a 2-qubit unitary into a {arbitrary-2q-gate, u} gate set.
+
+    NOTE: GULPS does not do well in its numerical synthesis precision in corner situations.
+    """
+    from gulps import GulpsDecomposer
+
+    gulps_decomposer = GulpsDecomposer(gate_set=gate_set, costs=costs, names=names)
+    return gulps_decomposer(unitary).reverse_bits()

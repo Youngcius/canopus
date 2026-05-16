@@ -1,0 +1,14 @@
+cube 
+H-representation
+begin
+8 4 rational
+ 0  1  0  0 
+ 0 -1  0  0
+ 0  0  1  0 
+ 0  0  0  1 
+ 1 -1  0  0 
+ 1  0 -1  0 
+ 1  0  0 -1 
+ 0  1  0  0 
+end
+verbose

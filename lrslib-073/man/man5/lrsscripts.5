@@ -1,0 +1,111 @@
+.TH "lrsscripts" "5" "2022.02.15" "February 2022" "lrslib 7.2"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SS "Name"
+lrsscripts: some (fragile) shell functions to perform common 
+lrslib operations. \fIcaveat emptor\fR \&!
+.SS "Synopsis"
+.HP 
+\fBmfel\fR \fIinput-file [output-file [procs ] ]\fR
+.HP
+\fBmlrs\fR\ \fIinput-file [output-file [procs [cptime [cpindex] ] ]\fR
+.HP
+\fBtlrs\fR\ \fIinput-file [output-file [procs ]\fR
+.HP 
+\fBplotV|plotR\fR
+\fIlrs-output-file [maxdepth [maxcobases] ]\fR
+.HP 
+\fBplotL\fR [\fIhistogram-file\fR] 
+.HP
+\fBprojred\fR \fI[-solver SMT-solver] ine-file [output file]\fR
+
+.SS "Description"
+
+\fBmfel\fR:
+multiprocessor version of \fBfel(1)\fR which performs multiple rounds of Fourier-Motzkin elimination
+as specified in either a project or eliminate option in the input file. \fBmplrs\fR
+performs only one iteration and terminates. \fIprocs\fR (if specified) is the number of processors to use (assigned according to the default-hostfile),
+otherwise all available processors on the current machine are used.
+
+\fBmlrs\fR:
+simple interface to \fBmplrs(1)\fR that is similar to \fBlrs(1)\fR and 
+in addition does automatic checkpoint/restart
+for long runs.
+\fIprocs\fR (if specified) is the number of processors to use
+(assigned according to the default-hostfile),
+otherwise all available processors on the current machine are used.
+\fIcptime\fR (if specified) is the time in seconds until a checkpoint/restart is made, default 86400 secs (1 day). 
+Checkpoint data is written into a file named input-file.cpN, where N=0,1,2,... is assigned
+consecutively. \fBcpindex\fR (if specified) is a valid value of N and causes a restart from
+checkpoint file input-file.cpN.
+Other \fBmplrs(1)\fR command line parameters are default values.
+
+\fBtlrs\fR:
+Runs naive hybrid arithmetic for multithreaded lrs using the binaries tlrs1, tlrs2, tlrsgmp.
+\fIprocs\fR (if specified) is the number of threads to use. If omitted or zero the default openMP maximum
+thread count is used.
+
+
+\fBplotV\fR(requires \fBgnuplot\fR be installed): 
+produces a PDF file named <lrs-output-file>V.pdf that gives a plot of each vertex or facet
+along with its height in the reverse search tree. 
+\fIlrs-output-file\fR should be an \fBlrs/mplrs\fR output file produced when the \fIprintcobasis\fR
+is included in the input file for the run.
+
+\fBplotR\fR(requires \fBgnuplot\fR be installed): performs a similar task 
+to \fBplotV\fR for cones producing the file
+<lrs-output-file>H.pdf where the height of each ray is plotted.
+
+\fBplotL\fR(requires \fBgnuplot\fR be installed): \fBplotL\fR produces 
+a realtime view of an \fBmplrs\fR run that uses the command line option "-hist <histogram-file>".
+If \fIhistogram-file\fR is not specified \fIhist\fR is the assumed file name.
+A PDF file named 
+\fI<histogram-file>.pdf\fR is produced. 
+The first plot has 3 graphs showing the number of processors working, the size of the job queue L, 
+and message requests pending, all versus elapsed time on the x-axis.
+The second histogram shows the size of the subtrees explored by producers. 
+The root of the subtree is not counted in this size. 
+Note that a producer stops after (possibly scaled) maxc nodes are explored, 
+but in backtracking some additional leaves may be discovered. 
+So the size of the largest subtree may be slightly larger than maxc. 
+
+\fBprojred\fR(requires \fBinedel\fR, \fBpolyv(1)\fR and
+external SMT solver be installed):
+simple wrapper for \fBpolyv(1)\fR that tests and greedily
+removes inequalities that are redundant after a projection, without
+doing the projection.  Repeatedly calls \fBpolyv(1)\fR and the
+specified SMT solver (\fBz3\fR by default), removing inequalities
+determined to be redundant for the given projection.  The output is
+produced in \fI[output file]\fR or on standard output if no output file is
+specified.  The output file will produce the same projection as the
+original input.  Inequalities and projection to test are given as 
+options in the input file, see \fBpolyv(1)\fR for details.
+
+.SS "Notes"
+.PP 
+User's guide for lrslib
+.RS 4
+\%http://cgm.cs.mcgill.ca/~avis/C/lrslib/USERGUIDE.html
+.RE
+.SS Author
+David Avis <avis at cs dot mcgill dot ca >
+.SS "See Also"
+lrs(1), mplrs(1), fel(1), polyv(1), lrslib(5)
+

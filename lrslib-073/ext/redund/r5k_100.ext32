@@ -1,0 +1,5 @@
+*mplrs:lrslib_v.7.3_2024.4.17(128bit,hybrid arithmetic,gmp v.6.2)32 processes
+*Input taken from r5k_100.ext
+*rows=60 lastp=10 lastrows=10 j=1
+*redund
+*interior point found, no hidden linearities

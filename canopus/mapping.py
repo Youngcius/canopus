@@ -1,8 +1,8 @@
 import os
 from itertools import chain
+from operator import length_hint
 
 import numpy as np
-from operator import length_hint
 from qiskit.circuit import Qubit
 from qiskit.circuit.library import SwapGate
 from qiskit.dagcircuit import DAGCircuit, DAGNode
@@ -168,7 +168,7 @@ class BidirectionalMapping(TransformationPass):
                 [self.distance_matrix[layout._v2p[node.qargs[0]], layout._v2p[node.qargs[1]]] for node in nodes]
             )
         return 0
-    
+
 
 class CanopusMapping(BidirectionalMapping):
     def __init__(
@@ -182,7 +182,7 @@ class CanopusMapping(BidirectionalMapping):
         init_layout_method="random",
         depth_driven=False,
         w_gate=0.5,
-        w_depth=0.5
+        w_depth=0.5,
     ):
         super().__init__(backend, seed, max_iterations, trials, layout_trials, init_layout_method)
         self.average_degree = average_degree(self.coupling_map.graph)
@@ -202,7 +202,7 @@ class CanopusMapping(BidirectionalMapping):
         """Given the DAG and initial layout, perform SABRE routing. Return the routed DAG and the final layout."""
         rng = np.random.default_rng(seed)
         layout = initial_layout.copy()
-        wire_durations = {p: 0 for p in range(self.canonical_qreg.size)}  # physical qubit wire durations
+        wire_durations = dict.fromkeys(range(self.canonical_qreg.size), 0)  # physical qubit wire durations
         required_predecessors = build_required_predecessors(dag)  # number of predecessors for unmapped DAG nodes
         last_mapped_layer: dict[tuple[int, int], DAGNode] = {}
         commutative_pairs: dict[tuple[int, int], tuple[int, int]] = {}
@@ -348,7 +348,9 @@ class CanopusMapping(BidirectionalMapping):
             logical_neighbors = [layout._p2v[p] for p in self.coupling_map.neighbors(layout._v2p[v])]
             for n in logical_neighbors:
                 swap_candidates.add(sort_two_objs(v, n, key=self._get_qubit_index))
-        swap_candidates = sorted(swap_candidates, key=lambda pair: (self._get_qubit_index(pair[0]), self._get_qubit_index(pair[1])))
+        swap_candidates = sorted(
+            swap_candidates, key=lambda pair: (self._get_qubit_index(pair[0]), self._get_qubit_index(pair[1]))
+        )
 
         extended_set = []
         _front_layer = front_layer
@@ -534,16 +536,16 @@ class SabreMapping(BidirectionalMapping):
 
         return routed_dag, layout
 
-    def _find_best_swap(
-        self, dag, front_layer, layout, required_predecessors, rng
-    ) -> tuple[Qubit, Qubit]:
+    def _find_best_swap(self, dag, front_layer, layout, required_predecessors, rng) -> tuple[Qubit, Qubit]:
         swap_candidates = set()
         qubits = chain.from_iterable([node.qargs for node in front_layer])
         for v in qubits:
             logical_neighbors = [layout._p2v[p] for p in self.coupling_map.neighbors(layout._v2p[v])]
             for n in logical_neighbors:
                 swap_candidates.add(sort_two_objs(v, n, key=self._get_qubit_index))
-        swap_candidates = sorted(swap_candidates, key=lambda pair: (self._get_qubit_index(pair[0]), self._get_qubit_index(pair[1])))
+        swap_candidates = sorted(
+            swap_candidates, key=lambda pair: (self._get_qubit_index(pair[0]), self._get_qubit_index(pair[1]))
+        )
 
         extended_set = []
         _front_layer = front_layer

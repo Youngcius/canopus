@@ -1,0 +1,15 @@
+#!/bin/csh
+# run this in man folder which contains a html folder with copy of man subfolders: man1 man5 etc
+# on Debian install:  sudo apt-get install man2html
+
+cd man1
+foreach i (*.1 )
+man2html -r < $i >! ../html/man1/$i.html
+end
+
+cd ../man5
+foreach i (*.5 )
+man2html -r < $i >! ../html/man5/$i.html
+end
+
+cd ..

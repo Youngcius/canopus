@@ -1,0 +1,86 @@
+README file for lrsarith : arithmetic package for lrslib                             
+-----------------------------------------------------------------------------
+Library routines and sample programs for using 64bit, 128bit, GMP (or MP)
+arithmetic packages, as well as hybrid arithmetic using all three. 
+Overflow checking is done for 64 and 128bit arithmetic.
+
+Documentation is currently being maintained at the URL:
+
+http://cgm.cs.mcgill.ca/~avis/C/lrs.html
+-----------------------------------------------------------------------------
+
+Version 1.0
+
+2020.12.18
+
+Note that lrsarith procedures may be implemented as macros that may
+evaluate arguments more than once.  Arguments given to lrsarith
+procedures should not be expressions with potential side effects.
+
+2020.12.7
+
+% make fixed
+
+Build the programs fixed1, fixed1n, fixed2, fixed2n, fixedmp, fixedgmp 
+that read an integer k and repeatedly square it 6 times.
+
+% fixed2
+5
+produces
+ 5  25  625  390625  152587890625  23283064365386962890625   overflow detected:halting
+
+% make hybrid                (% make mp does same using internal MP arithmetic instead of GMP)
+
+Build the program hybrid (and fixed1, fixed2, fixedgmp) that runs through the three arithmetic 
+packages as needed.
+
+% hybrid
+5
+produces
+ 5  25  625  390625  152587890625    overflow detected:restarting
+ 5  25  625  390625  152587890625  23283064365386962890625    overflow detected:restarting
+ 5  25  625  390625  152587890625  23283064365386962890625  542101086242752217003726400434970855712890625 
+
+--------------------------------------------------------------------------------------------------------------
+
+% make coll            (% make flint   make FLINT arithmetic version)
+
+Reverse search code for building a Collatz tree with largest value maxn in all arithmetic versions
+
+% coll
+coll: enter maxn maxcount
+      maxn<0      : print counts only 
+      maxcount=-1 : scale to maxn^8 MAXCOUNT=10^8 
+      maxcount=0  : no upper bound on tree size
+16 0
+ v     odd     full
+      depth   depth
+ 1      0       0
+ 2              1
+ 4              2
+ 8              3
+ 16             4
+ 5      1       5
+ 10             6
+ 3      2       7
+ 6              8
+ 12             9
+count=10 
+Maxv= 16 
+maxv= 16 
+
+
+-----------------------------------------------------------------------------------------------------------
+
+% make test
+
+Test the arithmetic constants used in overflow checking. Current output:
+
+MAXDa 4611686018427387903 MAXDl 2147483647 MAXDm 3037000499 
+addint   9223372036854775806 
+mulint   9223372030926249001 
+linint   9223372028264841218 
+MAXDa 85070591730234615847396907784232501249 MAXDl 9223372036854775807 MAXDm 13043817825277250404 
+addint   170141183460469231694793815568465002498 
+mulint   170141183459020538148444170386518163216 
+linint   170141183460469231694793815568465002498

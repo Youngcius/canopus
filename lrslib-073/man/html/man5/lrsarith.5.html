@@ -1,0 +1,205 @@
+Content-type: text/html; charset=UTF-8
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML><HEAD><TITLE>Man page of lrsarith</TITLE>
+</HEAD><BODY>
+<H1>lrsarith</H1>
+Section: lrsarith 1.1 (5)<BR>Updated: 2022.1.19<BR><A HREF="#index">Index</A>
+<A HREF="../index.html">Return to Main Contents</A><HR>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<A NAME="lbAB">&nbsp;</A>
+<H3>Name</H3>
+
+lrsarith: library routines for exact precision integer and rational
+arithmetic from lrslib with sample programs. 64bit integer, 128bit integer,
+GMP, lrslib MP,
+and FLINT
+arithmetic packages are supported. as well as hybrid arithmetic.
+Overflow checking is done for 64bit and 128bit arithmetic.
+<A NAME="lbAC">&nbsp;</A>
+<H3>Synopsis</H3>
+
+<DL COMPACT>
+<DT>
+<B>lrslong.h lrslong.c</B>&nbsp;<I>[64bit and 128bit arithmetic]</I>
+<DT>
+<B>lrsgmp.h lrsgmp.c</B>&nbsp;<I>[GMP and FLINT arithmetic]</I>   (requires external library)
+<DT>
+<B>lrsmp.h lrsmp.c</B>&nbsp;<I>[lrslib MP arithmetic]</I>
+</DL>
+<A NAME="lbAD">&nbsp;</A>
+<H3>Description</H3>
+
+<P>
+
+<DD>This package was extracted from 
+version 7.1 of lrslib which uses hybrid arithmetic with overflow checking, starting in 64bit
+integers, moving to 128bit (if available) and then GMP.  Overflow checking is conservative to
+improve performance: eg. with 64 bit arithmetic, a*b triggers overflow if either a or b is at least
+2^31, and a+b triggers an overflow if either a or b is at least 2^62.  Typically problems that can
+be solved in 64bits run 3-4 times faster than with GMP and inputs solvable in 128bits run twice as
+fast as GMP. A rational number is represented by a pair of integers, however the user must keep track of the
+numerator and denominators manually. Operations for rational arithmetic are included.
+<P>
+Various test programs are available and can be built from the makefile:
+<P>
+
+<I>% make fixed</I>
+<P>
+Build the programs fixed1, fixed1n, fixed2, fixed2n, fixedmp, fixedgmp
+that read an integer k and repeatedly square it 6 times.
+<P>
+
+<I>% make hybrid</I>&nbsp;   (% make mp   use internal MP arithmetic instead of GMP)
+<P>
+Build the program hybrid (and fixed1, fixed2, fixedgmp) that runs through the three arithmetic
+packages as needed.
+<P>
+
+<I>% make coll</I>&nbsp;         (% make flint   make FLINT arithmetic version)
+<P>
+Reverse search code for building a Collatz tree with largest value maxn in all arithmetic versions.
+<P>
+
+<I>% make test</I>&nbsp;  
+<P>
+Test the arithmetic constants used in overflow checking.
+<A NAME="lbAE">&nbsp;</A>
+<H3>Initialization</H3>
+
+<P>
+lrs_mp_init(digits,fpin,fpout);
+<P>
+digits: maximum number of decimal digits in MP arithmetic else set digits=0
+<P>
+fpin, fpout: input and output file pointers, eg,  stdin, stdout
+<A NAME="lbAF">&nbsp;</A>
+<H3>Types</H3>
+
+Fixed arithmetic is handled by defining a generic integer type and a set of
+generic operations. A generic integer a, integer vector v and integer matrix A are defined
+<P>
+lrs_mp a;     lrs_mp_vector v;    lrs_mp_matrix A;
+<P>
+allocated
+<P>
+lrs_alloc_mp(a);     v=<A HREF="../mann/lrs_alloc_mp_vector.n.html">lrs_alloc_mp_vector</A>(n);    A=lrs_alloc_mp_matrix(m,n);
+<P>
+and freed
+<P>
+lrs_clear_mp(a);     <A HREF="../mann/lrs_clear_mp_vector.n.html">lrs_clear_mp_vector</A>(n);    lrs_clear_mp_matrix(m,n);
+<P>
+where m and n are the dimensions.
+<A NAME="lbAG">&nbsp;</A>
+<H3>Operations</H3>
+
+Operations using lrs_mp integers are written generically. The most basic ones are below
+and a complete list is included in lrslong.h.
+Operations may be implemented as macros which may evaluate their arguments
+more than once.  Arguments should not be expressions with potential side effects.
+Here, a,b,c,d,e are lrs_mp integers, i is a long long int and the equivalent C code is given in parenthesis.
+<P>
+addint(a,b,c)         (c=a+b)            /* a and b should be different */
+<P>
+changesign(a)         (a = -a)
+<P>
+compare(a,b)          (a ? b and returns -1,0,1 for &lt;,=,&gt;)
+<P>
+copy(a,b)             (a=b)
+<P>
+decint(a,b)           (a=a-b)
+<P>
+divint(a,b,c)         (c=a/b a=a%b)
+<P>
+exactdivint(a,b,c)    (c=a/b)
+<P>
+itomp(i,a);           (a=i)
+<P>
+linint(a, ka, b, kb)  (a=a*ka+b*kb for ka, kb long long integers)
+<P>
+mp_greater(a, b)      (a&gt;b)         
+<P>
+mulint(a,b,c)         (c=a*b)              /* b and c may be the same */
+<P>
+negative(a)           (a&lt;0)
+<P>
+one(a)                (a == 1)
+<P>
+pmp(&quot;string&quot;,a)       (print &quot;string&quot; followed by a to lrs_ofp)
+<P>
+positive(a)           (a&gt;0)
+<P>
+qpiv(a,b,c,d,e)       (a=(a*b-c*d)/e  where the division is exact )
+<P>
+sign(a)               (a &lt; 0 ? NEG : POS)
+<P>
+storesign(a, i)        (a = labs(a) * i)
+<P>
+subint(a,b,c)         (c=a-b)
+<P>
+zero(a)               (a == 0)
+<P>
+<A NAME="lbAH">&nbsp;</A>
+<H3>Notes</H3>
+
+<P>
+
+User's guide for lrslib
+<DL COMPACT><DT><DD>
+<A HREF="http://cgm.cs.mcgill.ca/~avis/C/lrslib/USERGUIDE.html">http://cgm.cs.mcgill.ca/~avis/C/lrslib/USERGUIDE.html</A>
+</DL>
+
+<A NAME="lbAI">&nbsp;</A>
+<H3>Author</H3>
+
+David Avis &lt;avis at cs dot mcgill dot ca &gt;
+<A NAME="lbAJ">&nbsp;</A>
+<H3>See also</H3>
+
+<B><A HREF="../man5/lrslib.5.html">lrslib</A></B>(5),
+
+<P>
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DL>
+<DT><A HREF="#lbAB">Name</A><DD>
+<DT><A HREF="#lbAC">Synopsis</A><DD>
+<DT><A HREF="#lbAD">Description</A><DD>
+<DT><A HREF="#lbAE">Initialization</A><DD>
+<DT><A HREF="#lbAF">Types</A><DD>
+<DT><A HREF="#lbAG">Operations</A><DD>
+<DT><A HREF="#lbAH">Notes</A><DD>
+<DT><A HREF="#lbAI">Author</A><DD>
+<DT><A HREF="#lbAJ">See also</A><DD>
+</DL>
+</DL>
+<HR>
+This document was created by
+<A HREF="/cgi-bin/man/man2html">man2html</A>,
+using the manual pages.<BR>
+Time: 07:33:14 GMT, January 31, 2024
+</BODY>
+</HTML>

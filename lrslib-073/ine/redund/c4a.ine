@@ -1,0 +1,9 @@
+linearity  1 3
+H-representation
+begin
+3 3 rational
+ 0  1    0 
+ 1  1    1 
+ 1  0    1
+end
+verbose

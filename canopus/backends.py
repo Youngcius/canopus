@@ -151,7 +151,7 @@ class SynthCostEstimator:
     def eval_dagcircuit_cost(self, dag: DAGCircuit, comm_opt: bool = True) -> tuple[float, float]:
         """Evaluate the circuit cost (both gate count and circuit depth) in pulse-level duration of a Qiskit DAGCircuit instance."""
         qubit_indices = {qarg: q for q, qarg in enumerate(dag.qubits)}
-        wire_durations = {q: 0.0 for q in range(dag.num_qubits())}
+        wire_durations = dict.fromkeys(range(dag.num_qubits()), 0.0)
         last_mapped_layer: dict[tuple[int, int], DAGNode] = {}
         commutative_pairs: dict[tuple[int, int], tuple[int, int]] = {}
         count_cost = 0.0
@@ -267,6 +267,7 @@ class SynthCostEstimator:
 
 def disp_last_mapped_layer(last_mapped_layer):
     from itertools import chain
+
     from canopus import CanonicalGate
 
     if not last_mapped_layer:

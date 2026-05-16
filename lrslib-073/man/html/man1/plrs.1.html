@@ -1,0 +1,709 @@
+Content-type: text/html; charset=UTF-8
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML><HEAD><TITLE>Man page of lrs</TITLE>
+</HEAD><BODY>
+<H1>lrs</H1>
+Section: lrs 7.3 (1)<BR>Updated: 2023.1.4 <BR><A HREF="#index">Index</A>
+<A HREF="../index.html">Return to Main Contents</A><HR>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<A NAME="lbAB">&nbsp;</A>
+<H3>Name</H3>
+
+lrs  -   Convert between representations of convex polyhedra, remove redundant inequalities, 
+convex hull computation, volume, triangulation, solution to linear programs in exact precision.
+<A NAME="lbAC">&nbsp;</A>
+<H3>Synopsis</H3>
+
+<DL COMPACT>
+<DT>
+<B>lrs|plrs</B>&nbsp;<I>[input-file] [output-file]</I> 
+<DT>
+<B>redund|minrep</B>&nbsp;<I>[input-file] [output-file]</I>      <B>See: <A HREF="../man1/redund.1.html">redund</A>(1) </B> 
+<DT>
+<B>fel</B>&nbsp;<I>[input-file] [output-file]</I>           <B>See: <A HREF="../man1/fel.1.html">fel</A>(1)</B>
+<DT>
+<B>hvref/xref</B>&nbsp;<I>[input-file]</I>                  <B>See: <A HREF="../man1/xref.1.html">xref</A>(1)</B> 
+</DL>
+<A NAME="lbAD">&nbsp;</A>
+<H3>Description</H3>
+
+<P>
+
+<DD>These programs are part of and must be compiled with
+<I>lrslib</I> which is a C library.
+All computations are done in exact arithmetic.
+<P>
+
+A polyhedron can be described by a list of inequalities (<I>H-representation)</I>
+or by a list of its vertices and extreme rays (<I>V-representation)</I>.
+<P>
+
+<I>lrs</I>
+converts an H-representation of a polyhedron to its V-representation and vice versa,
+known respectively as the
+<I>vertex enumeration</I>
+and
+<I>facet enumeration</I> problems (see Example (1) below).
+For V-representations the volume can be computed and a triangulation
+produced. 
+lrs can also be used to solve a linear program, remove linearities from a system,
+and extract a subset of columns.
+<BR>
+
+<I>plrs</I> is a primitive
+multi-threaded version of lrs that gives some speedup on shared
+memory machines. See <B>threads</B> option.
+For a fully parallel version see <B><A HREF="../man1/mplrs.1.html">mplrs</A>(1) </B>
+<P>
+
+<I>redund|minrep</I>
+<BR>
+
+These are aliases of <I>lrs</I> which can also perform these functions via
+the <B>redund</B>,  <B>redund_list</B>  and <B>testlin</B> options.
+For a more complete description and examples see <B><A HREF="../man1/redund.1.html">redund</A>(1)</B>.
+<BR>
+
+<I>H-representation:</I>
+redundant inequalities in an input H-representation are removed and
+the remaining inequalities output. In addition <I>minrep</I> checks
+for hidden linearities. 
+<BR>
+
+<I>V-representation:</I>
+outputs all extreme points and extreme rays, often called the
+<I>convex hull</I> problem. In addition <I>minrep</I> checks 
+for hidden linearities. 
+<P>
+
+<I>fel</I>
+projects an input H-representation onto a given set of variables using Fourier-Motzkin elimination.
+For a V-representation it extracts the specified columns.
+The output is non-redundant and can be
+can be piped directly into <I>lrs</I>.
+This is an alias of <I>lrs</I> which can also perform these functions via
+the <B>eliminate</B> and <B>project</B> options.
+<P>
+
+<I>hvref/xref</I>&nbsp;produce a cross reference list between H- and V-representations.
+See <B><A HREF="../man1/xref.1.html">xref</A>(1)</B>.
+<P>
+
+<I>mplrs</I>
+is Skip Jordan's parallel wrapper based on MPI for <I>lrs/redund</I> using the same
+input and output formats. 
+See: <B><A HREF="../man1/mplrs.1.html">mplrs</A>(1)</B>
+<P>
+
+Fukuda's
+<B>FAQ page</B>[1]
+contains a more detailed introduction to the problem, along with many useful tips for the new user.
+User's guide for <B>lsrslib</B>[8]
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H3>File formats</H3>
+
+<P>
+
+File formats were developed jointly with Komei Fukuda and are compatible with
+<B>cdd/cddlib</B>[2].
+<BR>
+
+The input for
+<I>lrs/redund</I>
+is an H- or V-representation of a polyhedron.
+<P>
+<BR>&nbsp;name
+<BR>&nbsp;H-representation&nbsp;[<I>or</I>&nbsp;V-representation]
+<BR>&nbsp;{options}
+<BR>&nbsp;{linearities}
+<BR>&nbsp;begin
+<BR>&nbsp;&nbsp;m&nbsp;n&nbsp;rational&nbsp;[<I>or</I>&nbsp;integer]
+<BR>&nbsp;{input&nbsp;matrix}
+<BR>&nbsp;end&nbsp;
+<BR>&nbsp;{options}
+<P>
+<I>name</I>
+is a user supplied name for the polyhedron.&nbsp; Comments may appear before the begin or after the end and
+should begin with a special character such as &quot;*&quot;.
+<P>
+
+If the representation is not specified H-representation is assumed.
+The input coefficients are read in free format, and are not checked for type. Coefficients are separated by white space. m is the number of rows and n the number of columns of the input matrix.
+<A NAME="lbAF">&nbsp;</A>
+<H3>H-representation</H3>
+
+<P>
+
+m is the number of input rows, each being an inequality or equation.
+<BR>
+
+n is the number of input columns and d=n-1 is the dimension of the input. 
+<BR>
+
+An inequality or equation of the form:
+<P>
+
+b + a_1 x_1 + ... + a_d x_d &gt;=&nbsp; 0 
+<P>
+
+b + a_1 x_1 + ... + a_d x_d =&nbsp; 0 
+<P>
+
+is input as the line:
+<P>
+
+b &nbsp;a_1 ... a_d
+<P>
+
+The coefficients can be entered as integers or rationals in the format x/y.
+To distinguish an equation a <B>linearity</B> option must be supplied
+before the <B>begin</B> line (see below).
+<A NAME="lbAG">&nbsp;</A>
+<H3>V-representation</H3>
+
+<P>
+
+m is the number of input rows, each being a vertex, ray or line.
+<BR>
+
+n is the number of input columns and d=n-1 is dimension of the input. 
+<BR>
+
+Each vertex is given in the form:
+<P>
+
+1 &nbsp; v_1 &nbsp;&nbsp;v_1  ...&nbsp;v_d
+<P>
+
+Each ray is given in the form:
+<P>
+
+0&nbsp;&nbsp; r_1 &nbsp;
+r_2...&nbsp;&nbsp; r_d
+<P>
+
+where 
+r_1 &nbsp;...&nbsp;&nbsp; r_d  is a point on the ray.
+<P>
+
+There must be at least one vertex in each file. For bounded polyhedra there will be no rays entered. The coefficients can be entered as integers or rationals in the format x/y.
+An input line can be specified as a ray and then included in the <B>linearity</B> option (see below).
+<P>
+
+<B>Note for cdd users</B>:
+Note the input files for
+<I>lrs</I>
+are read in free format.
+<I>lrs</I>
+will look for exactly m*n rationals or integers separated by white space (blank, carriage return, tab etc.).
+<I>lrs</I>
+will not &quot;drop&quot; extra columns of input if n is less than the number of columns supplied.
+<P>
+<A NAME="lbAH">&nbsp;</A>
+<H3>Options</H3>
+
+<P>
+
+Almost all options are placed
+<B>after</B>
+the end statement, maintaining compatibility with
+<I>cdd</I>. Where this is not the case, it will be mentioned explicitly.
+<P>
+
+<B>allbases</B>
+This option instructs
+<I>lrs</I>
+to list each vertex (or facet) for each of its bases.
+This option is often combined with printcobasis.
+<P>
+
+<B>bound&nbsp; x </B>
+(H-representation only). Either the maximize or minimize option should be selected. x is an integer or rational. For maximization (resp. minimization) the reverse search tree is truncated&nbsp; whenever the current objective value is less (resp. more) than x.
+<P>
+
+<B>cache n</B> &nbsp;&nbsp;&nbsp;&nbsp;(default n=50)
+<BR>
+
+<I>lrs</I>
+stores the latest&nbsp; n dictionaries in the reverse search tree. This speeds up the backtracking step, but requires more memory.
+<P>
+
+<B>debug&nbsp; startingcobasis endingcobasis</B>
+<BR>
+
+Print out cryptic but detailed trace, dictionaries etc. starting at #B=startingcobasis and ending at #B=endingcobasis. <B>debug 0 0</B> gives a complete trace.
+<P>
+
+<B>digits n</B>  (lrsmp arithmetic only - placed before the begin statement)
+<BR>
+
+n is the maximum number of decimal digits to be used. If this is exceeded the program terminates with a message 
+and can usually be restarted with the restart option. The default is set to 100 digits. 
+At the end of a run a message is given informing the user of the maximum integer size encountered. 
+<P>
+
+<B>dualperturb</B>
+If lrs is executed with the <B>maximize</B> or <B>minimize</B> option, the reverse search tree is rooted at an optimum vertex for this function.
+If there are multiple optimum vertices, the output will often not be complete. This option gives a small perturbation to the objective to avoid this. A warning message is given if the starting dictionary is dual degenerate.
+<P>
+
+<B>estimates k</B>
+<BR>
+
+Estimate the output size. Used in conjunction with <B>maxdepth</B> and <B>seed</B>.
+See: <B>Estimation</B>[3].
+<P>
+
+<B>eliminate  k   i_1 i_2 ... i_k  </B>          (see <B><A HREF="../man1/fel.1.html">fel</A>(1)</B>)
+<BR>
+
+<I>(H-representation)</I> Eliminates k variables in an H-representation corresponding to cols i_1 .. i_k
+by projection onto the remaining variables
+using the Fourier-Motzkin method. 
+Variables are eliminated in the order given and redundancy is removed after each iteration.
+<BR>
+
+<I>(V-representation)</I> Delete the k given columns from the input matrix and remove
+redundancies (cf. <B>extract</B> where redundancies are not removed).
+<BR>
+
+Column indices are between 1 and n-1 and column zero cannot be eliminated.
+The output is a valid lrs input file. 
+See also <B>project</B> and <B>extract</B>
+<P>
+
+<B>extract [ k   i_1 i_2 ... i_k ] </B>  
+<BR>
+
+<I>(H-representation)</I> A preprocessing step to remove linearities (if any) 
+in an H-representation and resize the A matrix.
+The output as a valid lrs input file. The resulting file will not contain any equations 
+but may not be full dimensional as there may be additional linearities in the 
+remaining inequalities. Options in the input file are stripped.
+The user can specify the k columns i_1 i_2 ... i_k to retain
+otherwise if k=0 or is ommitted 
+the lex-min set of columns are retained, equivalent to the
+the order 1,2,..n-1. 
+Linearly dependent columns are skipped and additional indices are taken from 1,2,...,n-1 as necessary.
+If there are no linearities in the input file the given columns are retained
+and the other ones are deleted. 
+<BR>
+
+<I>(V-representation)</I> Extract the given columns from the input file outputing a valid lrs input file.
+Options are stripped.
+<P>
+
+<B>geometric&nbsp;&nbsp;</B>
+<I>(H-representation&nbsp; or voronoi option only)</I> Each ray is printed together with the vertex with which it is incident. 
+<P>
+
+<B>incidence</B>
+This option automatically switches on <B>printcobasis</B>. 
+For input H-representation, indices of all input inequalities that contain the vertex/ray that is about to be output. 
+For input V-representation, indices of all input vertices/rays that lie on the facet that is 
+about to be output. A starred index indicates that this vertex&nbsp; is also in the cobasis, 
+but is not contained in the facet. It arises due to the lifting operation used with input V-representations.
+<P>
+
+<B>linearity&nbsp; k&nbsp; i_1 &nbsp;i_2 &nbsp;... &nbsp;i_k </B>     (placed before begin statement)
+<BR>
+
+(H-representation) The k rows  i_1 &nbsp;i_2 &nbsp;... &nbsp;i_k  &nbsp;of the input file
+represent  equations. 
+(V-representation) The k rows, which should have a zero in column 1, represent lines
+in space (rather than rays).
+<P>
+
+<B>lponly</B> Solve the LP given by the input H-representation with objective function specified
+by the <B>maximize</B> or <B>minimize</B> options and terminate. Use with <B>verbose</B> option
+to get dual variables. See:
+<B>Linear Programming</B>[4].
+<P>
+
+<B>maxcobases k</B>
+<BR>
+
+The search will be truncated after k cobases have been generated. 
+<P>
+<P>
+
+<B>maxdepth k</B>
+<BR>
+
+The search will be truncated at depth k. All bases with depth less than or equal to k will be computed.&nbsp; k is&nbsp; a non-negative integer, and this option is used for estimates - see
+<B>Estimation</B>[3].
+<B>Note</B>: For H-representations, rays at depth k will not be reported. For V-representations, facets at depth k will not be reported.
+<P>
+
+<B>maximize&nbsp;  b &nbsp;a_1 ... a_{n-1} </B>&nbsp;
+<BR>
+
+<B>minimize&nbsp;  b &nbsp;a_1 ... a_{n-1} </B>&nbsp;
+<BR>
+
+<I>(H-representation)</I>
+The starting vertex maximizes (or minimizes) the function
+&nbsp;b + a_1 x_1+ ... + a_{n-1} x_{n-1}.
+<BR>
+
+The <B>dualperturb</B> option may be needed to avoid dual degeneracy. 
+Often used with <B>lponly</B>.
+<BR>
+
+<I>(V-representation, v.7.2)</I> 
+The input file row numbers maximizing(minimizing) the function are output
+along with the optimum value. Using
+<B>verbose</B> the optimizing lines are also printed. With minimization a facet gives an optimum value of zero,
+a negative value indicates infeasibility and a positive value indicates strong redundancy. 
+<P>
+
+<B>maxincidence n k</B>
+<BR>
+
+Prunes the search tree when the depth is at least k and the current vertex/facet has incidence at least n.
+Using <B>verbose</B> a message is printed whenever the search tree is pruned.
+<P>
+
+<B>maxoutput n</B>
+<BR>
+
+Limits number of output lines produced (either vertices+rays or facets) to n
+<P>
+
+<B>mindepth k</B>
+<BR>
+
+Backtracking will be terminated at depth k. 
+<P>
+
+<B>nonnegative</B>
+(This option must come before the begin statement - H-representation only)  &nbsp; Bug: Can only be used if the origin is a vertex of the polyhedron&nbsp;
+For problems where the input is an H-representation of the form b+Ax&gt;=0, x&gt;=0 (ie. all variables non-negative, all constraints inequalities) it is not necessary to give the non-negative constraints explicitly if the nonnegative option is used. 
+This option cannot be used for V-representations, or with the linearity option (in which case the linearities will be treated as inequalities). This option may be used with redund , but the implied nonnegativity constraints are not tested themselves for redundancy. 
+<P>
+
+<B>project  k   i_1 i_2 ... i_k  </B>          (see <B><A HREF="../man1/fel.1.html">fel</A>(1)</B>)
+<BR>
+
+<I>(H-representation)</I> Project the polyhedron onto the k variables corresponding to cols i_1 .. i_k
+using the Fourier-Motzkin method. Column  indices are between 1 and n-1 and column
+zero is automatically retained.
+Variables not contained in the list are eliminated using a heuristic 
+which chooses the column which minimizes the product of the number of positive and negative entries.
+Redundancy is removed after each iteration using linear programming.
+<BR>
+
+<I>(V-representation)</I> Extract the k given columns from the input matrix and remove
+redundancies. Column  indices are between 1 and n-1 and column
+zero is automatically extracted (cf. <B>extract</B> where redundancies are not removed).
+<BR>
+
+The output as a valid lrs input file.
+See also <B>eliminate</B> and <B>extract</B>
+<P>
+
+<B>printcobasis&nbsp;k</B>
+<BR>
+
+Every k-th cobasis is printed.
+If k is omitted, the cobasis is printed for each vertex/ray/facet that is output. 
+For a long run it is useful to print the cobasis occasionally so that the program can be restarted if necessary.
+<I>H-representation</I>: the cobasis is a list the indices of the inequalities from the 
+input file that define the current vertex or ray.
+For rays the cobasis is the cobasis of the vertex from which the ray emanates. 
+One of the indices is starred, this indicates the inequality to be dropped from the cobasis to define the ray. 
+If the <B>allbases</B> option is used, all cobases will be printed.
+<I>V-representation</I>: the cobasis is a list of the input vertices/rays that define the current facet. 
+See option
+<B>incidence</B>
+for more information. 
+<P>
+
+<B>printslack</B>
+(H-representation only) A list of the indices of the input inequalities that are satisfied 
+strictly for the current vertex, ie. corresponding slack variable is positive. If nonnegative is set, the list will also include indices n+i for each decision variable x_i
+which is positive.
+<P>
+
+<B>redund start end </B>            (see <B><A HREF="../man1/redund.1.html">redund</A>(1)</B>)      
+<BR>
+
+Check input lines with line numbers from start to end and remove any redundant lines.
+<BR>
+
+<B>redund 0 0</B>  will check all input lines. 
+<P>
+
+<B>redund_list k   i_1 i_2 ... i_k</B>    (see <B><A HREF="../man1/redund.1.html">redund</A>(1)</B>)         
+<BR>
+
+Check the k input line numbers with indices i_1 i_2 ... i_k  
+and remove any redundant lines.
+<P>
+
+<B>restart&nbsp; V# R# B# depth {facet #s or vertex/ray #s</B>} 
+<BR>
+
+<I>lrs</I>
+can be restarted from any known cobasis. The calculation will proceed to normal termination. All of the information is contained in the output from a
+<B>printcobasis</B>
+option.&nbsp; The
+<B>order of the indices is very important,</B>
+enter them exactly as they appear in the output from the previously terminated run.
+<P>
+
+<P>
+
+<B>seed k</B>
+<BR>
+
+Set the random number generator seed=k. Used with <B>estimates</B>.
+<P>
+
+<B>startingcobasis i_1 &nbsp;i_2 &nbsp;... &nbsp;i_{n-1}</B>
+<BR>
+
+lrs will start from the given cobasis which  which 
+is a list of the inequalities (for H-representation) or vertices/rays (for V-representation) 
+that define it. If it is invalid, or this option is not specified,
+<I>lrs</I>
+will find its own starting cobasis.
+<P>
+
+<B>testlin</B>      <B>(before the begin line only)</B>   <I>H-representation</I> only    (new 7.3)
+<BR>
+
+<I>redund</I> 
+An LP test will be made for hidden linearities at the beginning of the run and is reported.
+If there are no hidden linearities
+one LP per constraint tests for redundancy. (<I>mplrs</I> can be run with no verification step.)
+If hidden linearities exist two LPs per constraint search for hidden linearities and remove redundancies.
+In both cases
+the run ends with a minimum set of linearities and inequalities (ie. no hidden inequalities or duplicates)
+and the dimension is reported.
+(<I>mplrs</I> will find all linearities but some non redundant inequalities may be eliminated, so a second run is required.)
+<BR>
+
+<I>lrs</I>
+If neither <B>redund</B> or <B>redund_list</B> options are present the initial
+LP test is made, reported and the run halted. 
+Otherwise same as <I>redund</I> above.
+<P>
+
+<B>threads n</B>      (new in 7.3, currently for plrs1,plrs2,plrsgmp,plrsmp and script plrs) 
+<BR>
+
+Multithreaded lrs using openMP for a parallel for loop at depth 0 in the search tree. Disabled for mplrs.
+If n is not specified the default openMP max threads is used.
+<P>
+
+<B>truncate</B> 
+The reverse search tree is truncated(pruned)&nbsp; whenever a new vertex is encountered. Note: This does note necessarily produce the set of all vertices adjacent to the optimum vertex in the polyhedron, but just a subset of them.
+<P>
+
+<B>verbose</B>
+Print slightly more detailed information about the run.
+<P>
+
+<B>volume</B>
+(V-representation only) 
+Compute the volume and, if the <B>verbose</B> option is also included,
+output a <B>triangulation</B>. See 
+<B>Volume Computation</B>[5].
+<P>
+
+<B>voronoi</B>
+(V-representation&nbsp; only - place immediately after end statement)  
+<BR>
+
+Compute Voronoi diagram - see
+<B>Voronoi Diagrams</B>[6].
+<A NAME="lbAI">&nbsp;</A>
+<H3>Arithmetic</H3>
+
+From version 7.1 <I>lrs/redund/mplrs</I> use hybrid arithmetic with overflow checking, 
+starting in 64bit integers, moving to 128bit (if available) and then GMP.
+Overflow checking is conservative to improve performance:
+eg. with 64 bit arithmetic, a*b triggers overflow if either a or b is at least 2^31, 
+and a+b triggers an overflow if either a or b is at least 2^62.
+Typically problems that can be solved in 64bits run 3-4 times faster than with GMP 
+and inputs solvable in 128bits run twice as fast as GMP.
+<P>
+
+Various arithmetic versions are available 
+and can be built from the makefile:
+<P>
+
+<B>lrs1</B>   Fixed length 64 bit integer arithmetic, terminates on overflow.
+<P>
+
+<B>lrs2</B>   Fixed length 128 bit integer arithmetic, terminates on overflow.
+<P>
+
+<B>lrsmp</B>  Built in extended precision integer arithmetic, uses <B>digits</B> option above.
+<P>
+
+<B>lrsgmp</B>  GNU MP which must be installed first from <A HREF="https://gmplib.org/.">https://gmplib.org/.</A>
+<P>
+
+<B>lrsflint</B>  FLINT hybrid arithmetic which must be installed first from
+<A HREF="http://www.flintlib.org/">http://www.flintlib.org/</A>  
+<P>
+<A NAME="lbAJ">&nbsp;</A>
+<H3>Examples</H3>
+
+<P>
+
+(1) Convert the H-representation of a cube given cube by 6 the six inequalities 
+<BR>
+
+-1 &lt;= x_i &lt;= 1 , i=1,2,3 into its V-representation consisting of 8 vertices.
+<P>
+
+<BR>&nbsp;%&nbsp;cat&nbsp;cube.ine
+<BR>&nbsp;cube.ine
+<BR>&nbsp;H-representation
+<BR>&nbsp;begin
+<BR>&nbsp;6&nbsp;4&nbsp;rational
+<BR>&nbsp;1&nbsp;&nbsp;1&nbsp;&nbsp;0&nbsp;&nbsp;0
+<BR>&nbsp;1&nbsp;&nbsp;0&nbsp;&nbsp;1&nbsp;&nbsp;0
+<BR>&nbsp;1&nbsp;&nbsp;0&nbsp;&nbsp;0&nbsp;&nbsp;1
+<BR>&nbsp;1&nbsp;-1&nbsp;&nbsp;0&nbsp;&nbsp;0
+<BR>&nbsp;1&nbsp;&nbsp;0&nbsp;&nbsp;0&nbsp;-1
+<BR>&nbsp;1&nbsp;&nbsp;0&nbsp;-1&nbsp;&nbsp;0
+<BR>&nbsp;end
+<P>
+<BR>&nbsp;%&nbsp;lrs&nbsp;cube.ine
+<P>
+<BR>&nbsp;*lrs:lrslib&nbsp;v.6.3&nbsp;2018.4.11(64bit,lrslong.h,overflow&nbsp;checking)
+<BR>&nbsp;*Input&nbsp;taken&nbsp;from&nbsp;file&nbsp;cube.ine
+<BR>&nbsp;cube.ine
+<BR>&nbsp;V-representation
+<BR>&nbsp;begin
+<BR>&nbsp;*****&nbsp;4&nbsp;rational
+<BR>&nbsp;1&nbsp;&nbsp;1&nbsp;&nbsp;1&nbsp;&nbsp;1
+<BR>&nbsp;1&nbsp;-1&nbsp;&nbsp;1&nbsp;&nbsp;1
+<BR>&nbsp;1&nbsp;&nbsp;1&nbsp;-1&nbsp;&nbsp;1
+<BR>&nbsp;1&nbsp;-1&nbsp;-1&nbsp;&nbsp;1
+<BR>&nbsp;1&nbsp;&nbsp;1&nbsp;&nbsp;1&nbsp;-1
+<BR>&nbsp;1&nbsp;-1&nbsp;&nbsp;1&nbsp;-1
+<BR>&nbsp;1&nbsp;&nbsp;1&nbsp;-1&nbsp;-1
+<BR>&nbsp;1&nbsp;-1&nbsp;-1&nbsp;-1
+<BR>&nbsp;end
+<BR>&nbsp;*Totals:&nbsp;vertices=8&nbsp;rays=0&nbsp;bases=8&nbsp;integer_vertices=8
+<P>
+<A NAME="lbAK">&nbsp;</A>
+<H3>Notes</H3>
+
+<DL COMPACT>
+<DT> 1.<DD>
+FAQ page
+<DL COMPACT><DT><DD>
+<A HREF="https://inf.ethz.ch/personal/fukudak/polyfaq/polyfaq.html">https://inf.ethz.ch/personal/fukudak/polyfaq/polyfaq.html</A>
+</DL>
+
+<DT> 2.<DD>
+cdd
+<DL COMPACT><DT><DD>
+<A HREF="https://inf.ethz.ch/personal/fukudak/cdd_home/">https://inf.ethz.ch/personal/fukudak/cdd_home/</A>
+</DL>
+
+<DT> 3.<DD>
+Estimation.
+<DL COMPACT><DT><DD>
+<A HREF="http://cgm.cs.mcgill.ca/%7Eavis/C/lrslib/USERGUIDE.html#Estimation">http://cgm.cs.mcgill.ca/%7Eavis/C/lrslib/USERGUIDE.html#Estimation</A>
+</DL>
+
+<DT> 4.<DD>
+Linear Programming
+<DL COMPACT><DT><DD>
+<A HREF="http://cgm.cs.mcgill.ca/%7Eavis/C/lrslib/USERGUIDE.html#Linear%20Programming">http://cgm.cs.mcgill.ca/%7Eavis/C/lrslib/USERGUIDE.html#Linear%20Programming</A>
+</DL>
+
+<DT> 5.<DD>
+Volume Computation.
+<DL COMPACT><DT><DD>
+<A HREF="http://cgm.cs.mcgill.ca/%7Eavis/C/lrslib/USERGUIDE.html#Volume%20Computation">http://cgm.cs.mcgill.ca/%7Eavis/C/lrslib/USERGUIDE.html#Volume%20Computation</A>
+</DL>
+
+<DT>6.<DD>
+Voronoi Diagrams.
+<DL COMPACT><DT><DD>
+<A HREF="http://cgm.cs.mcgill.ca/%7Eavis/C/lrslib/USERGUIDE.html#Voronoi%20Diagrams">http://cgm.cs.mcgill.ca/%7Eavis/C/lrslib/USERGUIDE.html#Voronoi%20Diagrams</A>
+</DL>
+
+<DT>7.<DD>
+redund: extreme point enumeration and eliminating redundant inequalities
+<DL COMPACT><DT><DD>
+<A HREF="http://cgm.cs.mcgill.ca/%7Eavis/C/lrslib/USERGUIDE.html#redund">http://cgm.cs.mcgill.ca/%7Eavis/C/lrslib/USERGUIDE.html#redund</A>
+</DL>
+
+<DT>8.<DD>
+User's guide for lrslib
+<DL COMPACT><DT><DD>
+<A HREF="http://cgm.cs.mcgill.ca/%7Eavis/C/lrslib/USERGUIDE.html">http://cgm.cs.mcgill.ca/%7Eavis/C/lrslib/USERGUIDE.html</A>
+</DL>
+
+</DL>
+<A NAME="lbAL">&nbsp;</A>
+<H3>Author</H3>
+
+David Avis &lt;avis at cs dot mcgill dot ca &gt;
+<A NAME="lbAM">&nbsp;</A>
+<H3>See also</H3>
+
+<B><A HREF="../man1/mplrs.1.html">mplrs</A></B>(1),
+
+<B><A HREF="../man5/lrslib.5.html">lrslib</A></B>(5),
+
+<B><A HREF="../man1/lrsnash.1.html">lrsnash</A></B>(1)
+
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DL>
+<DT><A HREF="#lbAB">Name</A><DD>
+<DT><A HREF="#lbAC">Synopsis</A><DD>
+<DT><A HREF="#lbAD">Description</A><DD>
+<DT><A HREF="#lbAE">File formats</A><DD>
+<DT><A HREF="#lbAF">H-representation</A><DD>
+<DT><A HREF="#lbAG">V-representation</A><DD>
+<DT><A HREF="#lbAH">Options</A><DD>
+<DT><A HREF="#lbAI">Arithmetic</A><DD>
+<DT><A HREF="#lbAJ">Examples</A><DD>
+<DT><A HREF="#lbAK">Notes</A><DD>
+<DT><A HREF="#lbAL">Author</A><DD>
+<DT><A HREF="#lbAM">See also</A><DD>
+</DL>
+</DL>
+<HR>
+This document was created by
+<A HREF="/cgi-bin/man/man2html">man2html</A>,
+using the manual pages.<BR>
+Time: 07:33:14 GMT, January 31, 2024
+</BODY>
+</HTML>

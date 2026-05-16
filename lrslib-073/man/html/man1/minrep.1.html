@@ -1,0 +1,294 @@
+Content-type: text/html; charset=UTF-8
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML><HEAD><TITLE>Man page of redund|minrep</TITLE>
+</HEAD><BODY>
+<H1>redund|minrep</H1>
+Section: lrslib 7.3 (1)<BR>Updated: 2024.1.10 <BR><A HREF="#index">Index</A>
+<A HREF="../index.html">Return to Main Contents</A><HR>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<A NAME="lbAB">&nbsp;</A>
+<H3>Name</H3>
+
+redund|minrep  -   Remove redundant inequalities from an H-representation or redundant
+vertices (non-extreme points) from a V-representation. <B>minrep</B> also identifies hidden
+linearities.
+<A NAME="lbAC">&nbsp;</A>
+<H3>Synopsis</H3>
+
+<DL COMPACT>
+<DT>
+<B>redund</B>&nbsp;<I>[input-file] [output-file]</I>      
+<DT>
+<B>minrep</B>&nbsp;<I>[input-file] [output-file]</I>     
+<DT>
+<B>mpirun</B>&nbsp;-np [procs] <B>mplrs -minrep</B>&nbsp;<I>[input-file] [output-file] [option...]</I>
+</DL>
+<A NAME="lbAD">&nbsp;</A>
+<H3>Description</H3>
+
+<P>
+
+<B>redund</B> and <B>minrep</B> are aliases to <B>lrs</B> which is part of 
+<DD>the C library <B><A HREF="../man5/lrslib.5.html">lrslib</A>(5)</B>. 
+This functionality can also be performed by
+<B>lrs</B> directly by using the options described below.
+All computations are done in exact arithmetic. For input file descriptions
+see <B><A HREF="../man1/lrs.1.html">lrs</A>(1)</B>.
+A parallel version of <B>minrep</B>
+is given by <B>mplrs -minrep</B>. 
+The <B>-redund</B> option performs the same function and is retained for legacy.
+(see <B><A HREF="../man1/mplrs.1.html">mplrs</A>(1)</B>)
+<P>
+
+<I>redund</I>
+<BR>
+
+<I>H-representation:</I>
+redundant inequalities in an input H-representation are removed and
+the remaining inequalities output. 
+Hidden linearities
+are not detected unless the <B>testlin</B> option is included,
+in which case the output is a minimum representation
+and the dimension is reported.
+<BR>
+
+<I>V-representation:</I>
+outputs all extreme points and extreme rays, often called the
+<I>convex hull</I> problem. 
+The <B>testlin</B> option cause linearities to be detected and explicitly
+output.
+<BR>
+
+Outputs can be piped directly into <I>lrs</I>.
+<I>redund</I> is a link to <I>lrs</I> which can also perform these functions via 
+the <B>testlin</B>, <B>redund</B> and <B>redund_list</B> options. 
+<B>mplrs -redund</B> always sets the <B>testlin</B> option, so always produces
+minimum representations. 
+<P>
+
+<I>minrep</I>
+<BR>
+
+Equivalent to <B>redund</B> with the <B>testlin</B> option. 
+<P>
+<P>
+
+With no options minrep|redund will process the entire input file.
+<P>
+
+<B>redund start end </B>       
+<BR>
+
+Check input lines with line numbers from start to end and remove any redundant lines.
+<BR>
+
+<B>redund 0 0</B>  will check all input lines. 
+<P>
+
+<B>redund_list k   i_1 i_2 ... i_k</B>   
+<BR>
+
+Check the k input line numbers with indices i_1 i_2 ... i_k  
+and remove any redundant lines.
+<P>
+
+<B>testlin</B>      <B>(before the begin line only)</B>   (new 7.3)
+<BR>
+
+An LP test will be made for hidden linearities at the beginning of the run and is reported.
+If there are no hidden linearities
+one LP per constraint tests for redundancy. (<I>mplrs</I> can be run with no verification step.)
+If hidden linearities exist two LPs per constraint search for hidden linearities and remove redundancies.
+In both cases
+the run ends with a minimum set of linearities and inequalities (ie. no hidden inequalities or duplicates)
+and the dimension is reported.
+(<I>mplrs</I> will find all linearities but some non redundant inequalities may be eliminated, so a second run is required.)
+<P>
+<B>verbose</B>
+<BR>
+
+As each input line is checked a message is printed telling its status
+<BR>
+
+<BR>&nbsp;*nr&nbsp;:non-redundant&nbsp;
+<BR>&nbsp;*re&nbsp;:redundant&nbsp;
+<BR>&nbsp;*sr&nbsp;:strongly&nbsp;redundant
+<BR>
+
+For an H-representation strongly redundant means the feasible
+region lies in its open half-space. For a V-representation it means that the point
+lies in the (relative) interior of the convex hull.
+<BR>
+
+In addition <I>minrep</I> may report
+<BR>&nbsp;*li&nbsp;:linearity
+<A NAME="lbAE">&nbsp;</A>
+<H3>Examples</H3>
+
+<P>
+
+(1) Remove hidden linearities and minimum representation of an H-representation.
+<BR>&nbsp;%&nbsp;cat&nbsp;cube.ine
+<BR>&nbsp;H-representation
+<BR>&nbsp;begin
+<BR>&nbsp;7&nbsp;4&nbsp;rational
+<BR>&nbsp;&nbsp;0&nbsp;&nbsp;1&nbsp;&nbsp;0&nbsp;&nbsp;0&nbsp;
+<BR>&nbsp;&nbsp;0&nbsp;&nbsp;0&nbsp;&nbsp;1&nbsp;&nbsp;0&nbsp;
+<BR>&nbsp;&nbsp;0&nbsp;&nbsp;0&nbsp;&nbsp;0&nbsp;&nbsp;1&nbsp;
+<BR>&nbsp;&nbsp;1&nbsp;-1&nbsp;&nbsp;0&nbsp;&nbsp;0&nbsp;
+<BR>&nbsp;&nbsp;1&nbsp;&nbsp;0&nbsp;-1&nbsp;&nbsp;0&nbsp;
+<BR>&nbsp;&nbsp;1&nbsp;&nbsp;0&nbsp;&nbsp;0&nbsp;-1&nbsp;
+<BR>&nbsp;-1&nbsp;&nbsp;0&nbsp;&nbsp;0&nbsp;&nbsp;1
+<BR>&nbsp;end
+<BR>&nbsp;verbose
+<BR>&nbsp;
+<BR>&nbsp;%&nbsp;minrep&nbsp;cube.ine
+<BR>&nbsp;minrep:lrslib_v.7.3_2024.1.10(64bit,lrslong.h,hybrid_arithmetic)
+<BR>&nbsp;*Input&nbsp;taken&nbsp;from&nbsp;&nbsp;cube.ine
+<BR>&nbsp;*hidden&nbsp;linearities&nbsp;exist
+<BR>&nbsp;*finding&nbsp;minimum&nbsp;representation
+<BR>&nbsp;*nr&nbsp;0&nbsp;&nbsp;1&nbsp;&nbsp;0&nbsp;&nbsp;0&nbsp;
+<BR>&nbsp;*nr&nbsp;0&nbsp;&nbsp;0&nbsp;&nbsp;1&nbsp;&nbsp;0&nbsp;
+<BR>&nbsp;*sr&nbsp;0&nbsp;&nbsp;0&nbsp;&nbsp;0&nbsp;&nbsp;1&nbsp;
+<BR>&nbsp;*nr&nbsp;1&nbsp;-1&nbsp;&nbsp;0&nbsp;&nbsp;0&nbsp;
+<BR>&nbsp;*nr&nbsp;1&nbsp;&nbsp;0&nbsp;-1&nbsp;&nbsp;0&nbsp;
+<BR>&nbsp;*li&nbsp;1&nbsp;&nbsp;0&nbsp;&nbsp;0&nbsp;-1&nbsp;
+<BR>&nbsp;*li-1&nbsp;&nbsp;0&nbsp;&nbsp;0&nbsp;&nbsp;1&nbsp;
+<BR>&nbsp;*linearity&nbsp;in&nbsp;row=6&nbsp;removed&nbsp;or&nbsp;in&nbsp;cobasis,&nbsp;independent
+<BR>&nbsp;*linearity&nbsp;in&nbsp;row=7&nbsp;dependent,&nbsp;made&nbsp;redundant
+<BR>&nbsp;H-representation
+<BR>&nbsp;linearity&nbsp;1&nbsp;1
+<BR>&nbsp;begin
+<BR>&nbsp;5&nbsp;4&nbsp;rational
+<BR>&nbsp;&nbsp;1&nbsp;&nbsp;0&nbsp;&nbsp;0&nbsp;-1&nbsp;
+<BR>&nbsp;&nbsp;0&nbsp;&nbsp;1&nbsp;&nbsp;0&nbsp;&nbsp;0&nbsp;
+<BR>&nbsp;&nbsp;0&nbsp;&nbsp;0&nbsp;&nbsp;1&nbsp;&nbsp;0&nbsp;
+<BR>&nbsp;&nbsp;1&nbsp;-1&nbsp;&nbsp;0&nbsp;&nbsp;0&nbsp;
+<BR>&nbsp;&nbsp;1&nbsp;&nbsp;0&nbsp;-1&nbsp;&nbsp;0&nbsp;
+<BR>&nbsp;end
+<BR>&nbsp;
+<BR>&nbsp;*input&nbsp;had&nbsp;7&nbsp;rows&nbsp;and&nbsp;4&nbsp;columns
+<BR>&nbsp;*&nbsp;2&nbsp;redundant&nbsp;row(s)&nbsp;found
+<BR>&nbsp;&nbsp;3&nbsp;7
+<BR>&nbsp;*&nbsp;1&nbsp;hidden&nbsp;linearity&nbsp;found
+<BR>&nbsp;
+<P>
+
+(2) Compute the extreme points of a set of 10 points in R^3
+<P>
+
+<BR>&nbsp;%&nbsp;cat&nbsp;c.ext
+<BR>&nbsp;V-representation
+<BR>&nbsp;begin
+<BR>&nbsp;10&nbsp;4&nbsp;rational
+<BR>&nbsp;1&nbsp;&nbsp;1&nbsp;&nbsp;1&nbsp;&nbsp;1&nbsp;
+<BR>&nbsp;1&nbsp;&nbsp;0&nbsp;&nbsp;1&nbsp;&nbsp;1&nbsp;
+<BR>&nbsp;1&nbsp;1/2&nbsp;0&nbsp;1/3
+<BR>&nbsp;1&nbsp;&nbsp;1&nbsp;&nbsp;1&nbsp;&nbsp;0&nbsp;
+<BR>&nbsp;1&nbsp;&nbsp;0&nbsp;&nbsp;1&nbsp;&nbsp;0&nbsp;
+<BR>&nbsp;1&nbsp;&nbsp;1&nbsp;&nbsp;0&nbsp;&nbsp;0&nbsp;
+<BR>&nbsp;1&nbsp;&nbsp;0&nbsp;&nbsp;0&nbsp;&nbsp;0&nbsp;
+<BR>&nbsp;1&nbsp;&nbsp;0&nbsp;1/3&nbsp;1/4
+<BR>&nbsp;1&nbsp;&nbsp;1&nbsp;&nbsp;0&nbsp;&nbsp;1&nbsp;
+<BR>&nbsp;1&nbsp;&nbsp;0&nbsp;&nbsp;0&nbsp;&nbsp;1&nbsp;
+<BR>&nbsp;end
+<P>
+<BR>&nbsp;%&nbsp;redund&nbsp;c.ext
+<P>
+<BR>&nbsp;*redund:lrslib&nbsp;v.7.2&nbsp;2020.6.8(64bit,lrslong.h,hybrid&nbsp;arithmetic)
+<BR>&nbsp;*Input&nbsp;taken&nbsp;from&nbsp;&nbsp;c.ext
+<BR>&nbsp;V-representation
+<BR>&nbsp;begin
+<BR>&nbsp;8&nbsp;4&nbsp;rational
+<BR>&nbsp;1&nbsp;&nbsp;1&nbsp;&nbsp;1&nbsp;&nbsp;1&nbsp;
+<BR>&nbsp;1&nbsp;&nbsp;0&nbsp;&nbsp;1&nbsp;&nbsp;1&nbsp;
+<BR>&nbsp;1&nbsp;&nbsp;1&nbsp;&nbsp;1&nbsp;&nbsp;0&nbsp;
+<BR>&nbsp;1&nbsp;&nbsp;0&nbsp;&nbsp;1&nbsp;&nbsp;0&nbsp;
+<BR>&nbsp;1&nbsp;&nbsp;1&nbsp;&nbsp;0&nbsp;&nbsp;0&nbsp;
+<BR>&nbsp;1&nbsp;&nbsp;0&nbsp;&nbsp;0&nbsp;&nbsp;0&nbsp;
+<BR>&nbsp;1&nbsp;&nbsp;1&nbsp;&nbsp;0&nbsp;&nbsp;1&nbsp;
+<BR>&nbsp;1&nbsp;&nbsp;0&nbsp;&nbsp;0&nbsp;&nbsp;1&nbsp;
+<BR>&nbsp;end
+<BR>&nbsp;*Input&nbsp;had&nbsp;10&nbsp;rows&nbsp;and&nbsp;4&nbsp;columns
+<BR>&nbsp;*&nbsp;2&nbsp;redundant&nbsp;row(s)&nbsp;found:
+<BR>&nbsp;3&nbsp;8
+<P>
+<A NAME="lbAF">&nbsp;</A>
+<H3>Notes</H3>
+
+<DL COMPACT>
+<DT> 1.<DD>
+FAQ page
+<DL COMPACT><DT><DD>
+<A HREF="https://inf.ethz.ch/personal/fukudak/polyfaq/polyfaq.html">https://inf.ethz.ch/personal/fukudak/polyfaq/polyfaq.html</A>
+</DL>
+
+<DT>2.<DD>
+redund: extreme point enumeration and eliminating redundant inequalities
+<DL COMPACT><DT><DD>
+<A HREF="http://cgm.cs.mcgill.ca/%7Eavis/C/lrslib/USERGUIDE.html#redund">http://cgm.cs.mcgill.ca/%7Eavis/C/lrslib/USERGUIDE.html#redund</A>
+</DL>
+
+<DT>3.<DD>
+User's guide for lrslib
+<DL COMPACT><DT><DD>
+<A HREF="http://cgm.cs.mcgill.ca/%7Eavis/C/lrslib/USERGUIDE.html">http://cgm.cs.mcgill.ca/%7Eavis/C/lrslib/USERGUIDE.html</A>
+</DL>
+
+</DL>
+<A NAME="lbAG">&nbsp;</A>
+<H3>Author</H3>
+
+David Avis &lt;avis at cs dot mcgill dot ca &gt;
+<A NAME="lbAH">&nbsp;</A>
+<H3>See also</H3>
+
+<B><A HREF="../man1/lrs.1.html">lrs</A></B>(1),
+
+<B><A HREF="../man1/mplrs.1.html">mplrs</A></B>(1),
+
+<B><A HREF="../man5/lrslib.5.html">lrslib</A></B>(5),
+
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DL>
+<DT><A HREF="#lbAB">Name</A><DD>
+<DT><A HREF="#lbAC">Synopsis</A><DD>
+<DT><A HREF="#lbAD">Description</A><DD>
+<DT><A HREF="#lbAE">Examples</A><DD>
+<DT><A HREF="#lbAF">Notes</A><DD>
+<DT><A HREF="#lbAG">Author</A><DD>
+<DT><A HREF="#lbAH">See also</A><DD>
+</DL>
+</DL>
+<HR>
+This document was created by
+<A HREF="/cgi-bin/man/man2html">man2html</A>,
+using the manual pages.<BR>
+Time: 07:33:14 GMT, January 31, 2024
+</BODY>
+</HTML>

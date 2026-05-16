@@ -1,0 +1,17 @@
+H-representation
+testlin
+linearity 1 6
+begin
+10 4 rational
+ 0  1  0  0 
+ 0 -1  0  0
+ 0  0  1  0 
+ 0  0  0  1 
+ 1 -1  0  0 
+ 1  0 -1  0 
+ 1  0  0 -1 
+ 0 -1  0  0
+-1  0  0  1
+ 0  0  1  0
+end
+verbose

@@ -1,0 +1,281 @@
+Content-type: text/html; charset=UTF-8
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML><HEAD><TITLE>Man page of polyv</TITLE>
+</HEAD><BODY>
+<H1>polyv</H1>
+Section: polyv 7.3 (1)<BR>Updated: 2023.10.21<BR><A HREF="#index">Index</A>
+<A HREF="../index.html">Return to Main Contents</A><HR>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<A NAME="lbAB">&nbsp;</A>
+<H3>Name</H3>
+
+polyv - utility to create and verify logical formulas checking properties
+of given H/V representations using logic solvers.
+<A NAME="lbAC">&nbsp;</A>
+<H3>Synopsis</H3>
+
+<DL COMPACT>
+<DT>
+<B>polyv</B>&nbsp;<I>[input-files]</I>
+</DL>
+<A NAME="lbAD">&nbsp;</A>
+<H3>Description</H3>
+
+<P>
+
+<P>
+<DD>The input file or files are H- or V-representations of polyhedra in <I>lrs</I>
+format, and the output is a logical formula in <I>SMT-LIB</I> 2.6 format.
+Behavior depends on the options and number of input files provided.
+In many cases, it is easier and faster to use <I>lrs</I>, <I>mplrs</I> or
+other tools to check the following questions directly.  <I>polyv</I> is
+an alternative approach intended for some examples where the direct approach
+is difficult.
+<P>
+First, <I>polyv</I> can be given a single H-representation defining a 
+polyhedron P, along with a list of variables for a projection of P and an
+inequality I to test. The question is whether we have the same projection
+when I is deleted from P.  If so we say I is redundant for the projection,
+otherwise it is non-redundant.  <I>polyv</I> allows the use of SMT solvers to
+decide this question  without performing the projection explicitly,
+producing a formula that is satisfiable iff the I is non-redundant for the
+projection.  In addition, <I>polyv</I> it produce <I>lrs</I> inputs that
+verify witnesses of non-redundancy produced by an SMT solver.
+<P>
+Next, <I>polyv</I> can be given two representations defining polyhedra
+P and Q, where H-representations may contain projections.  The question
+is whether P and Q are different polyhedra: <I>polyv</I> produces a formula
+that is satisfiable iff there is a point contained in exactly one of P and Q.
+<P>
+Finally, <I>polyv</I> can be given three representations defining polyhedra
+P, Q and R.  The question is whether the intersection of P and Q is different
+from R: <I>polyv</I> produces a formula that is satisfiable iff there is a
+point contained in exactly one of R and the intersection.
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H3>File formats</H3>
+
+<P>
+
+The input file is in <I>lrs</I> format (see 
+<B><A HREF="../man1/lrs.1.html">lrs</A></B>(1)<B>)</B>
+
+consisting of
+(a) an H-representation of
+a polyhedron, (b) a projection to a subset of variables given by the <I>project</I> or <I>eliminate</I>
+options, and (c) an inequality to test given by the <I>redund</I> or <I>redund_list</I> options.
+Note that only &quot;linearity&quot;, &quot;redund&quot;, &quot;redund_list&quot;, &quot;project&quot;
+and &quot;eliminate&quot; options are supported, and the combination of
+redund/redund_list and project/eliminate options is both unique to
+polyv and required.
+<P>
+<P>
+
+The output
+is in <I>SMT-LIB</I> 2.6 format using logic <I>LRA</I>.  Solvers such as
+<I>z3</I> or <I>cvc5</I> support this logic.  See The SMT-LIB Standard: Version 2.6
+for details.
+<P>
+<A NAME="lbAF">&nbsp;</A>
+<H3>Usage</H3>
+
+<P>
+
+<P>
+<B>polyv</B>&nbsp;[input-file]
+produces a logical formula satisfiable iff the first inequality
+given in a redund/redund_list option is redundant after projection according to
+a project/eliminate option.
+The solver can produce witnesses for non-redundant inequalities, i.e.
+an assignment to the variables whose image is in the projection only if
+the inequality is removed.  No witness is produced if the inequality
+is redundant.
+<P>
+
+A witness of non-redundancy can be verified using two
+certificates.  The first certificate specifies that the assignment to
+the variables is feasible when the inequality in question is removed.
+The second certificate asserts that when this inequality is added,
+no feasible assignment has the same projection.  Certificates are produced
+using the following options.
+<P>
+
+<B>polyv</B>&nbsp;-c 1 [input-file]
+reads a witness of non-redundancy on standard input and produces an lrs input
+file that should be feasible.  The options in the input file should be the
+same as when the formula was produced.
+<P>
+
+<B>polyv</B>&nbsp;-c 2 [input-file]
+reads a witness of non-redundancy on standard input and produces an lrs input
+file that should be infeasible.  The options in the input file should be
+the same as when the formula was produced.
+<P>
+
+<B>polyv</B>&nbsp;[input-file-1] [input-file-2]
+given two H/V representations, produces a logical formula satisfiable
+iff they define different polyhedra.  Projections are supported in
+H-representations using the project or eliminate option.  This can be
+used to e.g. verify H/V equivalency or fel projections.
+<P>
+
+<B>polyv</B>&nbsp;[input-file-1] [input-file-2] [input-file-3]
+given three H/V representations, produces a logical formula satisfiable
+iff the intersection of polyhedra defined by input-file-1 and input-file-2 is
+not defined by input-file-3.  Projections are supported in H-representations
+using the project or eliminate option.
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H3>Examples</H3>
+
+<P>
+
+(1) Check if the first inequality in cp4.ine is redundant for projections.
+<BR>
+
+(a) To check for redundancy after the first variable is eliminated,
+add options &quot;redund_list 1 1&quot; and &quot;eliminate 1 1&quot; to cp4.ine. Then:
+<P>
+<BR>&nbsp;%&nbsp;polyv&nbsp;cp4.ine&nbsp;&gt;&nbsp;cp4-11.smt
+<BR>&nbsp;%&nbsp;z3&nbsp;cp4-11.smt&nbsp;&gt;&nbsp;cp4-11.out&nbsp;&nbsp;&nbsp;&nbsp;
+<BR>
+
+or
+<BR>
+
+<BR>&nbsp;%&nbsp;cvc5&nbsp;-L&nbsp;smt&nbsp;--produce-models&nbsp;cp4-11.smt&nbsp;&gt;&nbsp;cp4-11.out&nbsp;
+<P>
+The first line of cp4-11.out reads &quot;sat&quot; indicating that
+inequality 1 is non-redundant for eliminating variable 1. We
+can check the witness:
+<P>
+<BR>&nbsp;%&nbsp;polyv&nbsp;-c&nbsp;1&nbsp;cp4.ine&nbsp;&lt;&nbsp;cp4-11.out&nbsp;|&nbsp;lrs
+<BR>&nbsp;%&nbsp;polyv&nbsp;-c&nbsp;2&nbsp;cp4.ine&nbsp;&lt;&nbsp;cp4-11.out&nbsp;|&nbsp;lrs
+<P>
+The first certificate is feasible and second infeasible, so
+the witness proves non-redundancy for the projection.
+<BR>
+
+(b) To check for redunancy after variables 1 and 2 are eliminated,
+add options &quot;redund_list 1 1&quot; and &quot;eliminate 2 1 2&quot; to cp4.ine. Then
+<P>
+<BR>&nbsp;%&nbsp;polyv&nbsp;cp4.ine&nbsp;&gt;&nbsp;cp4-112.smt
+<BR>&nbsp;%&nbsp;z3&nbsp;cp4-112.smt&nbsp;&gt;&nbsp;cp4-112.out
+<BR>
+
+or
+<BR>
+
+<BR>&nbsp;%&nbsp;cvc5&nbsp;-L&nbsp;smt&nbsp;--produce-models&nbsp;cp4-112.smt&nbsp;&gt;&nbsp;cp4-112.out
+<P>
+The first line of cp4-112.out reads &quot;unsat&quot; indicating that
+inequality 1 is redundant for eliminating variables 1 and 2.
+In this case there is no witness.
+<P>
+<P>
+
+(2) Check if given H- and V- representations define different polyhedra.
+<BR>
+
+(a) To check whether mp5.ine and mp5.ext (produced using lrs) define
+different polyhedra:
+<P>
+<BR>&nbsp;%&nbsp;polyv&nbsp;mp5.ine&nbsp;mp5.ext&nbsp;&gt;&nbsp;mp5hv.smt
+<BR>&nbsp;%&nbsp;z3&nbsp;mp5hv.smt&nbsp;&gt;&nbsp;mp5hv.out
+<P>
+The first line of mp5hv.out reads &quot;unsat&quot; indicating that these two
+representations do not define different polyhedra (i.e. they are
+equivalent).
+<BR>
+
+(b) After removing the last vertex (the origin) from mp5.ext to create
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;mp5missing.ext:
+<P>
+<BR>&nbsp;%&nbsp;polyv&nbsp;mp5.ine&nbsp;mp5missing.ext&nbsp;&gt;&nbsp;mp5hvm.smt
+<BR>&nbsp;%&nbsp;z3&nbsp;mp5hvm.smt&nbsp;&gt;&nbsp;mp5hvm.out
+<P>
+The first line of mp5hvm.out reads &quot;sat&quot; indicating that these
+two representations define different polyhedra.  
+<BR>
+
+Note that the H-representations are allowed to include projections.
+<P>
+<A NAME="lbAH">&nbsp;</A>
+<H3>Notes</H3>
+
+<DL COMPACT>
+<DT> 1.<DD>
+SMT-Lib Standards
+<DL COMPACT><DT><DD>
+<A HREF="http://smtlib.cs.uiowa.edu/language.shtml">http://smtlib.cs.uiowa.edu/language.shtml</A>
+</DL>
+
+<DT> 2.<DD>
+z3
+<DL COMPACT><DT><DD>
+<A HREF="https://github.com/Z3Prover/z3/wiki">https://github.com/Z3Prover/z3/wiki</A>
+</DL>
+
+<DT> 3.<DD>
+cvc5
+<DL COMPACT><DT><DD>
+<A HREF="https://cvc5.github.io/">https://cvc5.github.io/</A>
+</DL>
+
+</DL>
+<A NAME="lbAI">&nbsp;</A>
+<H3>Author</H3>
+
+Charles Jordan &lt;skip at res dot otaru-uc dot ac dot jp &gt;
+<A NAME="lbAJ">&nbsp;</A>
+<H3>See also</H3>
+
+<B><A HREF="../man5/lrslib.5.html">lrslib</A></B>(5),
+
+<B><A HREF="../man1/lrs.1.html">lrs</A></B>(1)
+
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DL>
+<DT><A HREF="#lbAB">Name</A><DD>
+<DT><A HREF="#lbAC">Synopsis</A><DD>
+<DT><A HREF="#lbAD">Description</A><DD>
+<DT><A HREF="#lbAE">File formats</A><DD>
+<DT><A HREF="#lbAF">Usage</A><DD>
+<DT><A HREF="#lbAG">Examples</A><DD>
+<DT><A HREF="#lbAH">Notes</A><DD>
+<DT><A HREF="#lbAI">Author</A><DD>
+<DT><A HREF="#lbAJ">See also</A><DD>
+</DL>
+</DL>
+<HR>
+This document was created by
+<A HREF="/cgi-bin/man/man2html">man2html</A>,
+using the manual pages.<BR>
+Time: 07:33:14 GMT, January 31, 2024
+</BODY>
+</HTML>

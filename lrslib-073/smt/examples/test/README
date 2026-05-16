@@ -1,0 +1,96 @@
+1. For the cube 
+1 0 0 0
+is a missing vertex in cube-1.ext and
+1 1/2 0 0  
+is a point not in the CH of these 7 points
+cube-1.ext.lp
+is formed by adding a leading col of zeroes, making it an H-rep,
+with the missing point (with leading zero) as objective.
+
+mai6% lrs  cube-1.ext.lp
+lrs:lrslib_v.7.2_2022.3.6(64bit,lrslong.h,hybrid_arithmetic)
+*Input taken from  cube-1.ext.lp
+cube-1
+*lponly mode: Dantzig's rule
+minimize 0  2  1  0  0 
+*Unbounded solution
+ 1  0  0  0  0 
+ 0 -1  1  1  1 
+*overflow checking on lrslong arithmetic
+*lrs:lrslib_v.7.2_2022.3.6(64bit,lrslong.h,hybrid arithmetic)
+
+We use a *ray* (without leading zero) as an objective function in
+cube.ine.lp
+which solves to give the missing vertex
+
+mai6% lrs  cube.ine.lp
+lrs:lrslib_v.7.2_2022.3.6(64bit,lrslong.h,hybrid_arithmetic)
+*Input taken from  cube.ine.lp
+cube
+minimize-1  1  1  1 
+*lponly mode: Dantzig's rule
+ 1  0  0  0 
+*Obj=-1     pivots=6 
+
+
+2.cp6-1.ext misses the origin of cp6.ext.
+
+mai6% lrs cp6-1.ext.lp
+lrs:lrslib_v.7.2_2022.3.6(64bit,lrslong.h,hybrid_arithmetic)
+*Input taken from  cp6-1.ext.lp
+cp6.ext.lp
+*lponly mode: Dantzig's rule
+minimize 0  2  1  1  1  1  1  0  0  0  0  0  0  0  0  0  0 
+*Unbounded solution
+ 1  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 
+ 0 -2  0  0  0  1  1  0  0  1  1  0  1  1  1  1 -2 
+*overflow checking on lrslong arithmetic
+
+Take the ray to give the objective in cp6.ine
+
+mai6% lrs cp6.ine
+lrs:lrslib_v.7.2_2022.3.6(64bit,lrslong.h,hybrid_arithmetic)
+*Input taken from  cp6.ine
+cp6.ine
+*lponly mode: Dantzig's rule
+minimize-2  0  0  0  1  1  0  0  1  1  0  1  1  1  1 -2 
+ 1  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 
+*Obj=-2     pivots=312 
+
+3. cp6-half.ext misses 16 vertices of cp6.ext and the extra point is
+
+1 23/216 199/216 103/108 199/216 25/27 35/36 203/216 35/36 67/72 7/216 1/18 7/72 19/216 7/108 7/72 
+
+mai6% lrs cp6-half.ext.lp
+lrs:lrslib_v.7.2_2022.3.6(64bit,lrslong.h,hybrid_arithmetic)
+*Input taken from  cp6-half.ext.lp
+cp6-half
+minimize 0  216  23  199  206  199  200  210  203  210  201  7  12  21  19  14  21 
+*lponly mode: Dantzig's rule
+*Unbounded solution
+ 0  0  0  0  0  0  0  0  0  0  0  1 -1  0  0 -1  1 
+ 1  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 
+ 0  0 -2  1  1  1  1 -1 -1 -1 -1  0  1 -1 -1  1  0 
+ 0  0 -1  0  1  0  0  0  0  0 -1  0  0  0  0  1  0 
+ 0  0 -1  0  0  1  0  0  0  0 -1 -1  1  0  0  1  0 
+ 0  0 -1  1  0  0  0  0  0  0 -1  0  1  0 -1  1  0 
+ 0  0 -1  0  0  0  1  0  0  0 -1 -1  1  0 -1  2  0 
+ 0  0  0  0  0  0  0  0 -1  0  1  1 -1  0  1 -1  0 
+ 0  0  0  0  0  0  0  0  0  0  0  0  1 -1 -1  1  0 
+ 0  0  0  0  0  0  0  0  0 -1  1  0  0  0  1 -1  0 
+ 0  0  0  0  0  0  0 -1  0  0  1  1  0  0  0 -1  0 
+
+We get 10 rays, each could be used as an objective in cp6.ine and the four I chose all gave
+different missing vertices. Eg:
+
+mai6% lrs cp6.ine
+lrs:lrslib_v.7.2_2022.3.6(64bit,lrslong.h,hybrid_arithmetic)
+*Input taken from  cp6.ine
+cp6.ine
+*lponly mode: Dantzig's rule
+minimize 0  0  0  0  0  0  0  0  0  0  1 -1  0  0 -1  1 
+ 1  0  1  1  0  0  1  1  0  0  0  1  1  1  1  0 
+*Obj=-2     pivots=165 
+
+*overflow checking on lrslong arithmetic
+

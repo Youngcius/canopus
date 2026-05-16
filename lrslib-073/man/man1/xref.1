@@ -1,0 +1,127 @@
+.TH "xref|hvref" "1" "2023.1.4 " "January 2024" "lrslib 7.3"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SS "Name"
+xref|hvref  - produce a cross reference list between H- and V-representations.
+ 
+.SS "Synopsis"
+.HP \w'\fBxref\fR\ [input-file] \ 'u
+\fBxref\fR\ \fI[input-file]\fR 
+.HP \w'\fBhvref\fR\ [input-file] \ 'u
+\fBhvref\fR\ \fI[input-file]\fR 
+.SS "Description"
+.PP
+These programs are part of and must be compiled with
+\fIlrslib\fR which is a C library.
+All computations are done in exact arithmetic.
+.PP
+\fIxref\fR and \fIhvref\fR\ produce a cross reference list between H- and V-representations.
+.PP
+\fBxref/hvref\fR   Cross reference listing between V- and H-representations  
+
+In the example below we start from an H-representation of cube.ine but the same
+steps apply to the V-representation cube.ext.
+It is recommended to first remove any redundancies from the input file using redund.
+
+1. Add  \fBprintcobasis\fR and \fBincidence\fR options to cube.ine and run \fblrs\fR.
+ % cat cube.ine
+ cube
+ H-representation
+ begin
+ 6 4 rational
+  0  1  0  0
+  0  0  1  0
+  0  0  0  1
+  1 -1  0  0
+  1  0 -1  0
+  1  0  0 -1
+ end
+ printcobasis
+ incidence
+ 
+% lrs cube.ine cube.ext   
+
+2. Run xref on the output file cube.ext getting cube.ext.ex
+
+ % xref cube.ext
+ % cat cube.ext.ex
+lg% cat cube.ext.x
+ V-representation
+     1   4 5 6    #
+     2   1 5 6    #
+     3   2 4 6    #
+     4   1 2 6    #
+     5   3 4 5    #
+     6   1 3 5    #
+     7   2 3 4    #
+     8   1 2 3    #
+
+
+3. Edit the file  cube.ext.x to insert a second line that contains two integers
+
+rows maxindex
+
+where rows >= # output lines in cube.ext.x
+      maxindex >= # input lines in cube.ine
+
+or just use 0 0 and run hvref, the output will tell you which values to use.
+
+% hvref cube.ext.x
+% hvref cube.ext.x
+
+ V-representation
+ 8 8
+ 1: 4 5 6
+ 2: 1 5 6
+ 3: 2 4 6
+ 4: 1 2 6
+ 5: 3 4 5
+ 6: 1 3 5
+ 7: 2 3 4
+ 8: 1 2 3
+ 
+ H-representation
+ 6 8
+ 1: 2 4 6 8
+ 2: 3 4 7 8
+ 3: 5 6 7 8
+ 4: 1 3 5 7
+ 5: 1 2 5 6
+ 6: 1 2 3 4
+ input rows=8 maxindex=6
+ 
+
+.SS "Notes"
+.IP " 1." 4
+FAQ page
+.RS 4
+\%https://inf.ethz.ch/personal/fukudak/polyfaq/polyfaq.html
+.RE
+.IP " 2." 4
+User's guide for lrslib
+.RS 4
+\%http://cgm.cs.mcgill.ca/~avis/C/lrslib/USERGUIDE.html
+.RE
+.SS Author
+David Avis <avis at cs dot mcgill dot ca >
+.SS "See also"
+.BR mplrs (1),
+.BR lrslib (5),
+.BR lrsnash (1)

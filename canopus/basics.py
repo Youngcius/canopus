@@ -39,6 +39,7 @@ class CanonicalGate(Gate):
     def __init__(self, a: ParameterValueType, b: ParameterValueType, c: ParameterValueType, label: str | None = None):
         super().__init__("can", 2, [a, b, c], label=label)
         from canopus.utils._accel import only_xx_rot
+
         self.is_xx_rot = only_xx_rot(a, b, c)
 
     def inverse(self, annotated: bool = False):
@@ -64,8 +65,7 @@ class CanonicalGate(Gate):
             cx q1, q0;
         }
         """
-        from qiskit.circuit.library import RXXGate, RYYGate, RZZGate
-        from qiskit.circuit.library import UGate, CXGate
+        from qiskit.circuit.library import CXGate, UGate
 
         q = QuantumRegister(2, "q")
         qc = QuantumCircuit(q, name=self.name)
@@ -96,6 +96,7 @@ class CanonicalGate(Gate):
             raise ValueError("unable to avoid copy while creating an array as requested")
         a, b, c = (float(param) for param in self.params)
         from canopus.utils._accel import canonical_unitary
+
         return canonical_unitary(a, b, c)
 
     def __eq__(self, other):

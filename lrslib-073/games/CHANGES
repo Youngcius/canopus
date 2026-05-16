@@ -1,0 +1,49 @@
+10.05.2023
+Changed game payoff representation from 64 bit integers to strings. The following files have been modified:
+
+
+lrsnashlib.h
+------------
+New game struct with mostly pointers, except for a name slot.
+
+game->payoff[player][row][col] is a pointer to a payoff string. All payoff strings are stored in the character array game->pstore, whose length is the size of the input file.  
+
+Removed MAXSTRAT (max number of strategies in games). Game storage is now dynamically allocated and freed.
+
+Removed the following three functions to compute field width for pretty printing of games: initFwidth, setFwidth, and updateFwidth. This is now handled by printGame in lrsnashlib.c.
+
+
+lrsnash.c
+---------
+Removed two superfluous warnings: RATWARN and SIZERRROR. 
+
+Removed function tl_readrat, which converted payoff strings to (num, den) pairs of long integers. All conversion is now handled by the functions in lrsgmp.c
+
+Added two functions allocateGameStorage and freeGameStorage to handle storage for game payoffs. 
+
+
+lrsnashlib.c
+------------
+Added the function str2rat (lrs_mp Na, lrs_mp Da, char *str) to convert payoff strings to  lrs_mp (Num, Den) pairs. It is based on readrat in lrsgmp.c.
+
+Modified the function FillConstraintRows(lrs_dic * P, lrs_dat * Q, const game * g, int p1, int p2, int firstRow). 
+- Replaced the long int data structures for (Num, Den) pairs by lrs_mp
+- using str2rat to convert payoff strings to (Num, Den) pairs
+- and using the macros zero and changesign from lrsgmp.h to handle sign changes.
+
+The functions FillNonnegativityRows, FillLinearityRow and FillFirstRow are reused because they do not use any information about game payoffs. (Still not sure if FillFirstRow is needed). 
+
+Rewrote printGame to handle payoff strings and use them to compute field widths. 
+
+
+setupnash_v2.c
+--------------
+
+Introduced variable string length for game payoffs (as in lrsnashlib) 
+
+
+TODO:
+-----
+lrsnash should be able to handle two legacy input files, but it produces a segfault at the statement "fclose(lrs_ifp);" at line 828 in lrsnashlib.c. When that statement is commented out, it seems to run without errors. 
+
+

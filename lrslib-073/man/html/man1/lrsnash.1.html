@@ -1,0 +1,207 @@
+Content-type: text/html; charset=UTF-8
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML><HEAD><TITLE>Man page of lrsnash</TITLE>
+</HEAD><BODY>
+<H1>lrsnash</H1>
+Section: lrslib 7.3 (1)<BR>Updated: 2024.1.31<BR><A HREF="#index">Index</A>
+<A HREF="../index.html">Return to Main Contents</A><HR>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<A NAME="lbAB">&nbsp;</A>
+<H3>Name</H3>
+
+lrsnash: &nbsp; 
+Compute Nash-equibria in 2-person games.
+<A NAME="lbAC">&nbsp;</A>
+<H3>Synopsis</H3>
+
+<DL COMPACT>
+<DT>
+<B>lrsnash</B> &nbsp;[options...] [input-file] 
+<DT>
+<B>lrsnash1</B>&nbsp;[options...] [input-file] 
+<DT>
+<B>lrsnash2</B>&nbsp;[options...] [input-file] 
+<DT>
+<B>nashdemo</B>&nbsp; 
+</DL>
+<P>
+
+<DD>options:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;-v,&nbsp;--verbose&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Prints&nbsp;a&nbsp;trace&nbsp;of&nbsp;the&nbsp;solution&nbsp;process
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;-d,&nbsp;--debug&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Dumps&nbsp;lots&nbsp;of&nbsp;information&nbsp;for&nbsp;debugging
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;-p,&nbsp;--printgame&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Prints&nbsp;the&nbsp;payoff&nbsp;matrix&nbsp;for&nbsp;the&nbsp;game
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;-s,&nbsp;--standard&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Promise&nbsp;that&nbsp;input&nbsp;files&nbsp;have&nbsp;standard&nbsp;structure
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;-o,&nbsp;--outfile&nbsp;&lt;file&gt;&nbsp;&nbsp;Send&nbsp;output&nbsp;to&nbsp;&lt;file&gt;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;-h,&nbsp;--help&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Prints&nbsp;this&nbsp;text
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Short&nbsp;options&nbsp;can&nbsp;be&nbsp;grouped,&nbsp;as&nbsp;in&nbsp;'-ps'&nbsp;and&nbsp;'-do&nbsp;out.txt'
+<P>
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<H3>Description</H3>
+
+<P>
+
+These C programs are distributed as part of the <B>lsrslib</B>[2] package
+and must be compiled with it.
+<P>
+Alice has a payoff matrix A and Bob has a playoff matrix B, both of dimension m by n.
+Alice assigns probabilities x to the rows and Bob y to the columns.
+Alice receives payoff x^T A y and Bob receives x^T B y.
+A Nash equilibriam 
+occurs for pairs x,y for which neither player can improve their expected payoff
+by unilateraly changing strategies.
+<P>
+<P>
+
+<I>lrsnash</I>
+is an application of <I>lrs</I> for finding Nash-equilibria
+in 2-person matrix games
+using a method described in [1]. It uses GMP exact extended precision arithmetic.
+<P>
+<I>lrsnash1</I>
+is the same as <I>lrsnash</I>
+except that it uses 64 bit exact arithmetic and terminates if overflow is detected.
+It is about 3-4 times faster.
+<P>
+<I>lrsnash2</I>
+is the same as <I>lrsnash</I>
+except that it uses 128 bit exact arithmetic and terminates if overflow is detected.
+It is about twice as fast. It requires a C
+compiler with __int128 support (eg. gcc v. 4.6.0 or later).
+<P>
+<I>nashdemo</I>
+is a simple template for <I>lrsnash</I>.
+It builds two 3x4 matrices A and B and computes their equilibria.
+<P>
+The running time may be significantly different depending on the order of the
+two matrices in the input. For large problems it may be advantageous to
+run <I>lrsnash</I> twice in parallel with the matrices
+in different orders.
+There is also a more complex legacy input format recognized by
+<I>lrsnash</I> that is described in [1].
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H3>File formats</H3>
+
+<P>
+
+The input file consists of two integers m and n on line 1
+followed by two mxn payoff matrices A and B:
+<P>
+<BR>&nbsp;m&nbsp;n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<BR>&nbsp;A&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(row&nbsp;by&nbsp;row)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<BR>&nbsp;B&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(row&nbsp;by&nbsp;row)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<P>
+<A NAME="lbAF">&nbsp;</A>
+<H3>Example</H3>
+
+The input file game  has two 3x2 payoff matrices:
+<P>
+<BR>&nbsp;%cat&nbsp;game
+<P>
+<BR>&nbsp;3&nbsp;2
+<BR>&nbsp;
+<BR>&nbsp;0&nbsp;6
+<BR>&nbsp;2&nbsp;5
+<BR>&nbsp;3&nbsp;3
+<BR>&nbsp;
+<BR>&nbsp;1&nbsp;0
+<BR>&nbsp;0&nbsp;2
+<BR>&nbsp;4&nbsp;3
+<P>
+<BR>&nbsp;%&nbsp;lrsnash&nbsp;game
+<BR>&nbsp;
+<BR>&nbsp;2&nbsp;&nbsp;1/3&nbsp;&nbsp;2/3&nbsp;&nbsp;4&nbsp;
+<BR>&nbsp;1&nbsp;&nbsp;2/3&nbsp;&nbsp;1/3&nbsp;&nbsp;0&nbsp;&nbsp;2/3&nbsp;
+<BR>&nbsp;
+<BR>&nbsp;2&nbsp;&nbsp;2/3&nbsp;&nbsp;1/3&nbsp;&nbsp;3&nbsp;
+<BR>&nbsp;1&nbsp;&nbsp;0&nbsp;&nbsp;1/3&nbsp;&nbsp;2/3&nbsp;&nbsp;8/3&nbsp;
+<BR>&nbsp;
+<BR>&nbsp;2&nbsp;&nbsp;1&nbsp;&nbsp;0&nbsp;&nbsp;3&nbsp;
+<BR>&nbsp;1&nbsp;&nbsp;0&nbsp;&nbsp;0&nbsp;&nbsp;1&nbsp;&nbsp;4&nbsp;
+<BR>&nbsp;
+<BR>&nbsp;*Number&nbsp;of&nbsp;equilibria&nbsp;found:&nbsp;3
+<BR>&nbsp;*Player&nbsp;1:&nbsp;vertices=5&nbsp;bases=5&nbsp;pivots=8
+<BR>&nbsp;*Player&nbsp;2:&nbsp;vertices=3&nbsp;bases=1&nbsp;pivots=8
+<P>
+<B>Interpretation</B>
+There are 3 Nash equilibria. For the first one:
+<P>
+<BR>&nbsp;2&nbsp;&nbsp;1/3&nbsp;&nbsp;2/3&nbsp;&nbsp;4&nbsp;&nbsp;&nbsp;&nbsp;
+<BR>
+
+Bob(player 2) plays column 1 and 2 with probablilities y=(1/3, 2/3) 
+and the payoff to Alice(player 1) is 4.
+<P>
+<BR>&nbsp;1&nbsp;&nbsp;2/3&nbsp;&nbsp;1/3&nbsp;&nbsp;0&nbsp;&nbsp;2/3
+<BR>
+
+Alice plays rows 1,2,3 with probabilities x=(2/3, 1/3, 0) and the payoff to Bob is 2/3.
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H3>Notes</H3>
+
+<DL COMPACT>
+<DT>1.<DD>
+D. Avis, G. Rosenberg, R. Savani, B. von Stengel, <I>Enumeration of Nash Equilibria for Two-Player Games</I>,
+Economic Theory 42(2009) 9-37
+<DT>2.<DD>
+User's guide for lrslib
+<DL COMPACT><DT><DD>
+<A HREF="http://cgm.cs.mcgill.ca/%7Eavis/C/lrslib/USERGUIDE.html">http://cgm.cs.mcgill.ca/%7Eavis/C/lrslib/USERGUIDE.html</A>
+</DL>
+
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H3>Authors</H3>
+
+David Avis and Terje Lensberg
+<A NAME="lbAI">&nbsp;</A>
+<H3>See also</H3>
+
+<B><A HREF="../man5/lrslib.5.html">lrslib</A></B>(5)
+
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DL>
+<DT><A HREF="#lbAB">Name</A><DD>
+<DT><A HREF="#lbAC">Synopsis</A><DD>
+<DT><A HREF="#lbAD">Description</A><DD>
+<DT><A HREF="#lbAE">File formats</A><DD>
+<DT><A HREF="#lbAF">Example</A><DD>
+<DT><A HREF="#lbAG">Notes</A><DD>
+<DT><A HREF="#lbAH">Authors</A><DD>
+<DT><A HREF="#lbAI">See also</A><DD>
+</DL>
+</DL>
+<HR>
+This document was created by
+<A HREF="/cgi-bin/man/man2html">man2html</A>,
+using the manual pages.<BR>
+Time: 07:33:14 GMT, January 31, 2024
+</BODY>
+</HTML>

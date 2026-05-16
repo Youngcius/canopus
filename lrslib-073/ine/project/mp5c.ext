@@ -1,0 +1,12 @@
+mp5c
+V-representation
+begin
+6 11 rational
+ 1  1  0  1  1  1  0  0  1  1  0 
+ 1  0  1  0  1  1  0  1  1  0  1 
+ 1  0  1  0  0  1  0  0  1  1  0 
+ 1  1  0  0  1  1  1  0  0  1  1 
+ 1  1  0  0  0  1  1  1  0  0  0 
+ 1  1  0  1  0  1  0  1  1  0  1 
+end
+eliminate 1 1

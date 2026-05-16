@@ -11,9 +11,9 @@ This module provides various utility functions including:
 # Import Rust-accelerated utilities as _accel submodule
 try:
     from canopus.utils import _accel
-    from canopus.utils._accel import *  # noqa: F403
+    from canopus.utils._accel import *
 except ImportError:
     _accel = None  # Rust extension not available
 
 # Re-export everything from _core for backward compatibility
-from canopus.utils._core import *  # noqa: F403
+from canopus.utils._core import *

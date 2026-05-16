@@ -1,0 +1,273 @@
+Content-type: text/html; charset=UTF-8
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML><HEAD><TITLE>Man page of mplrs</TITLE>
+</HEAD><BODY>
+<H1>mplrs</H1>
+Section: mplrs  7.3 (1)<BR>Updated: 2024.2.5<BR><A HREF="#index">Index</A>
+<A HREF="../index.html">Return to Main Contents</A><HR>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<A NAME="lbAB">&nbsp;</A>
+<H3>Name</H3>
+
+mplrs - Convert between representations of convex polyhedra, remove redundant
+inequalities, do Fourier-Motzkin elimination (parallel version).
+<A NAME="lbAC">&nbsp;</A>
+<H3>Synopsis</H3>
+
+<DL COMPACT>
+<DT>
+<B> mpirun </B> -np <I>num_proc&nbsp;</I><B>mplrs</B> <I>infile</I> [<I>outfile</I>] [<I>option</I>...]
+<DD>
+<P>
+</DL>
+<A NAME="lbAD">&nbsp;</A>
+<H3>Description</H3>
+
+<P>
+
+<DD>A polyhedron can be described by a list of inequalities (<I>H-representation)</I>
+or by a list of its vertices and extreme rays (<I>V-representation)</I>.
+<I>mplrs</I>
+is a parallel version of lrs, and converts an H-representation of a polyhedron to its V-representation, and vice versa.&nbsp; These problems are known respectively as the
+<I>vertex enumeration</I>
+and
+<I>convex hull problems</I>.
+With <B>lrs</B> options <B>redund</B> or <B>redund_list</B> in the input file it 
+will do parallel execution of <B>minrep</B> (computing a minimum representation),
+see <B><A HREF="../man1/redund.1.html">redund</A>(1)</B>.
+With <B>lrs</B> options <B>project</B> or <B>eliminate</B> in the input file it will do parallel
+execution of <B>fel</B> (Fourier-Motkin elimination).
+<P>
+
+<A NAME="lbAE">&nbsp;</A>
+<H3>Usage</H3>
+
+<P>
+
+The number of processors
+<I>num_proc</I>
+specified to
+<B>mpirun</B>
+should be 4 or higher.
+Some lrs input file options are not supported by 
+<B>mplrs</B>.
+<P>
+
+<A NAME="lbAF">&nbsp;</A>
+<H3>Options</H3>
+
+<P>
+<P>
+
+<B>mplrs</B>
+supports the following options, where default values are given in brackets.
+<DL COMPACT><DT><DD>
+<B>-checkp &lt;checkpoint file&gt;</B> if mplrs is terminated by -stop or -time then it can be restarted using this &lt;checkpoint file&gt; and -restart
+</DL>
+
+<DL COMPACT><DT><DD>
+<B>-countonly</B> don't output vertices/rays/facets, just count them
+</DL>
+
+<DL COMPACT><DT><DD>
+<B>-freq &lt;file&gt;</B> store frequency data in &lt;file&gt; for use by gnuplot, see below
+</DL>
+
+<DL COMPACT><DT><DD>
+<B>-hist &lt;file&gt;</B>store parallelization data in &lt;file&gt; for use by gnuplot, see below
+</DL>
+
+<DL COMPACT><DT><DD>
+<B>-id &lt;initial depth&gt;</B> [2] the depth of the original tree search to populate the job list L
+</DL>
+
+<DL COMPACT><DT><DD>
+<B>-lmax &lt;int&gt;</B>[lmin] if job list |L|&gt;np*lmax then then maxc is replaced by maxc*scale
+</DL>
+
+<DL COMPACT><DT><DD>
+<B>-lmin &lt;int&gt;</B>[3] if job list |L|&lt;np*lmin then the maxd parameter is set for all producers 
+</DL>
+
+<DL COMPACT><DT><DD>
+<B>-maxbuf &lt;n&gt;</B>[500] controls maximum size of worker output buffers
+</DL>
+
+<DL COMPACT><DT><DD>
+<B>-maxc &lt;maxcobases&gt;</B>[50 (*scale)] a producer stops and returns all subtrees that are not leaves to L after generating&nbsp; maxc nodes&nbsp;&nbsp;&nbsp;
+</DL>
+
+<DL COMPACT><DT><DD>
+<B>-maxd &lt;depth&gt;</B>[0] a producer returns all subtrees that are not leaves at depth maxd. Zero if not used
+</DL>
+
+<DL COMPACT><DT><DD>
+<B>-minheight</B> jobs are scheduled in increasing order by height in the search tree (default is LIFO)
+</DL>
+
+<DL COMPACT><DT><DD>
+<B>-queue</B> jobs are scheduled in FIFO order (default is LIFO)
+</DL>
+
+<DL COMPACT><DT><DD>
+<B>-restart &lt;checkpoint file&gt;</B> restart mplrs using previously created &lt;checkpoint file&gt;. If used with -checkp file names should be different!
+</DL>
+
+<DL COMPACT><DT><DD>
+<B>-scale &lt;int&gt;</B>[100] used by lmax
+</DL>
+
+<DL COMPACT><DT><DD>
+<B>-stop &lt;stopfile&gt; </B> terminate mplrs if a file with name &lt;stopfile&gt; is created in the current directory
+</DL>
+
+<DL COMPACT><DT><DD>
+<B>-stopafter &lt;n&gt;</B> exit after approximately &lt;n&gt; cobases have been computed (no guarantee about how many vertices/rays/facets computed)
+</DL>
+
+<DL COMPACT><DT><DD>
+<B>-temp &lt;prefix&gt;</B>[/tmp/] store a temporary file for each process. Should be specified if /tmp not writeable. Using &quot; -temp&nbsp; ./ &quot; will write temporary files to the current directory
+</DL>
+
+<DL COMPACT><DT><DD>
+<B>-time &lt;seconds&gt;</B> terminate mplrs after &lt;seconds&gt; of elapsed time
+</DL>
+
+<B> redund/fel options
+<DL COMPACT><DT><DD>
+-j &lt;int&gt;</B>[1] if non-zero splits the run into &lt;int&gt; jobs per worker, over-riding rows and lastrows
+</DL>
+
+<DL COMPACT><DT><DD>
+<B>-lastp &lt;int&gt;</B>[10] the percentage of jobs to use lastrows
+</DL>
+
+<DL COMPACT><DT><DD>
+<B>-lastrows &lt;int&gt;</B>[10] the number of rows for the last lastp jobs 
+</DL>
+
+<DL COMPACT><DT><DD>
+<B>-minrep</B> removes redundant inequalities, finds hidden
+linearities and outputs a minimum representation of the input file. This ignores any <B>project</B> or <B>eliminate</B> option present in the input file
+</DL>
+
+<DL COMPACT><DT><DD>
+<B>-redund</B> same as <B>-minrep</B>, maintained for legacy purposes.
+</DL>
+
+<DL COMPACT><DT><DD>
+<B>-rows &lt;int&gt;</B>[60] the number of rows per job 
+</DL>
+
+<A NAME="lbAG">&nbsp;</A>
+<H3>-hist file format</H3>
+
+Example line:
+<DL COMPACT><DT><DD>
+<BR>&nbsp;&nbsp;&nbsp;54.118141&nbsp;94&nbsp;279&nbsp;94&nbsp;0&nbsp;0&nbsp;373
+<P>
+<BR>&nbsp;&nbsp;&nbsp;time&nbsp;since&nbsp;execution&nbsp;began&nbsp;in&nbsp;seconds&nbsp;(54.118141&nbsp;here)
+<BR>&nbsp;&nbsp;&nbsp;number&nbsp;of&nbsp;busy&nbsp;workers&nbsp;(94&nbsp;here)
+<BR>&nbsp;&nbsp;&nbsp;current&nbsp;size&nbsp;of&nbsp;job&nbsp;list&nbsp;(279&nbsp;here)
+<BR>&nbsp;&nbsp;&nbsp;number&nbsp;of&nbsp;workers&nbsp;that&nbsp;may&nbsp;return&nbsp;unfinished&nbsp;jobs&nbsp;(94&nbsp;here)
+<BR>&nbsp;&nbsp;&nbsp;unused&nbsp;(0&nbsp;here)
+<BR>&nbsp;&nbsp;&nbsp;unused&nbsp;(0&nbsp;here)
+<BR>&nbsp;&nbsp;&nbsp;total&nbsp;number&nbsp;of&nbsp;jobs&nbsp;that&nbsp;have&nbsp;been&nbsp;in&nbsp;the&nbsp;job&nbsp;list&nbsp;(373&nbsp;here)
+</DL>
+
+The second and fourth entries are similar and can differ due to
+latencies.
+<P>
+<A NAME="lbAH">&nbsp;</A>
+<H3>-freq file format</H3>
+
+One integer per line
+corresponding to the size of a subtree explored by a worker.
+<A NAME="lbAI">&nbsp;</A>
+<H3>Example</H3>
+
+<P>
+
+Input file mp5.ine is run with 8 processors.  This produced 378 subtrees that were enumerated in parallel using 6 producer cores,&nbsp; 1 core controlling the run and 1 core collecting the output.
+<P>
+<DL COMPACT><DT><DD>
+
+
+
+<PRE>
+      mai20% mpirun -np 8 mplrs mp5.ine mp5.mplrs
+      *mplrs:lrslib v.6.0 2015.7.13(lrsgmp.h)8 processes
+      *Copyright (C) 1995,2015, David Avis&nbsp;&nbsp; <A HREF="mailto:avis@cs.mcgill.ca">avis@cs.mcgill.ca</A>
+      *Input taken from mp5.ine
+      *Output written to: mp5.mplrs
+      *Starting depth of 2 maxcobases=50 maxdepth=0 lmin=3 lmax=3 scale=100
+      *Phase 1 time: 0 seconds.
+      *Total number of jobs: 378, L became empty 4 times
+      *Totals: vertices=32 rays=0 bases=9041 integer-vertices=16
+      *Elapsed time: 1 seconds.
+      2.285u 0.137s 0:01.86 129.5%&nbsp;&nbsp;&nbsp; 0+0k 0+9976io 36pf+0w
+    
+</PRE>
+
+</DL>
+
+
+
+
+<A NAME="lbAJ">&nbsp;</A>
+<H3>Author</H3>
+
+Charles Jordan &lt;skip at res dot otaru-uc dot ac dot jp &gt;
+<A NAME="lbAK">&nbsp;</A>
+<H3>See also</H3>
+
+<B><A HREF="../man1/lrs.1.html">lrs</A></B>(1),
+
+<B><A HREF="../man5/lrslib.5.html">lrslib</A></B>(5)
+
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DL>
+<DT><A HREF="#lbAB">Name</A><DD>
+<DT><A HREF="#lbAC">Synopsis</A><DD>
+<DT><A HREF="#lbAD">Description</A><DD>
+<DT><A HREF="#lbAE">Usage</A><DD>
+<DT><A HREF="#lbAF">Options</A><DD>
+<DT><A HREF="#lbAG">-hist file format</A><DD>
+<DT><A HREF="#lbAH">-freq file format</A><DD>
+<DT><A HREF="#lbAI">Example</A><DD>
+<DT><A HREF="#lbAJ">Author</A><DD>
+<DT><A HREF="#lbAK">See also</A><DD>
+</DL>
+</DL>
+<HR>
+This document was created by
+<A HREF="http://localhost/cgi-bin/man/man2html">man2html</A>,
+using the manual pages.<BR>
+Time: 06:04:25 GMT, February 05, 2024
+</BODY>
+</HTML>
