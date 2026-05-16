@@ -75,13 +75,16 @@ jobs:
           restore-keys: |
             cargo-${{ runner.os }}-${{ matrix.python }}-
 
-      - name: Build & install canopus with test extras
-        # `pip install` reads pyproject.toml and invokes maturin via PEP 517
-        # build isolation, so we DON'T need to call `maturin develop` directly
-        # (which would require an active virtualenv that setup-python doesn't create).
+      - name: Build & install canopus with test extras (editable)
+        # Editable install via PEP 660: pip → maturin places the compiled `_accel`
+        # extension inside the source tree, so subsequent `import canopus` resolves
+        # to this tree (which Python prefers because cwd is on sys.path[0]) and
+        # finds the .so. Plain `pip install .` would put it in site-packages but
+        # `import canopus` from the repo root still picks the source tree first,
+        # which then has no .so → ModuleNotFoundError.
         run: |
           pip install --upgrade pip
-          pip install ".[test]"
+          pip install -e ".[test]"
 
       - name: Smoke test (import canopus without monodromy)
         # Verifies the wheel was built correctly and the lazy-import refactor
