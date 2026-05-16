@@ -273,7 +273,7 @@ def disp_last_mapped_layer(last_mapped_layer):
     if not last_mapped_layer:
         return None
 
-    num_qubits = max(chain.from_iterable(pair for pair in last_mapped_layer.keys())) + 1
+    num_qubits = max(chain.from_iterable(pair for pair in last_mapped_layer)) + 1
     qc = QuantumCircuit(num_qubits)
     for pair, node in last_mapped_layer.items():
         gname, params = node.op.name, node.op.params

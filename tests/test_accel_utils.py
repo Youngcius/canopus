@@ -26,7 +26,7 @@ def test_canonical_unitary():
 
 
 def test_mirror_weyl_coord():
-    for i in range(1000):
+    for _ in range(1000):
         u = unitary_group.rvs(4)
         _, _, coord = canonical_decompose(u)
         coord1 = mirror_weyl_coord(*coord)
@@ -38,7 +38,7 @@ def test_mirror_weyl_coord():
 
 def test_optimal_can_gate_duration():
     durations = []
-    for i in range(10000):
+    for _ in range(10000):
         u = unitary_group.rvs(4)
         _, _, (a, b, c) = canonical_decompose(u)
         duration = optimal_can_gate_duration(a, b, c, 1, 1, 0)

@@ -1,0 +1,91 @@
+name: CI
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+  workflow_dispatch:
+
+# Cancel in-flight runs on the same ref when a new commit lands.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ============================================================================
+  # Static checks: lint + format. Runs first so style violations surface fast.
+  # Does NOT require building the Rust extension or installing runtime deps,
+  # so it stays cheap and quick.
+  # ============================================================================
+  lint:
+    name: Ruff (lint + format)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install ruff
+        run: pip install "ruff>=0.6"
+
+      - name: ruff check
+        run: ruff check canopus
+
+      - name: ruff format --check
+        run: ruff format --check canopus
+
+  # ============================================================================
+  # Build the Rust extension and run the test suite across the matrix.
+  # Each cell needs a Rust toolchain + the Python deps from pyproject.toml.
+  #
+  # NOTE: the `monodromy` package is not on PyPI and is required by parts of
+  # canopus at import time. Until monodromy lands on PyPI (or canopus moves
+  # to lazy imports), the test job is allowed to fail gracefully via
+  # `continue-on-error` on monodromy-dependent paths.
+  # ============================================================================
+  test:
+    name: Test (${{ matrix.os }}, py${{ matrix.python }})
+    needs: lint
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        python: ["3.10", "3.11", "3.12", "3.13"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo build
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: cargo-${{ runner.os }}-${{ matrix.python }}-${{ hashFiles('Cargo.toml', 'Cargo.lock') }}
+          restore-keys: |
+            cargo-${{ runner.os }}-${{ matrix.python }}-
+
+      - name: Build extension (editable install)
+        run: |
+          pip install --upgrade pip maturin
+          maturin develop --release
+
+      - name: Install runtime + test deps
+        run: pip install -e ".[test]"
+
+      - name: Install monodromy (optional, may fail)
+        continue-on-error: true
+        run: pip install "git+https://github.com/Pitt-JonesLab/monodromy"
+
+      - name: Run pytest
+        run: pytest -ra

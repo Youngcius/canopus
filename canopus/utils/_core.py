@@ -103,7 +103,7 @@ def synth_cost_by_zzphase(a, b, c):
     assert check_weyl_coord(a, b, c), "Weyl coordinate must be normalized to satisfy 0.5 >= a >= b >= |c|"
     zzphase_coverage = get_zzphase_coverage()
     target = canonical_unitary(a, b, c)
-    cost, fid = coverage_lookup_cost(zzphase_coverage, target)
+    cost, _fid = coverage_lookup_cost(zzphase_coverage, target)
     return cost
 
 
@@ -159,7 +159,7 @@ def get_zzphase_with_mirror_coverage():
 def synth_cost_by_zzphase_with_mirror(a, b, c):
     cov = get_zzphase_with_mirror_coverage()
     target = canonical_unitary(a, b, c)
-    cost, fid = coverage_lookup_cost(cov, target)
+    cost, _fid = coverage_lookup_cost(cov, target)
     return cost
 
 
@@ -186,7 +186,7 @@ def get_sqisw_with_mirror_coverage():
 def synth_cost_by_sqisw_with_mirror(a, b, c):
     cov = get_sqisw_with_mirror_coverage()
     target = canonical_unitary(a, b, c)
-    cost, fid = coverage_lookup_cost(cov, target)
+    cost, _fid = coverage_lookup_cost(cov, target)
     return cost
 
 
@@ -206,7 +206,7 @@ def get_het_isa_coverage():
 def synth_cost_by_het_isa(a, b, c):
     cov = get_het_isa_coverage()
     target = canonical_unitary(a, b, c)
-    cost, fid = coverage_lookup_cost(cov, target)
+    cost, _fid = coverage_lookup_cost(cov, target)
     return cost
 
 
@@ -226,7 +226,7 @@ def get_stabilizer_isa_coverage():
 def synth_cost_by_stabilizer_isa(a, b, c):
     cov = get_stabilizer_isa_coverage()
     target = canonical_unitary(a, b, c)
-    cost, fid = coverage_lookup_cost(cov, target)
+    cost, _fid = coverage_lookup_cost(cov, target)
     return cost
 
 
@@ -380,9 +380,8 @@ def qc2mat(qc: qiskit.QuantumCircuit) -> np.ndarray:
 def is_canonical_normalized(qc: qiskit.QuantumCircuit) -> bool:
     CanonicalGate = _get_gate_class("CanonicalGate")
     for instr in qc.data:
-        if isinstance(instr.operation, CanonicalGate):
-            if not check_weyl_coord(*instr.operation.params):
-                return False
+        if isinstance(instr.operation, CanonicalGate) and not check_weyl_coord(*instr.operation.params):
+            return False
     return True
 
 
@@ -403,12 +402,13 @@ def infidelity(u: np.ndarray, v: np.ndarray) -> float:
     return 1 - np.abs(np.trace(u.conj().T @ v)) / d
 
 
-def front_layer_from_circuit(qc: qiskit.QuantumCircuit, predicate: Callable = None) -> list[CircuitInstruction]:
+def front_layer_from_circuit(qc: qiskit.QuantumCircuit, predicate: Callable | None = None) -> list[CircuitInstruction]:
     """
     Obtain the front layer of the circuit
     """
     if predicate is None:
-        predicate = lambda _: True
+        def predicate(_):
+            return True
     front_layer = []
     qubits_to_indices = {q: i for i, q in enumerate(qc.qubits)}
     visited_qubits = set()
@@ -634,7 +634,7 @@ def crop_coupling_map(coupling_map, crop_size, seed=None):
     edge_numbers = [g.num_edges() for g in subgraphs]
     max_edges = max(edge_numbers)
     physical_qubits_candidates = [
-        nodes for nodes, edge_count in zip(node_list, edge_numbers) if edge_count == max_edges
+        nodes for nodes, edge_count in zip(node_list, edge_numbers, strict=False) if edge_count == max_edges
     ]
     if len(physical_qubits_candidates) == 1:
         physical_qubits = physical_qubits_candidates[0]

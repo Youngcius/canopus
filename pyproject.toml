@@ -166,13 +166,14 @@ select = [
 ignore = [
     "E501",   # line length is enforced by the formatter, not the linter
     "B008",   # function calls in argument defaults — common in qiskit code
-    "UP038",  # `isinstance(x, (A, B))` — keeping tuple form for clarity
 ]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**/*.py"      = ["E402", "F401"]
 "**/__init__.py"     = ["F401", "F403"]
 "canopus/utils/_accel.pyi" = ["ALL"]
+"canopus/basics.py"          = ["E741"]  # `I` is the conventional identity matrix in quantum computing
+"canopus/extensions/bqskit.py" = ["B006"]  # mutable default `[]` matches bqskit base-class signature
 
 # Note: isort's `known-first-party` is auto-derived from `[tool.ruff].src`
 # (i.e. ["canopus", "tests"]), so no explicit `[tool.ruff.lint.isort]` block is needed.

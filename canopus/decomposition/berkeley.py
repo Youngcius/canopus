@@ -92,16 +92,10 @@ def _build_unitary_from_ops(
         if op_type == "B":
             result = b_unitary @ result
         elif op_type == "ry":
-            if target == 0:
-                op_unitary = np.kron(ry_matrix(angle), np.eye(2))
-            else:
-                op_unitary = np.kron(np.eye(2), ry_matrix(angle))
+            op_unitary = np.kron(ry_matrix(angle), np.eye(2)) if target == 0 else np.kron(np.eye(2), ry_matrix(angle))
             result = op_unitary @ result
         elif op_type == "rz":
-            if target == 0:
-                op_unitary = np.kron(rz_matrix(angle), np.eye(2))
-            else:
-                op_unitary = np.kron(np.eye(2), rz_matrix(angle))
+            op_unitary = np.kron(rz_matrix(angle), np.eye(2)) if target == 0 else np.kron(np.eye(2), rz_matrix(angle))
             result = op_unitary @ result
     return result
 

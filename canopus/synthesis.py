@@ -50,11 +50,11 @@ _xx_decomposer = XXDecomposer(euler_basis="U3")
 
 def rebase_to_custom(
     qc: QuantumCircuit,
-    gate_set: list[Gate] = None,
-    costs: list[float] = None,
-    names: list[str] = None,
-    coverage: list[CircuitPolytope] = None,
-    seed: int = None,
+    gate_set: list[Gate] | None = None,
+    costs: list[float] | None = None,
+    names: list[str] | None = None,
+    coverage: list[CircuitPolytope] | None = None,
+    seed: int | None = None,
 ) -> QuantumCircuit:
     """Rebase the circuit to a customized gate set"""
     return PassManager(
@@ -72,14 +72,14 @@ class CustomSynthesis(TransformationPass):
 
     def __init__(
         self,
-        gate_set: list[Gate] = None,
-        costs: list[float] = None,
-        names: list[str] = None,
-        coverage: list[CircuitPolytope] = None,
-        seed: int = None,
+        gate_set: list[Gate] | None = None,
+        costs: list[float] | None = None,
+        names: list[str] | None = None,
+        coverage: list[CircuitPolytope] | None = None,
+        seed: int | None = None,
     ):
         super().__init__()
-        self._isa_config = {name: gate for name, gate in zip(names, gate_set, strict=True)}
+        self._isa_config = dict(zip(names, gate_set, strict=True))
         self._isa_config_bqskit = {
             name: gate_from_qiskit_to_bqskit(gate) for name, gate in zip(names, gate_set, strict=True)
         }

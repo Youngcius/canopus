@@ -68,7 +68,7 @@ def _kak_from_unitary(unitary: np.ndarray) -> _QiskitKAKDecomposition:
     """
     # ! NOTE: This function must be based on Cirq's KAK decomposition instead of Qiskit's
     #       ! cause they have different conventions for edge cases of Weyl chamber coordinates.
-    #       ! When x≥y≥|z|，x=π/4, Cirq ensures z≥0
+    #       ! When x>=y>=|z|, x=pi/4, Cirq ensures z>=0
     decomp = cirq.kak_decomposition(unitary, rtol=0, atol=1e-12)
     return _QiskitKAKDecomposition(
         a=decomp.interaction_coefficients[0],
@@ -250,7 +250,7 @@ def two_qubit_unitary_to_can_circuit(unitary: np.ndarray) -> QuantumCircuit:
 
 
 def two_qubit_unitary_to_custom_circuit(
-    unitary: np.ndarray, gate_set: list, costs: list, names: list = None
+    unitary: np.ndarray, gate_set: list, costs: list, names: list | None = None
 ) -> QuantumCircuit:
     """Synthesize a 2-qubit unitary into a {arbitrary-2q-gate, u} gate set.
 
