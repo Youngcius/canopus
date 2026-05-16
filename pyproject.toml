@@ -23,7 +23,7 @@ build-backend = "maturin"
 # ==============================================================================
 [project]
 name = "canopus-quantum"
-version = "0.1.0"
+version = "0.1.1"
 description = "ISA-aware qubit mapping/routing framework tailored to advanced quantum instruction sets, built on canonical two-qubit gate representation."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -67,7 +67,7 @@ classifiers = [
 #
 # REQUIRED but NOT on PyPI (declared here for documentation only — users must
 # install it manually before `import canopus` succeeds):
-#   - monodromy (https://github.com/Pitt-JonesLab/monodromy) — used at module
+#   - monodromy (https://github.com/Youngcius/monodromy) — used at module
 #     load time by canopus.synthesis and canopus.utils._core for Weyl-chamber
 #     coverage computation. Building monodromy further requires the `lrs`
 #     binary from lrslib; see README for platform-specific setup.

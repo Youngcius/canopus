@@ -15,10 +15,10 @@
 
 ### Prerequisite: `monodromy` (+ `lrslib`)
 
-Canopus depends on the [`monodromy`](https://github.com/Pitt-JonesLab/monodromy) library for Weyl-chamber coverage computation. `monodromy` is **not** on PyPI and must be installed manually **before** `pip install canopus-quantum`:
+Canopus depends on the [`monodromy`](https://github.com/Youngcius/monodromy) library for Weyl-chamber coverage computation. `monodromy` is **not** on PyPI and must be installed manually **before** `pip install canopus-quantum`:
 
 ```bash
-pip install git+https://github.com/Pitt-JonesLab/monodromy
+pip install git+https://github.com/Youngcius/monodromy
 ```
 
 `monodromy` itself needs the `lrs` binary from [lrslib](http://cgm.cs.mcgill.ca/~avis/C/lrs.html). Platform-specific setup:
