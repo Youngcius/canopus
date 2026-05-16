@@ -17,7 +17,6 @@ import qiskit
 import qiskit.qasm2
 import qiskit.quantum_info as qi
 import rustworkx as rx
-from monodromy.coverage import coverage_lookup_cost, gates_to_coverage
 from prettytable import PrettyTable
 from pytket import OpType
 from pytket.utils.stats import gate_counts
@@ -67,6 +66,27 @@ def _get_gate_class(name: str):
     return _basics_cache[name]
 
 
+def _import_monodromy():
+    """Lazily import `monodromy.coverage` with an actionable error if missing.
+
+    `monodromy` is not on PyPI, so it cannot be a hard runtime dep of canopus.
+    Functions that genuinely need it call this helper at the start of their
+    body; users who never touch monodromy-backed features can `import canopus`
+    without monodromy installed.
+    """
+    try:
+        from monodromy import coverage
+    except ImportError as e:  # pragma: no cover - environment-dependent
+        raise ImportError(
+            "This Canopus feature requires the 'monodromy' package, which is not on PyPI. "
+            "Install it manually:\n"
+            "    pip install git+https://github.com/Youngcius/monodromy\n"
+            "monodromy further depends on the `lrs` system binary; see the README "
+            "for platform-specific setup."
+        ) from e
+    return coverage
+
+
 # Constants that don't create circular dependencies
 half_pi = pi / 2
 X = qi.Pauli("X").to_matrix()
@@ -92,7 +112,7 @@ def get_zzphase_coverage():
             return pickle.load(f)
     gate_set = [RZZGate(pi / 6), RZZGate(pi / 4), RZZGate(pi / 2)]
     costs = [1 / 3, 1 / 2, 1]
-    cov = gates_to_coverage(*gate_set, costs=costs)
+    cov = _import_monodromy().gates_to_coverage(*gate_set, costs=costs)
     with open(ZZPhase_Coverage_File, "wb") as f:
         pickle.dump(cov, f)
     return cov
@@ -103,7 +123,7 @@ def synth_cost_by_zzphase(a, b, c):
     assert check_weyl_coord(a, b, c), "Weyl coordinate must be normalized to satisfy 0.5 >= a >= b >= |c|"
     zzphase_coverage = get_zzphase_coverage()
     target = canonical_unitary(a, b, c)
-    cost, _fid = coverage_lookup_cost(zzphase_coverage, target)
+    cost, _fid = _import_monodromy().coverage_lookup_cost(zzphase_coverage, target)
     return cost
 
 
@@ -111,7 +131,7 @@ def synth_cost_by_zzphase(a, b, c):
 def get_sqisw_coverage():
     gate_set = [iSwapGate().power(0.5), iSwapGate()]
     costs = [0.75, 1.5]
-    cov = gates_to_coverage(*gate_set, costs=costs)
+    cov = _import_monodromy().gates_to_coverage(*gate_set, costs=costs)
     return cov
 
 
@@ -119,7 +139,7 @@ def get_sqisw_coverage():
 def get_cx_coverage():
     gate_set = [CXGate()]
     costs = [1]
-    cov = gates_to_coverage(*gate_set, costs=costs)
+    cov = _import_monodromy().gates_to_coverage(*gate_set, costs=costs)
     return cov
 
 
@@ -150,7 +170,7 @@ def get_zzphase_with_mirror_coverage():
         iswap_cost,
     ]
     names = ["RZZ_π_6", "RZZ_π_4", "RZZ_π_2", "pSWAP_π_6", "pSWAP_π_4", "pSWAP_π_2"]
-    cov = gates_to_coverage(*gate_set, costs=costs, names=names)
+    cov = _import_monodromy().gates_to_coverage(*gate_set, costs=costs, names=names)
     with open(ZZPhase_With_Mirror_Coverage_File, "wb") as f:
         pickle.dump(cov, f)
     return cov
@@ -159,7 +179,7 @@ def get_zzphase_with_mirror_coverage():
 def synth_cost_by_zzphase_with_mirror(a, b, c):
     cov = get_zzphase_with_mirror_coverage()
     target = canonical_unitary(a, b, c)
-    cost, _fid = coverage_lookup_cost(cov, target)
+    cost, _fid = _import_monodromy().coverage_lookup_cost(cov, target)
     return cost
 
 
@@ -177,7 +197,7 @@ def get_sqisw_with_mirror_coverage():
     #     optimal_can_gate_duration(0.5, 0, 0, 1, 1, 0) / SQiSW_AshN_Time_XY
     # ]
     costs = [0.75, 1.5, 1.25, 1]
-    cov = gates_to_coverage(*gate_set, costs=costs)
+    cov = _import_monodromy().gates_to_coverage(*gate_set, costs=costs)
     with open(SQiSW_With_Mirror_Coverage_File, "wb") as f:
         pickle.dump(cov, f)
     return cov
@@ -186,7 +206,7 @@ def get_sqisw_with_mirror_coverage():
 def synth_cost_by_sqisw_with_mirror(a, b, c):
     cov = get_sqisw_with_mirror_coverage()
     target = canonical_unitary(a, b, c)
-    cost, _fid = coverage_lookup_cost(cov, target)
+    cost, _fid = _import_monodromy().coverage_lookup_cost(cov, target)
     return cost
 
 
@@ -197,7 +217,7 @@ def get_het_isa_coverage():
             return pickle.load(f)
     gate_set = [RZZGate(pi / 6), RZZGate(pi / 4), RZZGate(pi / 2), iSwapGate().power(0.5), iSwapGate()]
     costs = [1 / 3, 1 / 2, 1, 0.75, 1.5]
-    cov = gates_to_coverage(*gate_set, costs=costs)
+    cov = _import_monodromy().gates_to_coverage(*gate_set, costs=costs)
     with open(Het_ISA_Coverage_File, "wb") as f:
         pickle.dump(cov, f)
     return cov
@@ -206,7 +226,7 @@ def get_het_isa_coverage():
 def synth_cost_by_het_isa(a, b, c):
     cov = get_het_isa_coverage()
     target = canonical_unitary(a, b, c)
-    cost, _fid = coverage_lookup_cost(cov, target)
+    cost, _fid = _import_monodromy().coverage_lookup_cost(cov, target)
     return cost
 
 
@@ -217,7 +237,7 @@ def get_stabilizer_isa_coverage():
             return pickle.load(f)
     gate_set = [iSwapGate(), CXGate()]
     costs = [1, 1]
-    cov = gates_to_coverage(*gate_set, costs=costs)
+    cov = _import_monodromy().gates_to_coverage(*gate_set, costs=costs)
     with open(Stabilizer_ISA_Coverage_File, "wb") as f:
         pickle.dump(cov, f)
     return cov
@@ -226,7 +246,7 @@ def get_stabilizer_isa_coverage():
 def synth_cost_by_stabilizer_isa(a, b, c):
     cov = get_stabilizer_isa_coverage()
     target = canonical_unitary(a, b, c)
-    cost, _fid = coverage_lookup_cost(cov, target)
+    cost, _fid = _import_monodromy().coverage_lookup_cost(cov, target)
     return cost
 
 
@@ -407,8 +427,10 @@ def front_layer_from_circuit(qc: qiskit.QuantumCircuit, predicate: Callable | No
     Obtain the front layer of the circuit
     """
     if predicate is None:
+
         def predicate(_):
             return True
+
     front_layer = []
     qubits_to_indices = {q: i for i, q in enumerate(qc.qubits)}
     visited_qubits = set()

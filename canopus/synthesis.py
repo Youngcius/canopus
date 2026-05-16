@@ -1,14 +1,12 @@
+from __future__ import annotations
+
 from math import pi
+from typing import TYPE_CHECKING
 
 import numpy as np
 import pytket
 import pytket.passes
 import qiskit
-from monodromy.coverage import (
-    CircuitPolytope,
-    convert_gate_to_monodromy_coordinate,
-    gates_to_coverage,
-)
 from pytket.circuit import OpType
 from qiskit import QuantumCircuit, QuantumRegister
 from qiskit.circuit import Gate
@@ -44,6 +42,27 @@ from canopus.utils import (
     qiskit_to_tket,
     tket_to_qiskit,
 )
+
+# monodromy is not on PyPI; defer its import to the functions that actually need it.
+# Type-only names live in a TYPE_CHECKING block so static checkers still resolve them.
+if TYPE_CHECKING:
+    from monodromy.coverage import CircuitPolytope
+
+
+def _import_monodromy():
+    """Lazily import `monodromy.coverage` with an actionable error if missing."""
+    try:
+        from monodromy import coverage
+    except ImportError as e:  # pragma: no cover - environment-dependent
+        raise ImportError(
+            "This Canopus feature requires the 'monodromy' package, which is not on PyPI. "
+            "Install it manually:\n"
+            "    pip install git+https://github.com/Youngcius/monodromy\n"
+            "monodromy further depends on the `lrs` system binary; see the README "
+            "for platform-specific setup."
+        ) from e
+    return coverage
+
 
 _xx_decomposer = XXDecomposer(euler_basis="U3")
 
@@ -91,13 +110,15 @@ class CustomSynthesis(TransformationPass):
             self._compute_coverage()
 
     def _compute_coverage(self):
-        self.coverage = gates_to_coverage(*self._isa_config.values(), costs=self._costs, names=self._isa_config.keys())
+        self.coverage = _import_monodromy().gates_to_coverage(
+            *self._isa_config.values(), costs=self._costs, names=self._isa_config.keys()
+        )
 
     def run(self, dag: DAGCircuit):
         for node in dag.op_nodes():
             if hasattr(node.op, "to_matrix") and node.num_qubits == 2:
                 u = node.op.to_matrix()
-                monodromy_coord = convert_gate_to_monodromy_coordinate(u)
+                monodromy_coord = _import_monodromy().convert_gate_to_monodromy_coordinate(u)
                 for circ_polytope in self.coverage:
                     if circ_polytope.has_element(monodromy_coord):
                         break
