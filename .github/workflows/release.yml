@@ -2,8 +2,10 @@ name: Release
 
 # Triggered by pushing a tag of the form `vX.Y.Z` (or manually via the
 # Actions tab). On a successful run the workflow:
-#   1. Builds wheels for Linux x86_64, macOS x86_64, macOS arm64 across
-#      CPython 3.10 / 3.11 / 3.12 / 3.13.
+#   1. Builds wheels for Linux x86_64 and macOS arm64 across CPython
+#      3.10 / 3.11 / 3.12 / 3.13. (macOS x86_64 is intentionally omitted —
+#      Intel Macs have been declining fast and the macos-13 runner queue is
+#      slow; Intel Mac users will install from sdist, which compiles locally.)
 #   2. Builds a source distribution (sdist).
 #   3. Publishes every artifact to PyPI via OIDC trusted publishing.
 #
@@ -51,9 +53,6 @@ jobs:
             runner: ubuntu-latest
             maturin-target: x86_64-unknown-linux-gnu
             manylinux: auto
-          - target: macos-x86_64
-            runner: macos-13
-            maturin-target: x86_64-apple-darwin
           - target: macos-arm64
             runner: macos-14
             maturin-target: aarch64-apple-darwin
