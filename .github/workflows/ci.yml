@@ -75,17 +75,22 @@ jobs:
           restore-keys: |
             cargo-${{ runner.os }}-${{ matrix.python }}-
 
-      - name: Build extension (editable install)
+      - name: Build & install canopus with test extras
+        # `pip install` reads pyproject.toml and invokes maturin via PEP 517
+        # build isolation, so we DON'T need to call `maturin develop` directly
+        # (which would require an active virtualenv that setup-python doesn't create).
         run: |
-          pip install --upgrade pip maturin
-          maturin develop --release
+          pip install --upgrade pip
+          pip install ".[test]"
 
-      - name: Install runtime + test deps
-        run: pip install -e ".[test]"
+      - name: Smoke test (import canopus without monodromy)
+        # Verifies the wheel was built correctly and the lazy-import refactor
+        # truly lets `import canopus` succeed in a monodromy-free environment.
+        run: python -c "import canopus; print('canopus imports OK from', canopus.__file__)"
 
       - name: Install monodromy (optional, may fail)
         continue-on-error: true
-        run: pip install "git+https://github.com/Pitt-JonesLab/monodromy"
+        run: pip install "git+https://github.com/Youngcius/monodromy"
 
       - name: Run pytest
         run: pytest -ra
