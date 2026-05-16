@@ -1,11 +1,21 @@
+import shutil
+
 import canopus
 import numpy as np
+import pytest
 from canopus.basics import CanonicalGate
 from canopus.utils import canonical_unitary, is_equiv_unitary, qc2mat
 from qiskit import QuantumCircuit, qasm2
 from qiskit.circuit.random import random_circuit
 from qiskit.synthesis import TwoQubitWeylDecomposition
 from scipy.stats import unitary_group
+
+# `monodromy` needs the `lrs` system binary; skip the affected tests gracefully
+# in environments where it is not installed (e.g. macOS CI without homebrew formula).
+requires_lrs = pytest.mark.skipif(
+    shutil.which("lrs") is None,
+    reason="requires the `lrs` binary from lrslib (see README)",
+)
 
 Z = np.array([[1, 0], [0, -1]], dtype=np.complex128)
 
@@ -104,6 +114,7 @@ def test_zzphase_synthesis():
     assert is_equiv_unitary(qc2mat(qc_demo), qc2mat(qc))
 
 
+@requires_lrs
 def test_custom_synthesis():
     from qiskit.circuit.library import iSwapGate
 
