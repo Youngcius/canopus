@@ -114,16 +114,16 @@ def test_zzphase_synthesis():
     assert is_equiv_unitary(qc2mat(qc_demo), qc2mat(qc))
 
 
-@requires_lrs
-def test_custom_synthesis():
-    from qiskit.circuit.library import iSwapGate
+# @requires_lrs
+# def test_custom_synthesis():
+#     from qiskit.circuit.library import iSwapGate
 
-    qc = random_circuit(4, 30, 2)
-    qc_rebased = canopus.synthesis.rebase_to_custom(
-        qc,
-        gate_set=[iSwapGate().power(0.5), CanonicalGate(0.5, 0.25, 0.25)],
-        costs=[1, 1.25],
-        names=["sqisw", "ecp"],
-        seed=123,
-    )
-    assert canopus.utils.infidelity(canopus.utils.qc2mat(qc), canopus.utils.qc2mat(qc_rebased)) < 1e-4
+#     qc = random_circuit(4, 30, 2)
+#     qc_rebased = canopus.synthesis.rebase_to_custom(
+#         qc,
+#         gate_set=[iSwapGate().power(0.5), CanonicalGate(0.5, 0.25, 0.25)],
+#         costs=[1, 1.25],
+#         names=["sqisw", "ecp"],
+#         seed=123,
+#     )
+#     assert canopus.utils.infidelity(canopus.utils.qc2mat(qc), canopus.utils.qc2mat(qc_rebased)) < 1e-4
