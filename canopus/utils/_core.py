@@ -28,8 +28,8 @@ from canopus.extensions.bqskit import FixedCanonicalGate as BQSKitFixedCanonical
 from canopus.utils._accel import (
     canonical_unitary,
     check_weyl_coord,
-    fuzzy_less,
     fuzzy_equal,
+    fuzzy_less,
     optimal_can_gate_duration,
     sort_two_ints,
 )
