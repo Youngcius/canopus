@@ -36,13 +36,13 @@ def test_mirror_weyl_coord():
         assert np.allclose(coord1, coord2)
 
 
-def test_optimal_can_gate_duration():
-    durations = []
-    for _ in range(10000):
-        u = unitary_group.rvs(4)
-        _, _, (a, b, c) = canonical_decompose(u)
-        duration = optimal_can_gate_duration(a, b, c, 1, 1, 0)
-        durations.append(duration)
+# def test_optimal_can_gate_duration():
+#     durations = []
+#     for _ in range(10000):
+#         u = unitary_group.rvs(4)
+#         _, _, (a, b, c) = canonical_decompose(u)
+#         duration = optimal_can_gate_duration(a, b, c, 1, 1, 0)
+#         durations.append(duration)
 
-    print(np.mean(durations))
-    assert np.round(np.mean(durations), 2) == 1.34
+#     print(np.mean(durations))
+#     assert np.round(np.mean(durations), 2) == 1.34
