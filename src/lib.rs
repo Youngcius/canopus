@@ -107,10 +107,16 @@ fn mirror_weyl_coord(a: f64, b: f64, c: f64) -> (f64, f64, f64) {
         "Weyl coordinate must be normalized to satisfy 0.5 >= a >= b >= |c|"
     );
 
-    if fuzzy_greater_equal(c, 0.0, None) {
+    let (na, nb, nc) = if fuzzy_greater_equal(c, 0.0, None) {
         (0.5 - c, 0.5 - b, a - 0.5)
     } else {
         (0.5 + c, 0.5 - b, 0.5 - a)
+    };
+
+    if fuzzy_equal(na, 0.5, None) && fuzzy_less(nc, 0.0, None) {
+        (na, nb, -nc)
+    } else {
+        (na, nb, nc)
     }
 }
 

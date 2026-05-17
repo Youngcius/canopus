@@ -29,6 +29,7 @@ from canopus.utils._accel import (
     canonical_unitary,
     check_weyl_coord,
     fuzzy_less,
+    fuzzy_equal,
     optimal_can_gate_duration,
     sort_two_ints,
 )
@@ -516,7 +517,7 @@ def remove_2q_gates(qc: qiskit.QuantumCircuit) -> qiskit.QuantumCircuit:
 def replace_close_to_zero_with_zero(arr) -> np.ndarray:
     """Replace all numerically-zero values with zeros"""
     arr = np.array(arr)
-    close_to_zero = np.isclose(arr, 0)
+    close_to_zero = fuzzy_equal(arr, 0)
     arr[close_to_zero] = 0
     return arr
 
@@ -578,7 +579,7 @@ def canonical_decompose(
     a, b, c = (coord[0] / half_pi, coord[1] / half_pi, -coord[2] / half_pi)
     a0 = a0 @ Z
     b0 = Z @ b0
-    if np.isclose(a, 0.5) and fuzzy_less(c, 0):
+    if fuzzy_equal(a, 0.5) and fuzzy_less(c, 0):
         c = -c
         a0 = a0 @ X
         a1 = a1 @ Z
