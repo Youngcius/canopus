@@ -8,7 +8,8 @@
 
 > ***Canopus** evokes the name of the second-brightest star in the sky, symbolizing its role as a "navigational" guide for routing qubits through the complex constraints of quantum hardware.*
 
-![](./assets/motivation.svg)
+
+![Canopus Architecture](https://raw.githubusercontent.com/Youngcius/canopus/master/assets/motivation.svg)
 
 
 ## Installation
