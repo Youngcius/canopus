@@ -84,8 +84,10 @@ class CanonicalGate(
     _num_params = 3
     _qasm_name = "can"
 
-    def get_unitary(self, params: RealVector = []) -> UnitaryMatrix:
+    def get_unitary(self, params: RealVector = None) -> UnitaryMatrix:
         """Return the unitary for this gate, see :class:`Unitary` for more."""
+        if params is None:
+            params = []
         self.check_parameters(params)
         cosm = np.cos(params[0] / 2 - params[1] / 2)  # cos(theta1/2 - theta2/2)
         cosp = np.cos(params[0] / 2 + params[1] / 2)  # cos(theta1/2 + theta2/2)
@@ -103,7 +105,7 @@ class CanonicalGate(
             ]
         )
 
-    def get_grad(self, params: RealVector = []) -> npt.NDArray[np.complex128]:
+    def get_grad(self, params: RealVector = None) -> npt.NDArray[np.complex128]:
         r"""
         Return the gradient for this gate.
 
@@ -136,6 +138,8 @@ class CanonicalGate(
                 - \frac{e^{- \frac{i \theta_{3}}{2}} \sin{\left(\frac{\theta_{1}}{2} - \frac{\theta_{2}}{2} \right)}}{2} & 0 & 0 & - \frac{i e^{- \frac{i \theta_{3}}{2}} \cos{\left(\frac{\theta_{1}}{2} - \frac{\theta_{2}}{2} \right)}}{2}
             \end{matrix}
         """
+        if params is None:
+            params = []
         self.check_parameters(params)
 
         cosm = np.cos(params[0] / 2 - params[1] / 2)  # cos(theta1/2 - theta2/2)

@@ -1,11 +1,11 @@
+import random
+from fractions import Fraction
+
 import numpy as np
-import qiskit
-from qiskit import qasm2
-from qiskit import QuantumRegister, ClassicalRegister, QuantumCircuit
+from qiskit import ClassicalRegister, QuantumCircuit, QuantumRegister, qasm2
 from qiskit.circuit.library import phase_estimation
 from qiskit.synthesis import synth_qft_full
-from fractions import Fraction
-import random
+
 
 def create_circuit_ae(num_qubits: int, probability: float = 0.2) -> QuantumCircuit:
     """Returns a quantum circuit implementing Quantum Amplitude Estimation.
@@ -106,7 +106,7 @@ def create_circuit_qpeexact(num_qubits: int) -> QuantumCircuit:
 if __name__ == "__main__":
     qc = create_circuit_ae(num_qubits=16).decompose()
     # qc = qiskit.transpile(qc, basis_gates=['cx', 'u3'], optimization_level=1)
-    qasm2.dump(qc, 'ae_16.qasm')
+    qasm2.dump(qc, "ae_16.qasm")
 
     qc = create_circuit_qpeexact(num_qubits=16).decompose()
-    qasm2.dump(qc, 'qpeexact_16.qasm')
+    qasm2.dump(qc, "qpeexact_16.qasm")

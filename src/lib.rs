@@ -1,4 +1,4 @@
-use ndarray::{array, Array2};
+use ndarray::{Array2, array};
 use num_complex::Complex64;
 use numpy::IntoPyArray;
 use pyo3::prelude::*;
@@ -268,7 +268,12 @@ fn only_xx_rot(_a: f64, b: f64, c: f64) -> bool {
 }
 
 #[pyfunction]
-fn canonical_unitary<'py>(py: Python<'py>, a: f64, b: f64, c: f64) -> PyResult<Bound<'py, numpy::PyArray2<Complex64>>> {
+fn canonical_unitary<'py>(
+    py: Python<'py>,
+    a: f64,
+    b: f64,
+    c: f64,
+) -> PyResult<Bound<'py, numpy::PyArray2<Complex64>>> {
     let zero = r!(0.0);
     let x = a * FRAC_PI_2;
     let y = b * FRAC_PI_2;

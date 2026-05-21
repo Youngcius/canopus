@@ -29,12 +29,8 @@ readme = "README.md"
 requires-python = ">=3.10"
 license = "Apache-2.0"
 license-files = ["LICENSE"]
-authors = [
-    { name = "Zhaohui Yang", email = "youngcius007@gmail.com" },
-]
-maintainers = [
-    { name = "Zhaohui Yang", email = "youngcius007@gmail.com" },
-]
+authors = [{ name = "Zhaohui Yang", email = "youngcius007@gmail.com" }]
+maintainers = [{ name = "Zhaohui Yang", email = "youngcius007@gmail.com" }]
 keywords = [
     "quantum-computing",
     "qubit-mapping",
@@ -64,14 +60,9 @@ classifiers = [
 
 # Runtime dependencies — every entry must be installable from PyPI so that
 # `pip install canopus-quantum` works out of the box.
-#
-# REQUIRED but NOT on PyPI (declared here for documentation only — users must
-# install it manually before `import canopus` succeeds):
-#   - monodromy (https://github.com/Youngcius/monodromy) — used at module
-#     load time by canopus.synthesis and canopus.utils._core for Weyl-chamber
-#     coverage computation. Building monodromy further requires the `lrs`
-#     binary from lrslib; see README for platform-specific setup.
+
 dependencies = [
+    "monodromy",
     "qiskit>=1.0",
     "numpy>=1.24",
     "scipy>=1.10",
@@ -82,7 +73,6 @@ dependencies = [
     "prettytable>=3",
 ]
 
-
 # ==============================================================================
 # OPTIONAL DEPENDENCIES
 # ==============================================================================
@@ -91,19 +81,18 @@ dependencies = [
 # calling canopus.rebase_to_custom / two_qubit_unitary_to_custom_circuit.
 # Imported lazily inside the function body so importing canopus does NOT
 # require GULPS to be installed.
-gulps = [
-    "gulps>=0.3",
-]
+gulps = ["gulps>=0.3"]
 
+
+# ==============================================================================
+# DEPENDENCY GROUPS
+# ==============================================================================
+[dependency-groups]
 # Testing dependencies
-test = [
-    "pytest>=7",
-    "pytest-cov>=4",
-]
-
+test = ["pytest>=7", "pytest-cov>=4"]
 # Development dependencies (linting, type checking, build tooling)
 dev = [
-    "canopus-quantum[test,gulps]",
+    { include-group = "test" }, # 直接包含 test 组
     "ruff>=0.6",
     "mypy>=1.10",
     "maturin>=1.5",
@@ -116,12 +105,12 @@ dev = [
 # PROJECT URLS (shown on the PyPI sidebar)
 # ==============================================================================
 [project.urls]
-Homepage      = "https://github.com/Youngcius/canopus"
+Homepage = "https://github.com/Youngcius/canopus"
 Documentation = "https://github.com/Youngcius/canopus#readme"
-Repository    = "https://github.com/Youngcius/canopus"
-Issues        = "https://github.com/Youngcius/canopus/issues"
-Changelog     = "https://github.com/Youngcius/canopus/blob/master/CHANGELOG.md"
-Paper         = "https://arxiv.org/abs/2511.04608"
+Repository = "https://github.com/Youngcius/canopus"
+Issues = "https://github.com/Youngcius/canopus/issues"
+Changelog = "https://github.com/Youngcius/canopus/blob/master/CHANGELOG.md"
+Paper = "https://arxiv.org/abs/2511.04608"
 
 
 # ==============================================================================
@@ -131,7 +120,7 @@ Paper         = "https://arxiv.org/abs/2511.04608"
 # Build the Rust extension as canopus.utils._accel
 module-name = "canopus.utils._accel"
 # Python source tree lives at the project root (i.e. ./canopus/...)
-python-source = "."
+python-source = "./python"
 # Required pyo3 feature to produce a CPython extension module
 features = ["pyo3/extension-module"]
 # Include the .pyi stub when building wheels so type checkers see correct signatures
@@ -153,27 +142,31 @@ extend-exclude = ["experiments", "analysis", "examples", "backup", "lrslib-073"]
 
 [tool.ruff.lint]
 select = [
-    "E",    # pycodestyle errors
-    "W",    # pycodestyle warnings
-    "F",    # pyflakes
-    "I",    # isort
-    "UP",   # pyupgrade
-    "B",    # flake8-bugbear
-    "C4",   # flake8-comprehensions
-    "SIM",  # flake8-simplify
-    "RUF",  # ruff-specific
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "UP",  # pyupgrade
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "SIM", # flake8-simplify
+    "RUF", # ruff-specific
 ]
 ignore = [
-    "E501",   # line length is enforced by the formatter, not the linter
-    "B008",   # function calls in argument defaults — common in qiskit code
+    "E501", # line length is enforced by the formatter, not the linter
+    "B008", # function calls in argument defaults — common in qiskit code
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/**/*.py"      = ["E402", "F401"]
-"**/__init__.py"     = ["F401", "F403"]
+"tests/**/*.py" = ["E402", "F401"]
+"**/__init__.py" = ["F401", "F403"]
 "canopus/utils/_accel.pyi" = ["ALL"]
-"canopus/basics.py"          = ["E741"]  # `I` is the conventional identity matrix in quantum computing
-"canopus/extensions/bqskit.py" = ["B006"]  # mutable default `[]` matches bqskit base-class signature
+"canopus/basics.py" = [
+    "E741",
+] # `I` is the conventional identity matrix in quantum computing
+"canopus/extensions/bqskit.py" = [
+    "B006",
+] # mutable default `[]` matches bqskit base-class signature
 
 # Note: isort's `known-first-party` is auto-derived from `[tool.ruff].src`
 # (i.e. ["canopus", "tests"]), so no explicit `[tool.ruff.lint.isort]` block is needed.
@@ -192,9 +185,7 @@ docstring-code-format = true
 minversion = "7.0"
 addopts = "-ra -q --color=yes"
 testpaths = ["tests"]
-filterwarnings = [
-    "ignore::DeprecationWarning:qiskit.*",
-]
+filterwarnings = ["ignore::DeprecationWarning:qiskit.*"]
 
 
 # ==============================================================================
@@ -205,7 +196,14 @@ python_version = "3.10"
 warn_return_any = true
 warn_unused_configs = true
 ignore_missing_imports = true
-exclude = ["experiments/", "analysis/", "examples/", "backup/", "build/", "lrslib-073/"]
+exclude = [
+    "experiments/",
+    "analysis/",
+    "examples/",
+    "backup/",
+    "build/",
+    "lrslib-073/",
+]
 
 
 # ==============================================================================
@@ -215,22 +213,34 @@ exclude = ["experiments/", "analysis/", "examples/", "backup/", "build/", "lrsli
 # ==============================================================================
 [tool.poe.tasks]
 # Build the Rust extension in editable mode (--release for optimized binaries)
-dev      = { shell = "maturin develop --release" }
+dev = { shell = "maturin develop --release" }
 # Build a redistributable wheel into ./target/wheels/
-build    = { shell = "maturin build --release" }
+build = { shell = "maturin build --release" }
 # Build wheels for the current platform across all Python versions (requires CI)
 build-all = { shell = "maturin build --release --strip --interpreter python3.10 python3.11 python3.12 python3.13" }
 # Remove every compiled artifact + cache
-clean    = { shell = "cargo clean && rm -f canopus/utils/_accel*.so && rm -rf canopus/**/__pycache__ .pytest_cache .mypy_cache .ruff_cache build/ target/wheels/" }
+clean = { shell = "cargo clean && rm -f canopus/utils/_accel*.so && rm -rf canopus/**/__pycache__ .pytest_cache .mypy_cache .ruff_cache build/ target/wheels/" }
 # Full rebuild
-rebuild  = { shell = "poe clean && poe dev" }
+rebuild = { shell = "poe clean && poe dev" }
 # Linters and formatters
-lint       = { shell = "ruff check canopus" }
-fmt        = { shell = "ruff format canopus" }
-fmt-check  = { shell = "ruff format --check canopus" }
-typecheck  = { shell = "mypy canopus" }
+lint = { shell = "ruff check canopus" }
+fmt = { shell = "ruff format canopus" }
+fmt-check = { shell = "ruff format --check canopus" }
+typecheck = { shell = "mypy canopus" }
 # Tests
-test     = { shell = "pytest" }
+test = { shell = "pytest" }
 test-cov = { shell = "pytest --cov=canopus --cov-report=term-missing" }
 # Aggregate gate — what CI runs before merge
-check    = { shell = "poe lint && poe fmt-check && poe test" }
+check = { shell = "poe lint && poe fmt-check && poe test" }
+
+[tool.uv.sources]
+monodromy = { url = "https://github.com/gjz010-Forks/monodromy/releases/download/0.0.2/monodromy-0.0.2-py3-none-any.whl" }
+
+[tool.uv]
+# 核心设置：让 uv 监听 Rust 代码变化，一旦改变，下次 uv sync / uv run 时自动重新编译
+cache-keys = [
+    { file = "pyproject.toml" },
+    { file = "Cargo.toml" },
+    { file = "Cargo.lock" },
+    { file = "src/**/*.rs" },    # ⚠️ 请确认你的 Rust 代码目录，如果是 src 就写 src/**/*.rs
+]

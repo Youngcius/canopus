@@ -1,0 +1,115 @@
+name: Reusable Wheels
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  # ============================================================================
+  # 构建 Wheels
+  # ============================================================================
+  build-wheels:
+    name: Wheels (${{ matrix.target }})
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: linux-x86_64
+            runner: ubuntu-latest
+            maturin-target: x86_64-unknown-linux-gnu
+            manylinux: auto
+          - target: macos-arm64
+            runner: macos-14
+            maturin-target: aarch64-apple-darwin
+          - target: windows-x86_64
+            runner: windows-latest
+            maturin-target: x86_64-pc-windows-msvc
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: |
+            3.10
+            3.11
+            3.12
+            3.13
+      - name: Build wheels
+        uses: PyO3/maturin-action@v1
+        with:
+          target: ${{ matrix.maturin-target }}
+          manylinux: ${{ matrix.manylinux || '' }}
+          args: --release --strip --out dist --interpreter 3.10 3.11 3.12 3.13
+      - name: Upload wheel artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: wheels-${{ matrix.target }}
+          path: dist/*.whl
+
+  # ============================================================================
+  # 树外测试 Wheel (Out-of-tree Test)
+  # ============================================================================
+  test-wheels:
+    name: Test Wheels (${{ matrix.target }}, Python ${{ matrix.python-version }})
+    needs: build-wheels
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [linux-x86_64, macos-arm64, windows-x86_64]
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
+        include:
+          - target: linux-x86_64
+            runner: ubuntu-latest
+          - target: macos-arm64
+            runner: macos-14
+          - target: windows-x86_64
+            runner: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Download wheel artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: wheels-${{ matrix.target }}
+          path: ${{ runner.temp }}/wheel-dist
+      - name: Install and test wheel in an isolated project
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          PY_VER_NODOT=$(echo "${{ matrix.python-version }}" | tr -d '.')
+          WHEEL_DIR="${{ runner.temp }}/wheel-dist"
+          WHEEL=$(find "$WHEEL_DIR" -name "*cp${PY_VER_NODOT}*.whl" -print -quit)
+
+          if [[ -z "$WHEEL" ]]; then
+            WHEEL=$(find "$WHEEL_DIR" -name '*.whl' -print -quit)
+          fi
+
+          if [[ -z "$WHEEL" ]]; then
+            echo "No wheel artifact found for Python ${{ matrix.python-version }}!"
+            exit 1
+          fi
+          echo "Found wheel: $WHEEL"
+
+          TEST_PROJECT="${{ runner.temp }}/test-project"
+          python -m venv "$TEST_PROJECT/.venv"
+
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            PYTHON_BIN="$TEST_PROJECT/.venv/Scripts/python.exe"
+          else
+            PYTHON_BIN="$TEST_PROJECT/.venv/bin/python"
+          fi
+
+          "$PYTHON_BIN" -m pip install --upgrade pip
+          "$PYTHON_BIN" -m pip install "$WHEEL" pytest pytest-cov
+
+          cd "$TEST_PROJECT"
+
+          "$PYTHON_BIN" -m pytest "$GITHUB_WORKSPACE/tests" --rootdir "$TEST_PROJECT" --import-mode=importlib
