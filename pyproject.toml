@@ -60,14 +60,9 @@ classifiers = [
 
 # Runtime dependencies — every entry must be installable from PyPI so that
 # `pip install canopus-quantum` works out of the box.
-#
-# REQUIRED but NOT on PyPI (declared here for documentation only — users must
-# install it manually before `import canopus` succeeds):
-#   - monodromy (https://github.com/Youngcius/monodromy) — used at module
-#     load time by canopus.synthesis and canopus.utils._core for Weyl-chamber
-#     coverage computation. Building monodromy further requires the `lrs`
-#     binary from lrslib; see README for platform-specific setup.
+
 dependencies = [
+    "monodromy",
     "qiskit>=1.0",
     "numpy>=1.24",
     "scipy>=1.10",
@@ -77,7 +72,6 @@ dependencies = [
     "bqskit>=1.0",
     "prettytable>=3",
 ]
-
 
 # ==============================================================================
 # OPTIONAL DEPENDENCIES

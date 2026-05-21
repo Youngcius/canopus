@@ -27,20 +27,16 @@ on:
     tags:
       - "v*"
   workflow_dispatch:
-
 permissions:
   contents: read
-
-# Cancel an in-flight release on the same tag if a new push lands.
 concurrency:
   group: release-${{ github.ref }}
   cancel-in-progress: false
-
 jobs:
   # ============================================================================
-  # Build native wheels via maturin across the supported OS × arch matrix.
-  # Each cell builds wheels for CPython 3.10 – 3.13 in one shot using maturin's
-  # multi-interpreter mode.
+  # 保持原样：构建 Wheel 依然使用 maturin-action
+  # 原因：uv build 目前不负责底层的 manylinux docker 容器管理，
+  # maturin 依然是 Rust 扩展跨平台构建的最佳工具。
   # ============================================================================
   build-wheels:
     name: Wheels (${{ matrix.target }})
@@ -58,7 +54,6 @@ jobs:
             maturin-target: aarch64-apple-darwin
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-python@v5
         with:
           python-version: |
@@ -66,44 +61,39 @@ jobs:
             3.11
             3.12
             3.13
-
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.maturin-target }}
           manylinux: ${{ matrix.manylinux || '' }}
           args: --release --strip --out dist --interpreter python3.10 python3.11 python3.12 python3.13
-
       - name: Upload wheel artifact
         uses: actions/upload-artifact@v4
         with:
           name: wheels-${{ matrix.target }}
           path: dist/*.whl
-
   # ============================================================================
-  # Source distribution. Built once, on Linux.
+  # ✨ uv 改造点 1：使用 uv 作为现代构建前端来打包 sdist
   # ============================================================================
   build-sdist:
     name: Source distribution
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Build sdist
-        uses: PyO3/maturin-action@v1
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
         with:
-          command: sdist
-          args: --out dist
-
+          enable-cache: true
+      - name: Build sdist
+        # uv 作为标准 PEP517 前端，会自动读取 pyproject.toml 调用 maturin 打包
+        run: uv build --sdist --out-dir dist
       - name: Upload sdist artifact
         uses: actions/upload-artifact@v4
         with:
           name: sdist
           path: dist/*.tar.gz
-
   # ============================================================================
-  # Publish to PyPI via OIDC trusted publishing.
-  # Requires the GitHub Environment `pypi` (no token secret needed).
+  # ✨ uv 改造点 2：完全使用 uv 原生能力发布到 PyPI
   # ============================================================================
   publish:
     name: Publish to PyPI
@@ -114,21 +104,17 @@ jobs:
       name: pypi
       url: https://pypi.org/p/canopus-quantum
     permissions:
-      id-token: write
+      id-token: write # 必须：授权 uv 使用 OIDC 与 PyPI 认证
     steps:
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
           path: dist
           merge-multiple: true
-
       - name: List artifacts
         run: ls -lh dist/
-
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
       - name: Publish to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          packages-dir: dist/
-          # skip-existing prevents the workflow from failing if a wheel was
-          # already uploaded by a previous run on the same tag.
-          skip-existing: true
+        # uv publish 原生支持 OIDC，直接识别 GitHub Actions 环境
+        run: uv publish dist/* --skip-existing

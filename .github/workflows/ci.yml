@@ -13,9 +13,8 @@ concurrency:
 
 jobs:
   # ============================================================================
-  # Static checks: lint + format. Runs first so style violations surface fast.
-  # Does NOT require building the Rust extension or installing runtime deps,
-  # so it stays cheap and quick.
+  # Static checks: lint + format.
+  # Resolve the project with uv, then execute tools from the synced env.
   # ============================================================================
   lint:
     name: Ruff (lint + format)
@@ -23,27 +22,23 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
+      - uses: astral-sh/setup-uv@v5
         with:
           python-version: "3.12"
 
-      - name: Install ruff
-        run: pip install "ruff>=0.6"
+      - name: Sync dev environment
+        run: uv sync --dev --frozen
 
       - name: ruff check
-        run: ruff check canopus
+        run: uv run ruff check
 
       - name: ruff format --check
-        run: ruff format --check canopus
+        run: uv run ruff format --check
 
   # ============================================================================
   # Build the Rust extension and run the test suite across the matrix.
-  # Each cell needs a Rust toolchain + the Python deps from pyproject.toml.
-  #
-  # NOTE: the `monodromy` package is not on PyPI and is required by parts of
-  # canopus at import time. Until monodromy lands on PyPI (or canopus moves
-  # to lazy imports), the test job is allowed to fail gracefully via
-  # `continue-on-error` on monodromy-dependent paths.
+  # Each cell resolves the locked project env via uv, then runs commands
+  # through uv so the compiled extension and Python tooling come from one place.
   # ============================================================================
   test:
     name: Test (${{ matrix.os }}, py${{ matrix.python }})
@@ -51,25 +46,18 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest]
         python: ["3.10", "3.11", "3.12", "3.13"]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
+      - uses: astral-sh/setup-uv@v5
         with:
           python-version: ${{ matrix.python }}
+          enable-cache: true
 
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
-
-      - name: Install lrslib (Linux only — enables monodromy-backed tests)
-        # `lrs` is in apt on Debian/Ubuntu but has no homebrew formula, so we
-        # install it only on Linux. macOS runners will skip monodromy-dependent
-        # tests via the `requires_lrs` pytest marker.
-        if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install -y lrslib
 
       - name: Cache cargo build
         uses: actions/cache@v4
@@ -82,25 +70,11 @@ jobs:
           restore-keys: |
             cargo-${{ runner.os }}-${{ matrix.python }}-
 
-      - name: Build & install canopus with test extras (editable)
-        # Editable install via PEP 660: pip → maturin places the compiled `_accel`
-        # extension inside the source tree, so subsequent `import canopus` resolves
-        # to this tree (which Python prefers because cwd is on sys.path[0]) and
-        # finds the .so. Plain `pip install .` would put it in site-packages but
-        # `import canopus` from the repo root still picks the source tree first,
-        # which then has no .so → ModuleNotFoundError.
-        run: |
-          pip install --upgrade pip
-          pip install -e ".[test]"
+      - name: Sync dev environment
+        run: uv sync --dev --frozen
 
-      - name: Smoke test (import canopus without monodromy)
-        # Verifies the wheel was built correctly and the lazy-import refactor
-        # truly lets `import canopus` succeed in a monodromy-free environment.
-        run: python -c "import canopus; print('canopus imports OK from', canopus.__file__)"
-
-      - name: Install monodromy (optional, may fail)
-        continue-on-error: true
-        run: pip install "git+https://github.com/Youngcius/monodromy"
+      - name: Smoke test (import canopus)
+        run: uv run python -c "import canopus; print('canopus imports OK from', canopus.__file__)"
 
       - name: Run pytest
-        run: pytest -ra
+        run: uv run pytest -ra
