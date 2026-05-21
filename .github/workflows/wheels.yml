@@ -1,0 +1,22 @@
+name: Wheels
+
+# Triggered on branch pushes / PRs to validate distributable wheels before a
+# tagged release. This workflow builds platform wheels and runs out-of-tree
+# tests against the built artifacts, but never uploads anything to PyPI.
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: wheels-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  wheels:
+    uses: ./.github/workflows/reusable-wheels.yml

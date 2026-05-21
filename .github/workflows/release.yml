@@ -28,52 +28,17 @@ on:
     tags:
       - "v*"
   workflow_dispatch:
+
 permissions:
   contents: read
+
 concurrency:
   group: release-${{ github.ref }}
   cancel-in-progress: false
+
 jobs:
-  # ============================================================================
-  # 构建 Wheels
-  # ============================================================================
-  build-wheels:
-    name: Wheels (${{ matrix.target }})
-    runs-on: ${{ matrix.runner }}
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - target: linux-x86_64
-            runner: ubuntu-latest
-            maturin-target: x86_64-unknown-linux-gnu
-            manylinux: auto
-          - target: macos-arm64
-            runner: macos-14
-            maturin-target: aarch64-apple-darwin
-          - target: windows-x86_64
-            runner: windows-latest
-            maturin-target: x86_64-pc-windows-msvc
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: |
-            3.10
-            3.11
-            3.12
-            3.13
-      - name: Build wheels
-        uses: PyO3/maturin-action@v1
-        with:
-          target: ${{ matrix.maturin-target }}
-          manylinux: ${{ matrix.manylinux || '' }}
-          args: --release --strip --out dist --interpreter 3.10 3.11 3.12 3.13
-      - name: Upload wheel artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: wheels-${{ matrix.target }}
-          path: dist/*.whl
+  wheels:
+    uses: ./.github/workflows/reusable-wheels.yml
 
   # ============================================================================
   # 构建 Sdist
@@ -96,81 +61,11 @@ jobs:
           path: dist/*.tar.gz
 
   # ============================================================================
-  # 🧪 新增：树外测试 Wheel (Out-of-tree Test)
-  # ============================================================================
-  test-wheels:
-    name: Test Wheels (${{ matrix.target }}, Python ${{ matrix.python-version }})
-    needs: build-wheels
-    runs-on: ${{ matrix.runner }}
-    strategy:
-      fail-fast: false
-      matrix:
-        target: [linux-x86_64, macos-arm64, windows-x86_64]
-        python-version: ["3.10", "3.11", "3.12", "3.13"]
-        include:
-          - target: linux-x86_64
-            runner: ubuntu-latest
-          - target: macos-arm64
-            runner: macos-14
-          - target: windows-x86_64
-            runner: windows-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python-version }}
-      - name: Set up uv
-        uses: astral-sh/setup-uv@v4
-      - name: Download wheel artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: wheels-${{ matrix.target }}
-          path: ${{ runner.temp }}/wheel-dist
-      - name: Install and test wheel in an isolated project
-        shell: bash
-        run: |
-          set -euo pipefail
-          
-          # 1. 查找构建好的对应 Python 版本的 wheel 文件
-          # 移除版本号中的点(例如 3.10 -> 310)以匹配 cp310 这样的 tag
-          PY_VER_NODOT=$(echo "${{ matrix.python-version }}" | tr -d '.')
-
-          # 先切换到对应目录执行查找，避免 Windows Bash 绝对路径问题
-          cd "${{ runner.temp }}/wheel-dist"
-
-          WHEEL=$(find "${{ runner.temp }}/wheel-dist" -name "*cp${PY_VER_NODOT}*.whl" -print -quit)
-          
-          # 如果没有找到明确版本号的 wheel（例如使用了 abi3 标记），则降级匹配任意一个 wheel
-          if [[ -z "$WHEEL" ]]; then
-            WHEEL=$(find "${{ runner.temp }}/wheel-dist" -name '*.whl' -print -quit)
-          fi
-          
-          if [[ -z "$WHEEL" ]]; then
-            echo "No wheel artifact found for Python ${{ matrix.python-version }}!"
-            exit 1
-          fi
-          echo "Found wheel: $WHEEL"
-          
-          # 2. 在临时目录下新建一个纯净的隔离项目 (不包含当前项目的 src 代码结构)
-          TEST_PROJECT="${{ runner.temp }}/test-project"
-          uv init --no-package --python "${{ matrix.python-version }}" "$TEST_PROJECT"
-          cd "$TEST_PROJECT"
-          
-          # 3. 将 wheel 连同测试需要的 extras (如 [test]) 一起安装
-          # 自动搞定 .venv 创建、解析 wheel metadata 以及下载相关依赖
-          uv add "../wheel-dist/${WHEEL_FILE}[test]"
-          
-          # 4. 在隔离项目的上下文中执行测试，测试用例指向工作区目录下的 tests/
-          uv run pytest "$GITHUB_WORKSPACE/tests"
-
-  # ============================================================================
   # 发布到 PyPI (必须等待 build-wheels, build-sdist, 以及 test-wheels 成功)
   # ============================================================================
   publish:
     name: Publish to PyPI
-    needs: [build-wheels, build-sdist, test-wheels]
+    needs: [wheels, build-sdist]
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     environment:
