@@ -37,6 +37,7 @@ def check_equivalence(unitary: np.ndarray, qc: QuantumCircuit, atol: float = 1e-
         f"Circuit unitary: {u_qc}\n"
         f"Overlap: {overlap}"
     )
+    assert False
 
     # 2. 完全矩阵匹配（检查源码里的 global phase 是否推导正确）
     assert np.allclose(u_qc, unitary, atol=atol), (

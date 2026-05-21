@@ -70,6 +70,8 @@ def _kak_from_unitary(unitary: np.ndarray) -> _QiskitKAKDecomposition:
     #       ! cause they have different conventions for edge cases of Weyl chamber coordinates.
     #       ! When x>=y>=|z|, x=pi/4, Cirq ensures z>=0
     decomp = cirq.kak_decomposition(unitary, rtol=0, atol=1e-12)
+    print(unitary)
+    print(decomp.interaction_coefficients)
     return _QiskitKAKDecomposition(
         a=decomp.interaction_coefficients[0],
         b=decomp.interaction_coefficients[1],
