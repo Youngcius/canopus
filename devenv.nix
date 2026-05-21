@@ -25,6 +25,10 @@
       rustfmt.enable = true;
     };
   };
+  packages = with pkgs; [
+    # For Python development
+    graphviz
+  ];
 
   # See full reference at https://devenv.sh/reference/options/
 }

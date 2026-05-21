@@ -7,7 +7,8 @@ name: Release
 #      Intel Macs have been declining fast and the macos-13 runner queue is
 #      slow; Intel Mac users will install from sdist, which compiles locally.)
 #   2. Builds a source distribution (sdist).
-#   3. Publishes every artifact to PyPI via OIDC trusted publishing.
+#   3. Tests the built wheels out-of-tree to ensure functionality.
+#   4. Publishes every artifact to PyPI via OIDC trusted publishing.
 #
 # === Prerequisites (do this once, BEFORE pushing a tag) ===
 # 1. Reserve the project on PyPI:
@@ -34,9 +35,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   # ============================================================================
-  # 保持原样：构建 Wheel 依然使用 maturin-action
-  # 原因：uv build 目前不负责底层的 manylinux docker 容器管理，
-  # maturin 依然是 Rust 扩展跨平台构建的最佳工具。
+  # 构建 Wheels
   # ============================================================================
   build-wheels:
     name: Wheels (${{ matrix.target }})
@@ -72,8 +71,9 @@ jobs:
         with:
           name: wheels-${{ matrix.target }}
           path: dist/*.whl
+
   # ============================================================================
-  # ✨ uv 改造点 1：使用 uv 作为现代构建前端来打包 sdist
+  # 构建 Sdist
   # ============================================================================
   build-sdist:
     name: Source distribution
@@ -85,26 +85,90 @@ jobs:
         with:
           enable-cache: true
       - name: Build sdist
-        # uv 作为标准 PEP517 前端，会自动读取 pyproject.toml 调用 maturin 打包
         run: uv build --sdist --out-dir dist
       - name: Upload sdist artifact
         uses: actions/upload-artifact@v4
         with:
           name: sdist
           path: dist/*.tar.gz
+
   # ============================================================================
-  # ✨ uv 改造点 2：完全使用 uv 原生能力发布到 PyPI
+  # 🧪 新增：树外测试 Wheel (Out-of-tree Test)
+  # ============================================================================
+  test-wheels:
+    name: Test Wheels (${{ matrix.target }}, Python ${{ matrix.python-version }})
+    needs: build-wheels
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [linux-x86_64, macos-arm64]
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
+        include:
+          - target: linux-x86_64
+            runner: ubuntu-latest
+          - target: macos-arm64
+            runner: macos-14
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v4
+      - name: Download wheel artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: wheels-${{ matrix.target }}
+          path: ${{ runner.temp }}/wheel-dist
+      - name: Install and test wheel in an isolated project
+        shell: bash
+        run: |
+          set -euo pipefail
+          
+          # 1. 查找构建好的对应 Python 版本的 wheel 文件
+          # 移除版本号中的点(例如 3.10 -> 310)以匹配 cp310 这样的 tag
+          PY_VER_NODOT=$(echo "${{ matrix.python-version }}" | tr -d '.')
+          WHEEL=$(find "${{ runner.temp }}/wheel-dist" -name "*cp${PY_VER_NODOT}*.whl" -print -quit)
+          
+          # 如果没有找到明确版本号的 wheel（例如使用了 abi3 标记），则降级匹配任意一个 wheel
+          if [[ -z "$WHEEL" ]]; then
+            WHEEL=$(find "${{ runner.temp }}/wheel-dist" -name '*.whl' -print -quit)
+          fi
+          
+          if [[ -z "$WHEEL" ]]; then
+            echo "No wheel artifact found for Python ${{ matrix.python-version }}!"
+            exit 1
+          fi
+          echo "Found wheel: $WHEEL"
+          
+          # 2. 在临时目录下新建一个纯净的隔离项目 (不包含当前项目的 src 代码结构)
+          TEST_PROJECT="${{ runner.temp }}/test-project"
+          uv init --no-package --python "${{ matrix.python-version }}" "$TEST_PROJECT"
+          cd "$TEST_PROJECT"
+          
+          # 3. 将 wheel 连同测试需要的 extras (如 [test]) 一起安装
+          # 自动搞定 .venv 创建、解析 wheel metadata 以及下载相关依赖
+          uv add "${WHEEL}[test]"
+          
+          # 4. 在隔离项目的上下文中执行测试，测试用例指向工作区目录下的 tests/
+          uv run pytest "${{ github.workspace }}/tests"
+
+  # ============================================================================
+  # 发布到 PyPI (必须等待 build-wheels, build-sdist, 以及 test-wheels 成功)
   # ============================================================================
   publish:
     name: Publish to PyPI
-    needs: [build-wheels, build-sdist]
+    needs: [build-wheels, build-sdist, test-wheels]
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     environment:
       name: pypi
       url: https://pypi.org/p/canopus-quantum
     permissions:
-      id-token: write # 必须：授权 uv 使用 OIDC 与 PyPI 认证
+      id-token: write
     steps:
       - name: Download all artifacts
         uses: actions/download-artifact@v4
@@ -116,5 +180,4 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v4
       - name: Publish to PyPI
-        # uv publish 原生支持 OIDC，直接识别 GitHub Actions 环境
         run: uv publish dist/* --skip-existing
