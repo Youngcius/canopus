@@ -1,21 +1,11 @@
-import shutil
-
 import canopus
 import numpy as np
-import pytest
 from canopus.basics import CanonicalGate
 from canopus.utils import canonical_unitary, is_equiv_unitary, qc2mat
 from qiskit import QuantumCircuit, qasm2
 from qiskit.circuit.random import random_circuit
 from qiskit.synthesis import TwoQubitWeylDecomposition
 from scipy.stats import unitary_group
-
-# `monodromy` needs the `lrs` system binary; skip the affected tests gracefully
-# in environments where it is not installed (e.g. macOS CI without homebrew formula).
-requires_lrs = pytest.mark.skipif(
-    shutil.which("lrs") is None,
-    reason="requires the `lrs` binary from lrslib (see README)",
-)
 
 Z = np.array([[1, 0], [0, -1]], dtype=np.complex128)
 
@@ -114,16 +104,17 @@ def test_zzphase_synthesis():
     assert is_equiv_unitary(qc2mat(qc_demo), qc2mat(qc))
 
 
-# @requires_lrs
-# def test_custom_synthesis():
-#     from qiskit.circuit.library import iSwapGate
+def test_custom_synthesis():
+    from qiskit.circuit.library import iSwapGate
 
-#     qc = random_circuit(4, 30, 2)
-#     qc_rebased = canopus.synthesis.rebase_to_custom(
-#         qc,
-#         gate_set=[iSwapGate().power(0.5), CanonicalGate(0.5, 0.25, 0.25)],
-#         costs=[1, 1.25],
-#         names=["sqisw", "ecp"],
-#         seed=123,
-#     )
-#     assert canopus.utils.infidelity(canopus.utils.qc2mat(qc), canopus.utils.qc2mat(qc_rebased)) < 1e-4
+    infidelities = []
+    for _ in range(20):
+        qc = random_circuit(4, 30, 2)
+        qc_rebased = canopus.synthesis.rebase_to_custom(
+            qc,
+            gate_set=[iSwapGate().power(0.5), CanonicalGate(0.5, 0.25, 0.25)],
+            costs=[1, 1.25],
+            names=["sqisw", "ecp"],
+        )
+        infidelities.append(canopus.utils.infidelity(canopus.utils.qc2mat(qc), canopus.utils.qc2mat(qc_rebased)))
+    assert np.median(infidelities) < 1e-9

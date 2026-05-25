@@ -10,10 +10,14 @@ from dataclasses import dataclass
 import cirq
 import numpy as np
 from qiskit import QuantumCircuit
+from qiskit.circuit.gate import Gate
 from qiskit.circuit.library import UGate
-from qiskit.synthesis import OneQubitEulerDecomposer
+from qiskit.synthesis import OneQubitEulerDecomposer, XXDecomposer
+from qiskit.transpiler import PassManager
+from qiskit.transpiler.passes import Optimize1qGatesDecomposition
 
-_one_qubit_decomposer = OneQubitEulerDecomposer("U3")
+_one_qubit_decomposer = OneQubitEulerDecomposer(basis="U")
+_xx_decomposer = XXDecomposer(euler_basis='U')
 
 
 @dataclass
@@ -232,17 +236,27 @@ def _append_single_qubit_from_matrix(qc: QuantumCircuit, matrix: np.ndarray, qub
     qc.global_phase += phase
     qc.append(UGate(theta, phi, lam), [qubit])
 
+def two_qubit_unitary_to_zzphase_circuit(unitary: np.ndarray) -> QuantumCircuit:
+    """Synthesize a 2-qubit unitary into {ZZ(π/6), ZZ(π/4), ZZ(π/2), U3} gates."""
+    from canopus.synthesis import RZXToRZZSynthesis
 
-def two_qubit_unitary_to_can_circuit(unitary: np.ndarray) -> QuantumCircuit:
+    qc = _xx_decomposer(unitary, approximate=False).reverse_bits()
+    qc = PassManager([RZXToRZZSynthesis(), Optimize1qGatesDecomposition(basis=["u"])]).run(qc)
+    return qc
+
+
+def two_qubit_unitary_to_canonical_circuit(unitary: np.ndarray) -> QuantumCircuit:
     """Synthesize a 2-qubit unitary into {can, u} gates."""
     from canopus.basics import CanonicalGate
     from canopus.utils import canonical_decompose
+    from canopus.utils._accel import fuzzy_equal
 
     (a0, a1), (b0, b1), (a, b, c) = canonical_decompose(unitary)
     qc = QuantumCircuit(2)
     _append_single_qubit_from_matrix(qc, b0, 0)
     _append_single_qubit_from_matrix(qc, b1, 1)
-    qc.append(CanonicalGate(a, b, c), [0, 1])
+    if not fuzzy_equal(a, 0):
+        qc.append(CanonicalGate(a, b, c), [0, 1])
     _append_single_qubit_from_matrix(qc, a0, 0)
     _append_single_qubit_from_matrix(qc, a1, 1)
 
@@ -250,7 +264,7 @@ def two_qubit_unitary_to_can_circuit(unitary: np.ndarray) -> QuantumCircuit:
 
 
 def two_qubit_unitary_to_custom_circuit(
-    unitary: np.ndarray, gate_set: list, costs: list, names: list | None = None
+    unitary: np.ndarray, gate_set: list[Gate], costs: list[float], names: list | None = None
 ) -> QuantumCircuit:
     """Synthesize a 2-qubit unitary into a {arbitrary-2q-gate, u} gate set.
 
@@ -259,4 +273,5 @@ def two_qubit_unitary_to_custom_circuit(
     from gulps import GulpsDecomposer
 
     gulps_decomposer = GulpsDecomposer(gate_set=gate_set, costs=costs, names=names)
-    return gulps_decomposer(unitary).reverse_bits()
+    qc = gulps_decomposer(unitary).reverse_bits()
+    return PassManager(Optimize1qGatesDecomposition(basis=["u"])).run(qc)
