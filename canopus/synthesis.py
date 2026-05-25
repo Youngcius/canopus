@@ -77,9 +77,7 @@ def rebase_to_custom(
             passes.Collect2qBlocks(),
             passes.ConsolidateBlocks(force_consolidate=True),
             CustomSynthesis(gate_set, costs, names),
-            passes.Optimize1qGatesDecomposition(
-                basis=["u"]
-            ),  # consolidate successive U3 gates
+            passes.Optimize1qGatesDecomposition(basis=["u"]),  # consolidate successive U3 gates
         ]
     ).run(qc)
 
@@ -109,9 +107,7 @@ class CustomSynthesis(TransformationPass):
                     names=self.isa_config["names"],
                 )
                 mini_dag = circuit_to_dag(mini_qc)
-                dag.substitute_node_with_dag(
-                    node, mini_dag, [mini_dag.qubits[1], mini_dag.qubits[0]]
-                )
+                dag.substitute_node_with_dag(node, mini_dag, [mini_dag.qubits[1], mini_dag.qubits[0]])
         return dag
 
 
@@ -123,9 +119,7 @@ def rebase_to_canonical(qc: QuantumCircuit) -> QuantumCircuit:
             passes.ConsolidateBlocks(force_consolidate=True),
             CanonicalSynthesis(),
             passes.Decompose("unitary"),  # convert 1Q unitary to U3
-            passes.Optimize1qGatesDecomposition(
-                basis=["u"]
-            ),  # consolidate successive U3 gates
+            passes.Optimize1qGatesDecomposition(basis=["u"]),  # consolidate successive U3 gates
         ]
     ).run(qc)
 
@@ -135,9 +129,7 @@ def normalize_canonical(qc: QuantumCircuit) -> QuantumCircuit:
     return PassManager(
         [
             CanonicalSynthesis(),
-            passes.Optimize1qGatesDecomposition(
-                basis=["u"]
-            ),  # consolidate successive U3 gates
+            passes.Optimize1qGatesDecomposition(basis=["u"]),  # consolidate successive U3 gates
         ]
     ).run(qc)
 
@@ -211,19 +203,11 @@ class SQiSWSynthesis(TransformationPass):
 
     def run(self, dag: DAGCircuit):
         for node in dag.op_nodes():
-            if (
-                hasattr(node.op, "to_matrix")
-                and node.num_qubits == 2
-                and node.op.name == "unitary"
-            ):
-                mini_qc = two_qubit_unitary_to_sqisw_circuit(
-                    node.op.to_matrix(), atol=1e-12
-                )
+            if hasattr(node.op, "to_matrix") and node.num_qubits == 2 and node.op.name == "unitary":
+                mini_qc = two_qubit_unitary_to_sqisw_circuit(node.op.to_matrix(), atol=1e-12)
                 mini_dag = circuit_to_dag(mini_qc)
                 # Swap qubit order on substitution to match the internal endianness used above.
-                dag.substitute_node_with_dag(
-                    node, mini_dag, [mini_dag.qubits[1], mini_dag.qubits[0]]
-                )
+                dag.substitute_node_with_dag(node, mini_dag, [mini_dag.qubits[1], mini_dag.qubits[0]])
 
         return dag
 
@@ -234,19 +218,11 @@ class BSynthesis(TransformationPass):
 
     def run(self, dag: DAGCircuit):
         for node in dag.op_nodes():
-            if (
-                hasattr(node.op, "to_matrix")
-                and node.num_qubits == 2
-                and node.op.name == "unitary"
-            ):
-                mini_qc = two_qubit_unitary_to_b_circuit(
-                    node.op.to_matrix(), atol=1e-12
-                )
+            if hasattr(node.op, "to_matrix") and node.num_qubits == 2 and node.op.name == "unitary":
+                mini_qc = two_qubit_unitary_to_b_circuit(node.op.to_matrix(), atol=1e-12)
                 mini_dag = circuit_to_dag(mini_qc)
                 # Swap qubit order on substitution to match the internal endianness used above.
-                dag.substitute_node_with_dag(
-                    node, mini_dag, [mini_dag.qubits[1], mini_dag.qubits[0]]
-                )
+                dag.substitute_node_with_dag(node, mini_dag, [mini_dag.qubits[1], mini_dag.qubits[0]])
 
         return dag
 
@@ -257,11 +233,7 @@ class ZZPhaseSynthesis(TransformationPass):
 
     def run(self, dag: DAGCircuit):
         for node in dag.op_nodes():
-            if (
-                hasattr(node.op, "to_matrix")
-                and node.num_qubits == 2
-                and node.op.name == "unitary"
-            ):
+            if hasattr(node.op, "to_matrix") and node.num_qubits == 2 and node.op.name == "unitary":
                 mini_qc = _xx_decomposer(
                     node.op.to_matrix(),
                     # basis_fidelity=0.995, approximate=True,
@@ -301,9 +273,7 @@ def logical_optimize(
     elif isinstance(circ, qiskit.QuantumCircuit):
         return tket_to_qiskit(_logical_optimize(qiskit_to_tket(circ)))
     else:
-        raise TypeError(
-            f"Unsupported circuit type: {type(circ)}. Expected pytket.Circuit or qiskit.QuantumCircuit."
-        )
+        raise TypeError(f"Unsupported circuit type: {type(circ)}. Expected pytket.Circuit or qiskit.QuantumCircuit.")
 
 
 def _logical_optimize(circ: pytket.Circuit) -> pytket.Circuit:
@@ -322,9 +292,7 @@ def rebase_to_tk2(
     elif isinstance(circ, qiskit.QuantumCircuit):
         return tket_to_qiskit(_rebase_to_tk2(qiskit_to_tket(circ), optimize))
     else:
-        raise TypeError(
-            f"Unsupported circuit type: {type(circ)}. Expected pytket.Circuit or qiskit.QuantumCircuit."
-        )
+        raise TypeError(f"Unsupported circuit type: {type(circ)}. Expected pytket.Circuit or qiskit.QuantumCircuit.")
 
 
 def _rebase_to_tk2(circ: pytket.Circuit, optimize: bool = True) -> pytket.Circuit:
@@ -332,9 +300,7 @@ def _rebase_to_tk2(circ: pytket.Circuit, optimize: bool = True) -> pytket.Circui
     circ = circ.copy()
     pytket.passes.DecomposeBoxes().apply(circ)
     if optimize:
-        pytket.passes.FullPeepholeOptimise(
-            allow_swaps=False, target_2qb_gate=OpType.TK2
-        ).apply(circ)
+        pytket.passes.FullPeepholeOptimise(allow_swaps=False, target_2qb_gate=OpType.TK2).apply(circ)
     pytket.passes.SynthesiseTK().apply(circ)  # or, else: ... SynthesiseTK().apply(circ)
     # pytket.passes.NormaliseTK2().apply(circ) # This function might result in other 1Q gates (e.g., X, Z) other than U3
     return circ
@@ -387,30 +353,22 @@ class CliffordSynthesis(TransformationPass):
                         mini_dag = DAGCircuit()
                         q = QuantumRegister(2)
                         mini_dag.add_qreg(q)
-                        mini_dag.apply_operation_back(
-                            UGate(-pi, pi / 2, pi / 2), [q[0]]
-                        )
+                        mini_dag.apply_operation_back(UGate(-pi, pi / 2, pi / 2), [q[0]])
                         mini_dag.apply_operation_back(SGate(), [q[0]])
                         mini_dag.apply_operation_back(SGate(), [q[1]])
                         mini_dag.apply_operation_back(HGate(), [q[1]])
                         mini_dag.apply_operation_back(CXGate(), [q[1], q[0]])
                         mini_dag.apply_operation_back(CXGate(), [q[0], q[1]])
                         mini_dag.apply_operation_back(HGate(), [q[0]])
-                        mini_dag.apply_operation_back(
-                            UGate(-pi, pi / 2, pi / 2), [q[1]]
-                        )
+                        mini_dag.apply_operation_back(UGate(-pi, pi / 2, pi / 2), [q[1]])
                         dag.substitute_node_with_dag(node, mini_dag, [q[1], q[0]])
                     elif self.isa_type == ISAType.StabilizerISA:
                         mini_dag = DAGCircuit()
                         q = QuantumRegister(2)
                         mini_dag.add_qreg(q)
-                        mini_dag.apply_operation_back(
-                            UGate(-pi, pi / 2, pi / 2), [q[0]]
-                        )
+                        mini_dag.apply_operation_back(UGate(-pi, pi / 2, pi / 2), [q[0]])
                         mini_dag.apply_operation_back(iSwapGate(), [q[0], q[1]])
-                        mini_dag.apply_operation_back(
-                            UGate(-pi, pi / 2, pi / 2), [q[1]]
-                        )
+                        mini_dag.apply_operation_back(UGate(-pi, pi / 2, pi / 2), [q[1]])
                         dag.substitute_node_with_dag(node, mini_dag, [q[1], q[0]])
                 elif np.allclose(node.op.params, [0.5, 0.5, 0.5]):  # SWAP gate
                     #           ┌─────┐       ┌────────┐┌───┐
@@ -468,7 +426,5 @@ class CliffordSynthesis(TransformationPass):
                     mini_dag.apply_operation_back(SdgGate(), [q[0]])
                     dag.substitute_node_with_dag(node, mini_dag, [q[0]])
                 else:
-                    raise ValueError(
-                        f"Unsupported RZ gate angle: {theta}. Only ±π, ±π/2 are supported."
-                    )
+                    raise ValueError(f"Unsupported RZ gate angle: {theta}. Only ±π, ±π/2 are supported.")
         return dag

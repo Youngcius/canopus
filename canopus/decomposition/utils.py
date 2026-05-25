@@ -17,7 +17,7 @@ from qiskit.transpiler import PassManager
 from qiskit.transpiler.passes import Optimize1qGatesDecomposition
 
 _one_qubit_decomposer = OneQubitEulerDecomposer(basis="U")
-_xx_decomposer = XXDecomposer(euler_basis='U')
+_xx_decomposer = XXDecomposer(euler_basis="U")
 
 
 @dataclass
@@ -235,6 +235,7 @@ def _append_single_qubit_from_matrix(qc: QuantumCircuit, matrix: np.ndarray, qub
     theta, phi, lam, phase = _one_qubit_decomposer.angles_and_phase(matrix)
     qc.global_phase += phase
     qc.append(UGate(theta, phi, lam), [qubit])
+
 
 def two_qubit_unitary_to_zzphase_circuit(unitary: np.ndarray) -> QuantumCircuit:
     """Synthesize a 2-qubit unitary into {ZZ(π/6), ZZ(π/4), ZZ(π/2), U3} gates."""
