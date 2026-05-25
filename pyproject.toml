@@ -84,6 +84,7 @@ dependencies = [
 ]
 
 
+[project.optional-dependencies]
 # Testing dependencies
 test = [
     "pytest>=7",
