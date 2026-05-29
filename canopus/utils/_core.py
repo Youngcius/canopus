@@ -881,13 +881,9 @@ def qiskit_to_bqskit(qc: qiskit.QuantumCircuit) -> bqskit.Circuit:
             circ.append_gate(bqskit.ir.gates.RYYGate(), location, [float(gate.params[0])])
         elif isinstance(gate, RZZGate):
             circ.append_gate(bqskit.ir.gates.RZZGate(), location, [float(gate.params[0])])
-        elif isinstance(gate, iSwapGate) or (
-            isinstance(gate, XXPlusYYGate) and float(gate.params[0]) == -pi
-        ):
+        elif isinstance(gate, iSwapGate) or (isinstance(gate, XXPlusYYGate) and float(gate.params[0]) == -pi):
             circ.append_gate(bqskit.ir.gates.ISwapGate(), location)
-        elif isinstance(gate, SQiSWGate) or (
-            isinstance(gate, XXPlusYYGate) and float(gate.params[0]) == -half_pi
-        ):
+        elif isinstance(gate, SQiSWGate) or (isinstance(gate, XXPlusYYGate) and float(gate.params[0]) == -half_pi):
             circ.append_gate(bqskit.ir.gates.SqrtISwapGate(), location)
         elif isinstance(gate, BGate):
             circ.append_gate(bqskit.ir.gates.BGate(), location)
