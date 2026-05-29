@@ -275,4 +275,4 @@ def two_qubit_unitary_to_custom_circuit(
 
     gulps_decomposer = GulpsDecomposer(gate_set=gate_set, costs=costs, names=names)
     qc = gulps_decomposer(unitary).reverse_bits()
-    return PassManager(Optimize1qGatesDecomposition(basis=["u"])).run(qc)
+    return PassManager([Optimize1qGatesDecomposition(basis=["u"])]).run(qc)

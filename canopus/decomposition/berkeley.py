@@ -12,6 +12,8 @@ The B gate has canonical coordinates (pi/4, pi/8, 0), which means:
 import numpy as np
 from qiskit import QuantumCircuit
 from qiskit.circuit.library import RYGate, RZGate
+from qiskit.transpiler import PassManager
+from qiskit.transpiler.passes import Optimize1qGatesDecomposition
 
 from canopus.basics import BGate
 from canopus.decomposition.utils import (
@@ -235,5 +237,6 @@ def two_qubit_unitary_to_b_circuit(unitary: np.ndarray, atol: float = 1e-12) -> 
     after_0, after_1 = single_ops[1]
     _append_single_qubit_from_matrix(qc, after_0, 0)
     _append_single_qubit_from_matrix(qc, after_1, 1)
+    qc = PassManager([Optimize1qGatesDecomposition(basis=["u"])]).run(qc)
 
     return qc

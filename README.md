@@ -3,7 +3,7 @@
 [![PyPI](https://img.shields.io/pypi/v/canopus-quantum?color=blue)](https://pypi.org/project/canopus-quantum/) [![License](https://img.shields.io/badge/license-Apache%202.0-green)](./LICENSE) [![CI](https://github.com/Youngcius/canopus/actions/workflows/ci.yml/badge.svg)](https://github.com/Youngcius/canopus/actions/workflows/ci.yml) [![Python](https://img.shields.io/badge/python-3.10--3.13-blue)](https://pypi.org/project/canopus-quantum/) [![Conference](https://img.shields.io/static/v1?label=Conference&message=ISCA%202026&color=purple)](https://arxiv.org/abs/2511.04608)
 
 
-**Canopus** (**Can**onical-**O**ptimized **P**lacement **U**tility **S**uite) is a qubit mapping/routing framework tailored to advanced quantum ISAs. Its main function is to optimize the layout and routing of qubits on quantum hardware, handling optimal synthesis with diverse ISAs in a unified approach through two-qubit canonical gate representation, providing guidance for hardware-software co-design.
+**Canopus** (**Can**onical-**O**ptimized **P**lacement **U**tility **S**uite) is a unified qubit mapping/routing framework tailored to diverse quantum ISAs, i.e., the implementation of the paper "[Unifying Qubit Routing Across Diverse Quantum ISAs via Canonical Representation](https://arxiv.org/abs/2511.04608)". Its main function is to optimize the layout and routing of qubits on quantum hardware, handling optimal synthesis with diverse ISAs in a unified approach through two-qubit canonical gate representation, providing guidance for hardware-software co-design.
 
 
 > ***Canopus** evokes the name of the second-brightest star in the sky, symbolizing its role as a "navigational" guide for routing qubits through the complex constraints of quantum hardware.*

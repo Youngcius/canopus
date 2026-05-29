@@ -21,7 +21,28 @@ from prettytable import PrettyTable
 from pytket import OpType
 from pytket.utils.stats import gate_counts
 from qiskit.circuit import CircuitInstruction, Gate
-from qiskit.circuit.library import CXGate, RZZGate, XXPlusYYGate, iSwapGate
+from qiskit.circuit.library import (
+    CXGate,
+    CZGate,
+    HGate,
+    RXGate,
+    RXXGate,
+    RYGate,
+    RYYGate,
+    RZGate,
+    RZZGate,
+    SdgGate,
+    SGate,
+    TdgGate,
+    TGate,
+    U3Gate,
+    UGate,
+    XGate,
+    XXPlusYYGate,
+    YGate,
+    ZGate,
+    iSwapGate,
+)
 from qiskit.transpiler import CouplingMap, Layout
 
 from canopus.extensions.bqskit import FixedCanonicalGate as BQSKitFixedCanonicalGate
@@ -766,7 +787,7 @@ def gate_from_qiskit_to_bqskit(g: Gate):
 def bqskit_to_qiskit(circ: bqskit.Circuit) -> qiskit.QuantumCircuit:
     BGate = _get_gate_class("BGate")
     CanonicalGate = _get_gate_class("CanonicalGate")
-    qc = qiskit.QuantumCircuit(2)
+    qc = qiskit.QuantumCircuit(circ.num_qudits)
     for op in circ.operations():
         if isinstance(op.gate, bqskit.ir.gates.XGate):
             qc.x(op.location[0])
@@ -814,3 +835,65 @@ def bqskit_to_qiskit(circ: bqskit.Circuit) -> qiskit.QuantumCircuit:
         else:
             raise ValueError(f"Unsupported gate type: {type(op.gate)}")
     return qc
+
+
+def qiskit_to_bqskit(qc: qiskit.QuantumCircuit) -> bqskit.Circuit:
+    BGate = _get_gate_class("BGate")
+    CanonicalGate = _get_gate_class("CanonicalGate")
+    SQiSWGate = _get_gate_class("SQiSWGate")
+
+    circ = bqskit.Circuit(qc.num_qubits)
+    for instr in qc.data:
+        gate = instr.operation
+        location = tuple(qc.find_bit(q).index for q in instr.qubits)
+
+        if isinstance(gate, XGate):
+            circ.append_gate(bqskit.ir.gates.XGate(), location)
+        elif isinstance(gate, YGate):
+            circ.append_gate(bqskit.ir.gates.YGate(), location)
+        elif isinstance(gate, ZGate):
+            circ.append_gate(bqskit.ir.gates.ZGate(), location)
+        elif isinstance(gate, HGate):
+            circ.append_gate(bqskit.ir.gates.HGate(), location)
+        elif isinstance(gate, SGate):
+            circ.append_gate(bqskit.ir.gates.SGate(), location)
+        elif isinstance(gate, SdgGate):
+            circ.append_gate(bqskit.ir.gates.SdgGate(), location)
+        elif isinstance(gate, TGate):
+            circ.append_gate(bqskit.ir.gates.TGate(), location)
+        elif isinstance(gate, TdgGate):
+            circ.append_gate(bqskit.ir.gates.TdgGate(), location)
+        elif isinstance(gate, (U3Gate, UGate)):
+            circ.append_gate(bqskit.ir.gates.U3Gate(), location, list(gate.params))
+        elif isinstance(gate, RXGate):
+            circ.append_gate(bqskit.ir.gates.RXGate(), location, [float(gate.params[0])])
+        elif isinstance(gate, RYGate):
+            circ.append_gate(bqskit.ir.gates.RYGate(), location, [float(gate.params[0])])
+        elif isinstance(gate, RZGate):
+            circ.append_gate(bqskit.ir.gates.RZGate(), location, [float(gate.params[0])])
+        elif isinstance(gate, CXGate):
+            circ.append_gate(bqskit.ir.gates.CNOTGate(), location)
+        elif isinstance(gate, CZGate):
+            circ.append_gate(bqskit.ir.gates.CZGate(), location)
+        elif isinstance(gate, RXXGate):
+            circ.append_gate(bqskit.ir.gates.RXXGate(), location, [float(gate.params[0])])
+        elif isinstance(gate, RYYGate):
+            circ.append_gate(bqskit.ir.gates.RYYGate(), location, [float(gate.params[0])])
+        elif isinstance(gate, RZZGate):
+            circ.append_gate(bqskit.ir.gates.RZZGate(), location, [float(gate.params[0])])
+        elif isinstance(gate, iSwapGate) or (
+            isinstance(gate, XXPlusYYGate) and float(gate.params[0]) == -pi
+        ):
+            circ.append_gate(bqskit.ir.gates.ISwapGate(), location)
+        elif isinstance(gate, SQiSWGate) or (
+            isinstance(gate, XXPlusYYGate) and float(gate.params[0]) == -half_pi
+        ):
+            circ.append_gate(bqskit.ir.gates.SqrtISwapGate(), location)
+        elif isinstance(gate, BGate):
+            circ.append_gate(bqskit.ir.gates.BGate(), location)
+        elif isinstance(gate, CanonicalGate):
+            theta1, theta2, theta3 = np.array(gate.params) * pi
+            circ.append_gate(BQSKitFixedCanonicalGate(theta1, theta2, theta3), location)
+        else:
+            raise ValueError(f"Unsupported gate type: {type(gate)}")
+    return circ
