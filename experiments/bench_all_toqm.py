@@ -5,9 +5,8 @@ sys.path.append("..")  # Adjust the path to import canopus
 
 import os
 import argparse
-import uuid
+import subprocess
 import canopus
-import pytket.qasm
 from qiskit import qasm2, QuantumCircuit
 from natsort import natsorted
 from canopus.utils import print_circ_info
@@ -16,9 +15,21 @@ from rich.console import Console
 
 console = Console()
 
+if sys.platform == 'darwin':
+    TOQM_MAPPER = './toqm_mapper_macos'
+elif sys.platform.startswith('linux'):
+    TOQM_MAPPER = './toqm_mapper_linux'
+else:
+    raise OSError(f"Unsupported operating system: {sys.platform}")
 
-
-TOQM_FLAGS = '-defaults -latency Latency_1_2_6 -expander GreedyTopK 10 -queue TrimSlowNodes 2000 1000 -nodeMod GreedyMapper -retain 1'
+TOQM_FLAGS = [
+    '-defaults',
+    '-latency', 'Latency_1_2_6',
+    '-expander', 'GreedyTopK', '10',
+    '-queue', 'TrimSlowNodes', '2000', '1000',
+    '-nodeMod', 'GreedyMapper',
+    '-retain', '1',
+]
 
 parser = argparse.ArgumentParser(description="Canopus executable.")
 parser.add_argument('-t', '--topology', default=None, type=str,
@@ -65,17 +76,34 @@ for fname in fnames:
         qasm2.dump(qc, output_fname)
         continue
 
-    # Call the TOQM executable
-    os.system(f'./toqm_mapper {fname} {coupling_file} {TOQM_FLAGS} > {output_fname}')
+    # Call the TOQM executable and fail fast instead of leaving an empty QASM file.
+    result = subprocess.run(
+        [TOQM_MAPPER, fname, coupling_file, *TOQM_FLAGS],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+        check=False,
+    )
+    if result.returncode != 0:
+        raise RuntimeError(
+            f"TOQM failed for {fname} with exit code {result.returncode}.\n"
+            f"{result.stderr.strip()}"
+        )
+    if not result.stdout.strip():
+        raise RuntimeError(
+            f"TOQM produced empty output for {fname}.\n"
+            f"{result.stderr.strip()}"
+        )
+
     # Replace 'swp ' with 'swap ' in the output file
-    with open(output_fname, 'r') as f:
-        content = f.read()
-    content = content.replace('swp ', 'swap ')
+    content = result.stdout.replace('swp ', 'swap ')
+
+    # Load the output circuit before saving, so invalid TOQM output does not poison results.
+    qc_toqm = QuantumCircuit.from_qasm_str(content)
+
     with open(output_fname, 'w') as f:
         f.write(content)
 
-    # Load the output circuit
-    qc_toqm = QuantumCircuit.from_qasm_str(content)
     print_circ_info(qc_toqm, 'Mapped circuit')
     console.print(f"Gate counts: {qc_toqm.count_ops()}")
     console.print(f"Saved to {output_fname}")

@@ -99,6 +99,9 @@ for fname in fnames:
         'het': depth_het / depth0,
     }, index=[0])], ignore_index=True)
 
+if not os.path.exists('./results'):
+    os.makedirs('./results')
+
 result_count.to_csv(os.path.join('./results', f'{args.compiler}-{args.topology}-count.csv'), index=False)
 print('Results saved to:', os.path.join('./results', f'{args.compiler}-{args.topology}-count.csv'))
 

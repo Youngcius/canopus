@@ -12,11 +12,12 @@ from qiskit import qasm2, QuantumCircuit
 from natsort import natsorted
 from canopus.utils import print_circ_info
 from rich.console import Console
+from canopus.extensions.bqskit import FixedCanonicalGate
+from canopus.utils import bqskit_to_qiskit, qiskit_to_bqskit
 import bqskit
-from bqskit.ir.gates import *
+from bqskit.ir.gates import CXGate, U3Gate
 from bqskit.compiler import Compiler
 from canopus.backends import ISAType
-from bqskit.ext.qiskit import bqskit_to_qiskit, qiskit_to_bqskit
 from math import pi
 
 
