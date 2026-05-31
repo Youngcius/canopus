@@ -57,9 +57,6 @@ sum_result:
 		"python result_summary.py --compiler canopus --topology chain" \
 		"python result_summary.py --compiler canopus --topology hhex" \
 		"python result_summary.py --compiler canopus --topology square" \
-		"python result_summary.py --compiler canopus_nocomm --topology chain" \
-		"python result_summary.py --compiler canopus_nocomm --topology hhex" \
-		"python result_summary.py --compiler canopus_nocomm --topology square" \
 		"python result_summary.py --compiler sabre --topology chain" \
 		"python result_summary.py --compiler sabre --topology hhex" \
 		"python result_summary.py --compiler sabre --topology square" \

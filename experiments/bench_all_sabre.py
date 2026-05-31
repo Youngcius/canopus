@@ -7,7 +7,7 @@ import os
 import argparse
 import canopus
 import pytket.qasm
-from qiskit import qasm2
+from qiskit import qasm2, QuantumCircuit
 from natsort import natsorted
 from canopus.utils import print_circ_info
 from qiskit.transpiler import PassManager
@@ -65,5 +65,14 @@ for fname in fnames:
     console.print(f"Circuit cost: {sabre_circ_cost}")
     console.print(f"Routing overhead (Count): {sabre_circ_cost[0] / logic_circ_cost[0]:.2f}; Routing Overhead (Depth): {sabre_circ_cost[1] / logic_circ_cost[1]:.2f}")
     
-    qasm2.dump(qc_sabre, output_fname)
-    console.print(f"Saved to {output_fname}")
+    if not os.path.exists(output_fname):
+        qasm2.dump(qc_sabre, output_fname)
+        console.print(f"Saved to {output_fname}", style='bold red')
+    else:
+        sabre_circ_cost_old = backend.cost_estimator.eval_circuit_cost(QuantumCircuit.from_qasm_file(output_fname))
+        if sabre_circ_cost[0] < sabre_circ_cost_old[0] and sabre_circ_cost[1] < sabre_circ_cost_old[1]:
+            qasm2.dump(qc_sabre, output_fname)
+            console.print(f"Saved to {output_fname}", style="bold red")
+            console.print(f"Current cost {sabre_circ_cost} is better than previous cost {sabre_circ_cost_old}, saved.", style="bold red")
+        else:
+            console.print(f"Current cost {sabre_circ_cost} is not better than previous cost {sabre_circ_cost_old}, skipping saving.", style="bold yellow")
