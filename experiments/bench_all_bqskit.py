@@ -41,7 +41,6 @@ if not os.path.exists(output_dpath):
 fnames = [os.path.join(benchmark_dpath, fname) for fname in natsorted(os.listdir(benchmark_dpath)) if
           fname.endswith('.qasm')]
 
-bqskit_compiler = Compiler()
 isa_type = ISAType(args.isa)
 
 match isa_type:
@@ -61,6 +60,7 @@ match isa_type:
     case _:
         raise ValueError(f"Unsupported ISA type: {isa_type}")
 
+bqskit_compiler = Compiler()
 cx_synth_cost_estimator = canopus.SynthCostEstimator('cx')
 np.random.seed(42)
 for fname in fnames:
@@ -87,6 +87,7 @@ for fname in fnames:
     model = bqskit.MachineModel(circ.num_qudits, coupling_graph=edge_list, gate_set=gate_set)
 
     circ_opt = bqskit.compile(circ, model=model, max_synthesis_size=3, optimization_level=1, compiler=bqskit_compiler)
+    bqskit_compiler.close()
     qc_opt = bqskit_to_qiskit(circ_opt)
     qc_opt = canopus.rebase_to_canonical(qc_opt)
 
