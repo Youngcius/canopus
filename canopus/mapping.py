@@ -9,7 +9,6 @@ from qiskit.circuit.library import SwapGate
 from qiskit.dagcircuit import DAGCircuit, DAGNode
 from qiskit.transpiler import Layout, TransformationPass, TranspilerError
 from qiskit.transpiler.passes import VF2Layout
-from tunits import dag
 
 from canopus.backends import CanopusBackend
 from canopus.utils import generate_random_layout, generate_trivial_layout
@@ -510,7 +509,7 @@ class SabreMapping(BidirectionalMapping):
         rng = np.random.default_rng(seed)
         layout = initial_layout.copy()
         required_predecessors = build_required_predecessors(dag)
-        self.qubit_decays = dict.fromkeys(dag.qubits, INIT_DECAY)
+        qubit_decays = dict.fromkeys(dag.qubits, INIT_DECAY)
 
         num_searches = 0
         # layouts = [layout.copy()] # dump intermediate layouts for debugging
@@ -527,7 +526,7 @@ class SabreMapping(BidirectionalMapping):
                     remaining_ops.append(node)
 
             if executable_ops:
-                self.qubit_decays = dict.fromkeys(dag.qubits, INIT_DECAY)
+                qubit_decays = dict.fromkeys(dag.qubits, INIT_DECAY)
                 front_layer = remaining_ops
                 for node in executable_ops:
                     routed_dag.apply_operation_back(
@@ -538,7 +537,7 @@ class SabreMapping(BidirectionalMapping):
                         if required_predecessors[successor] == 0:
                             front_layer.append(successor)
             else:
-                swap = self._find_best_swap(dag, front_layer, layout, required_predecessors, rng)
+                swap = self._find_best_swap(dag, front_layer, layout, required_predecessors, qubit_decays, rng)
                 routed_dag.apply_operation_back(SwapGate(), [self.canonical_qreg[layout._v2p[v]] for v in swap])
 
                 layout.swap(*swap)
@@ -546,14 +545,14 @@ class SabreMapping(BidirectionalMapping):
 
                 num_searches += 1
                 if num_searches % NUM_SEARCHES_TO_RESET == 0:
-                    self.qubit_decays = dict.fromkeys(dag.qubits, INIT_DECAY)
+                    qubit_decays = dict.fromkeys(dag.qubits, INIT_DECAY)
                 else:
-                    self.qubit_decays[swap[0]] += DECAY_STEP
-                    self.qubit_decays[swap[1]] += DECAY_STEP
+                    qubit_decays[swap[0]] += DECAY_STEP
+                    qubit_decays[swap[1]] += DECAY_STEP
 
         return routed_dag, layout
 
-    def _find_best_swap(self, dag, front_layer, layout, required_predecessors, rng) -> tuple[Qubit, Qubit]:
+    def _find_best_swap(self, dag, front_layer, layout, required_predecessors, qubit_decays, rng) -> tuple[Qubit, Qubit]:
         swap_candidates = set()
         qubits = chain.from_iterable([node.qargs for node in front_layer])
         for v in qubits:
@@ -581,18 +580,18 @@ class SabreMapping(BidirectionalMapping):
         for node in decremented:
             required_predecessors[node] += 1
 
-        costs = np.array([self._heuristic_cost(front_layer, extended_set, layout, swap) for swap in swap_candidates])
+        costs = np.array([self._heuristic_cost(front_layer, extended_set, layout, swap, qubit_decays) for swap in swap_candidates])
         min_cost = np.min(costs)
         min_indices = np.where(np.abs(costs - min_cost) < 1e-8)[0]
         swap = swap_candidates[rng.choice(min_indices)]
         return swap
 
-    def _heuristic_cost(self, front_layer, extended_set, layout: Layout, swap: tuple[Qubit, Qubit]):
+    def _heuristic_cost(self, front_layer, extended_set, layout: Layout, swap: tuple[Qubit, Qubit], qubit_decays: dict[Qubit, float]):
         layout = layout.copy()
         layout.swap(*swap)
         c1 = self._avg_dist(front_layer, layout)
         c2 = self._avg_dist(extended_set, layout)
-        w = max(self.qubit_decays[swap[0]], self.qubit_decays[swap[1]])
+        w = max(qubit_decays[swap[0]], qubit_decays[swap[1]])
         return w * (c1 + EXT_WEIGHT * c2)
 
 
