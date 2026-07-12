@@ -9,6 +9,7 @@ from qiskit.circuit.library import SwapGate
 from qiskit.dagcircuit import DAGCircuit, DAGNode
 from qiskit.transpiler import Layout, TransformationPass, TranspilerError
 from qiskit.transpiler.passes import VF2Layout
+from tunits import dag
 
 from canopus.backends import CanopusBackend
 from canopus.utils import generate_random_layout, generate_trivial_layout
@@ -38,10 +39,10 @@ class BidirectionalMapping(TransformationPass):
     ):
         super().__init__()
         self.backend = backend
-        self.trials = min(os.cpu_count(), 10) if trials is None else trials
+        self.trials = min(os.cpu_count(), 10) if trials is None else min(trials, os.cpu_count())
         self.max_iterations = max_iterations
         self.seed = seed
-        self.layout_trials = min(os.cpu_count(), 10) if layout_trials is None else layout_trials
+        self.layout_trials = min(os.cpu_count(), 10) if layout_trials is None else min(layout_trials, os.cpu_count())
         self.init_layout_method = init_layout_method
         self.parallel = parallel
 
@@ -72,7 +73,6 @@ class BidirectionalMapping(TransformationPass):
         self.property_set["original_qubit_indices"] = {bit: index for index, bit in enumerate(dag.qubits)}
         self.canonical_qreg = dag.qregs["q"]
         self._qubit_indices = {q: i for i, q in enumerate(dag.qubits)}
-        self.qubit_decays = dict.fromkeys(dag.qubits, INIT_DECAY)
 
         # Try to run VF2Layout first
         if best_routed_dag := self._run_vf2layout(dag):
@@ -81,7 +81,7 @@ class BidirectionalMapping(TransformationPass):
         # If VF2Layout fails, run the algorithmic mapping procedure.
         # Layout trials are independent, so they run in parallel worker processes by default.
         if self.parallel and self.layout_trials > 1:
-            results = Parallel(n_jobs=min(self.layout_trials, os.cpu_count()))(
+            results = Parallel(n_jobs=self.layout_trials)(
                 delayed(self._run_layout_trial)(dag, trial) for trial in range(self.layout_trials)
             )
         else:
@@ -143,7 +143,7 @@ class BidirectionalMapping(TransformationPass):
         # Routing trials are independent; parallelize them only when the layout-trial loop in
         # run() is not already occupying the worker processes (i.e., a single fixed layout).
         if self.parallel and self.layout_trials == 1 and self.trials > 1:
-            results = Parallel(n_jobs=min(self.trials, os.cpu_count()))(
+            results = Parallel(n_jobs=self.trials)(
                 delayed(self._route_one_trial_with_cost)(dag, initial_layout, trial_seed)
                 for trial_seed in trial_seeds
             )
@@ -510,6 +510,7 @@ class SabreMapping(BidirectionalMapping):
         rng = np.random.default_rng(seed)
         layout = initial_layout.copy()
         required_predecessors = build_required_predecessors(dag)
+        self.qubit_decays = dict.fromkeys(dag.qubits, INIT_DECAY)
 
         num_searches = 0
         # layouts = [layout.copy()] # dump intermediate layouts for debugging
@@ -526,6 +527,7 @@ class SabreMapping(BidirectionalMapping):
                     remaining_ops.append(node)
 
             if executable_ops:
+                self.qubit_decays = dict.fromkeys(dag.qubits, INIT_DECAY)
                 front_layer = remaining_ops
                 for node in executable_ops:
                     routed_dag.apply_operation_back(
