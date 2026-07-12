@@ -81,6 +81,7 @@ dependencies = [
     "bqskit>=1.0",
     "gulps>=0.3",
     "prettytable>=3",
+    "joblib>=1.3",
 ]
 
 

@@ -267,10 +267,7 @@ def two_qubit_unitary_to_canonical_circuit(unitary: np.ndarray) -> QuantumCircui
 def two_qubit_unitary_to_custom_circuit(
     unitary: np.ndarray, gate_set: list[Gate], costs: list[float], names: list | None = None
 ) -> QuantumCircuit:
-    """Synthesize a 2-qubit unitary into a {arbitrary-2q-gate, u} gate set.
-
-    NOTE: GULPS does not do well in its numerical synthesis precision in corner situations.
-    """
+    """Synthesize a 2-qubit unitary into a {arbitrary-2q-gate, u} gate set."""
     from gulps import GulpsDecomposer
 
     gulps_decomposer = GulpsDecomposer(gate_set=gate_set, costs=costs, names=names)

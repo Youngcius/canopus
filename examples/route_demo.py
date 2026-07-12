@@ -10,6 +10,9 @@ from qiskit.transpiler import CouplingMap, PassManager
 from pytket.utils import compare_unitaries
 from qiskit import qasm2
 
+from rich.console import Console
+
+console = Console()
 
 # configure logging
 # logging.basicConfig(

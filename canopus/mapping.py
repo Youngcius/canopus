@@ -3,6 +3,7 @@ from itertools import chain
 from operator import length_hint
 
 import numpy as np
+from joblib import Parallel, delayed
 from qiskit.circuit import Qubit
 from qiskit.circuit.library import SwapGate
 from qiskit.dagcircuit import DAGCircuit, DAGNode
@@ -33,6 +34,7 @@ class BidirectionalMapping(TransformationPass):
         trials=None,
         layout_trials=None,
         init_layout_method="random",
+        parallel=True,
     ):
         super().__init__()
         self.backend = backend
@@ -41,6 +43,7 @@ class BidirectionalMapping(TransformationPass):
         self.seed = seed
         self.layout_trials = min(os.cpu_count(), 10) if layout_trials is None else layout_trials
         self.init_layout_method = init_layout_method
+        self.parallel = parallel
 
         self.coupling_map = backend.coupling_map
         self.distance_matrix = self.coupling_map.distance_matrix.astype(int)
@@ -75,26 +78,16 @@ class BidirectionalMapping(TransformationPass):
         if best_routed_dag := self._run_vf2layout(dag):
             return best_routed_dag
 
-        # If VF2Layout fails, run the algorithmic mapping procedure
-        best_routed_dag = None
-        best_initial_layout = None
-        best_final_layout = None
-        best_metric = None
+        # If VF2Layout fails, run the algorithmic mapping procedure.
+        # Layout trials are independent, so they run in parallel worker processes by default.
+        if self.parallel and self.layout_trials > 1:
+            results = Parallel(n_jobs=min(self.layout_trials, os.cpu_count()))(
+                delayed(self._run_layout_trial)(dag, trial) for trial in range(self.layout_trials)
+            )
+        else:
+            results = [self._run_layout_trial(dag, trial) for trial in range(self.layout_trials)]
 
-        for trial in range(self.layout_trials):
-            trial_seed = None if self.seed is None else self.seed + trial
-            if self.init_layout_method == "trivial":
-                initial_layout = generate_trivial_layout(self.canonical_qreg, self.coupling_map)
-            elif self.init_layout_method == "random":
-                initial_layout = generate_random_layout(self.canonical_qreg, self.coupling_map, trial_seed)
-            else:
-                raise ValueError(f"Unsupported initial layout method: {self.init_layout_method}")
-
-            routed_dag, initial_layout, final_layout = self._bidirectional_route(dag, initial_layout, trial_seed)
-            metric = self._eval_dagcircuit_cost(routed_dag)
-            if best_metric is None or metric < best_metric:
-                best_routed_dag, best_initial_layout, best_final_layout = routed_dag, initial_layout, final_layout
-                best_metric = metric
+        best_routed_dag, best_initial_layout, best_final_layout, _ = min(results, key=lambda res: res[3])
 
         best_initial_layout = Layout.from_intlist(
             [best_initial_layout[v] for v in self.canonical_qreg], self.canonical_qreg
@@ -107,6 +100,20 @@ class BidirectionalMapping(TransformationPass):
         self.property_set["final_layout"] = best_final_layout
 
         return best_routed_dag
+
+    def _run_layout_trial(self, dag, trial) -> tuple[DAGCircuit, dict, dict, tuple]:
+        """Generate an initial layout and run one complete bidirectional routing trial."""
+        trial_seed = None if self.seed is None else self.seed + trial
+        if self.init_layout_method == "trivial":
+            initial_layout = generate_trivial_layout(self.canonical_qreg, self.coupling_map)
+        elif self.init_layout_method == "random":
+            initial_layout = generate_random_layout(self.canonical_qreg, self.coupling_map, trial_seed)
+        else:
+            raise ValueError(f"Unsupported initial layout method: {self.init_layout_method}")
+
+        routed_dag, initial_layout, final_layout = self._bidirectional_route(dag, initial_layout, trial_seed)
+        metric = self._eval_dagcircuit_cost(routed_dag)
+        return routed_dag, initial_layout, final_layout, metric
 
     def _bidirectional_route(self, dag, initial_layout, seed) -> tuple[DAGCircuit, Layout, Layout]:
         results = []
@@ -131,20 +138,26 @@ class BidirectionalMapping(TransformationPass):
         return results[best_result_idx]
 
     def _route(self, dag, initial_layout, seed) -> tuple[DAGCircuit, Layout]:
-        best_routed_dag = None
-        best_final_layout = None
-        best_metric = None
+        trial_seeds = [None if seed is None else seed + trial for trial in range(self.trials)]
 
-        for trial in range(self.trials):
-            trial_seed = None if seed is None else seed + trial
-            routed_dag, final_layout = self._route_one_trial(dag, initial_layout, trial_seed)
-            metric = self._eval_dagcircuit_cost(routed_dag)
-            if best_metric is None or metric < best_metric:
-                best_routed_dag = routed_dag
-                best_final_layout = final_layout
-                best_metric = metric
+        # Routing trials are independent; parallelize them only when the layout-trial loop in
+        # run() is not already occupying the worker processes (i.e., a single fixed layout).
+        if self.parallel and self.layout_trials == 1 and self.trials > 1:
+            results = Parallel(n_jobs=min(self.trials, os.cpu_count()))(
+                delayed(self._route_one_trial_with_cost)(dag, initial_layout, trial_seed)
+                for trial_seed in trial_seeds
+            )
+        else:
+            results = [
+                self._route_one_trial_with_cost(dag, initial_layout, trial_seed) for trial_seed in trial_seeds
+            ]
 
+        best_routed_dag, best_final_layout, _ = min(results, key=lambda res: res[2])
         return best_routed_dag, best_final_layout
+
+    def _route_one_trial_with_cost(self, dag, initial_layout, seed) -> tuple[DAGCircuit, Layout, tuple]:
+        routed_dag, final_layout = self._route_one_trial(dag, initial_layout, seed)
+        return routed_dag, final_layout, self._eval_dagcircuit_cost(routed_dag)
 
     def _route_one_trial(self, dag, initial_layout, seed) -> tuple[DAGCircuit, Layout]:
         """Given the DAG and initial layout, perform SABRE routing. Return the routed DAG and the final layout."""
@@ -183,8 +196,9 @@ class CanopusMapping(BidirectionalMapping):
         depth_driven=False,
         w_gate=0.5,
         w_depth=0.5,
+        parallel=True,
     ):
-        super().__init__(backend, seed, max_iterations, trials, layout_trials, init_layout_method)
+        super().__init__(backend, seed, max_iterations, trials, layout_trials, init_layout_method, parallel)
         self.average_degree = average_degree(self.coupling_map.graph)
         self.w_degree = self.average_degree / (2 + self.average_degree)  #  Empirically, this setting works well
         self.comm_opt = comm_opt
@@ -484,8 +498,9 @@ class SabreMapping(BidirectionalMapping):
         trials=None,
         layout_trials=None,
         init_layout_method="random",
+        parallel=True,
     ):
-        super().__init__(backend, seed, max_iterations, trials, layout_trials, init_layout_method)
+        super().__init__(backend, seed, max_iterations, trials, layout_trials, init_layout_method, parallel)
 
     def _eval_dagcircuit_cost(self, dag):
         return dag.count_ops().get("swap", 0)
