@@ -143,13 +143,10 @@ class BidirectionalMapping(TransformationPass):
         # run() is not already occupying the worker processes (i.e., a single fixed layout).
         if self.parallel and self.layout_trials == 1 and self.trials > 1:
             results = Parallel(n_jobs=self.trials)(
-                delayed(self._route_one_trial_with_cost)(dag, initial_layout, trial_seed)
-                for trial_seed in trial_seeds
+                delayed(self._route_one_trial_with_cost)(dag, initial_layout, trial_seed) for trial_seed in trial_seeds
             )
         else:
-            results = [
-                self._route_one_trial_with_cost(dag, initial_layout, trial_seed) for trial_seed in trial_seeds
-            ]
+            results = [self._route_one_trial_with_cost(dag, initial_layout, trial_seed) for trial_seed in trial_seeds]
 
         best_routed_dag, best_final_layout, _ = min(results, key=lambda res: res[2])
         return best_routed_dag, best_final_layout
@@ -552,7 +549,9 @@ class SabreMapping(BidirectionalMapping):
 
         return routed_dag, layout
 
-    def _find_best_swap(self, dag, front_layer, layout, required_predecessors, qubit_decays, rng) -> tuple[Qubit, Qubit]:
+    def _find_best_swap(
+        self, dag, front_layer, layout, required_predecessors, qubit_decays, rng
+    ) -> tuple[Qubit, Qubit]:
         swap_candidates = set()
         qubits = chain.from_iterable([node.qargs for node in front_layer])
         for v in qubits:
@@ -580,13 +579,17 @@ class SabreMapping(BidirectionalMapping):
         for node in decremented:
             required_predecessors[node] += 1
 
-        costs = np.array([self._heuristic_cost(front_layer, extended_set, layout, swap, qubit_decays) for swap in swap_candidates])
+        costs = np.array(
+            [self._heuristic_cost(front_layer, extended_set, layout, swap, qubit_decays) for swap in swap_candidates]
+        )
         min_cost = np.min(costs)
         min_indices = np.where(np.abs(costs - min_cost) < 1e-8)[0]
         swap = swap_candidates[rng.choice(min_indices)]
         return swap
 
-    def _heuristic_cost(self, front_layer, extended_set, layout: Layout, swap: tuple[Qubit, Qubit], qubit_decays: dict[Qubit, float]):
+    def _heuristic_cost(
+        self, front_layer, extended_set, layout: Layout, swap: tuple[Qubit, Qubit], qubit_decays: dict[Qubit, float]
+    ):
         layout = layout.copy()
         layout.swap(*swap)
         c1 = self._avg_dist(front_layer, layout)

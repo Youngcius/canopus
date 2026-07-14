@@ -23,7 +23,7 @@ build-backend = "maturin"
 # ==============================================================================
 [project]
 name = "canopus-quantum"
-version = "0.1.4"
+version = "0.2.0"
 description = "ISA-aware qubit mapping/routing framework tailored to advanced quantum instruction sets, built on canonical two-qubit gate representation."
 readme = "README.md"
 requires-python = ">=3.10"
