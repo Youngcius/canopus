@@ -180,12 +180,13 @@ For fine-grained evaluation, you may also run `bench_all.py`, `bench_all_toqm.py
 If you use Canopus in your work, please cite:
 
 ```bibtex
-@article{yang2025unifying,
-  title   = {Unifying Qubit Routing Across Diverse Quantum ISAs via Canonical Representation},
-  author  = {Yang, Zhaohui and Zhang, Kai and Tian, Xinyang and Ren, Xiangyu and
-             Liu, Yingjian and Li, Yunfeng and Ding, Dawei and Chen, Jianxin and Xie, Yuan},
-  journal = {arXiv preprint arXiv:2511.04608},
-  year    = {2025}
+@inproceedings{yang2026unifying,
+  title={Unifying qubit routing across diverse quantum isas via canonical representation},
+  author={Yang, Zhaohui and Zhang, Kai and Tian, Xinyang and Ren, Xiangyu and Liu, Yingjian and Li, Yunfeng and Ding, Dawei and Chen, Jianxin and Xie, Yuan},
+  booktitle={2026 ACM/IEEE 53rd Annual International Symposium on Computer Architecture (ISCA)},
+  pages={2302--2317},
+  year={2026},
+  organization={IEEE}
 }
 ```
 
